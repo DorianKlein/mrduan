@@ -10,7 +10,7 @@ export default function Home() {
       
       {/* 标题区域 */}
       <h1 className="text-4xl font-bold mb-8">
-        Hello, I&apos;m a Unity Developer
+        Hello, I&apos;m Dorian
       </h1>
 
       {/* Bento Grid 容器：这里就是我们将要填格子的地方 */}
@@ -26,9 +26,9 @@ export default function Home() {
         <div className="bg-neutral-900 rounded-2xl p-6 md:col-span-2 md:row-span-2 border border-neutral-800">
           <h2 className="text-2xl font-bold text-blue-500">About Me</h2>
           <p className="mt-4 text-gray-400">
-            我是半路出家的程序员，目标是成为技术总监。
+            这里有一个不太浪漫的程序员。
             <br />
-            擅长 Unity, C#, XR 开发。
+            希望能够吊起你的情绪。
           </p>
         </div>
 
