@@ -1,5 +1,15 @@
-// app/123studio/souvenir/page.tsx
-import Badge3D from '@/components/Badge3D';
+'use client'; // 确保页面本身也是 Client Component
+
+// 1. 引入 dynamic
+import dynamic from 'next/dynamic';
+
+// 2. 动态引入 Badge3D，并强制关闭 SSR (服务器端渲染)
+const Badge3DModel = dynamic(() => import('@/components/Badge3D'), { 
+  ssr: false,
+  // 可选：加个加载中的占位符，防止闪烁
+  loading: () => <div className="w-full h-full flex items-center justify-center text-white/50">Loading 3D Model...</div>
+});
+
 
 export default function SouvenirPage() {
   return (
@@ -18,16 +28,18 @@ export default function SouvenirPage() {
       </div>
       
       {/* 3D 徽章展示容器，去掉白底和阴影，让它融入背景 */}
-      <div className="w-full max-w-[500px] aspect-square">
-        <Badge3D 
+      <div className="w-full h-[50vh] md:h-[500px] md:aspect-square relative touch-none"
+            style={{ touchAction: 'none' }}>
+        <Badge3DModel 
           // 我们只需要正面图
-          frontImg="/badges/紫悦.png"
-          backImg="/badges/紫悦（背）.png"
+          frontImg="/badges/ziyue.png"
+          backImg="/badges/ziyue-back.png"
+          scale={1}
         />
       </div>
       
       <p className="mt-6 text-sm text-gray-400 font-mono animate-pulse">
-        ● Drag to Rotate (Horizontally Only)
+        ● 小紫悦
       </p>
 
     </div>
