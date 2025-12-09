@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>收件箱爆满中...</title>
+    <style>
+        /* === 全局样式：奶乎乎的背景 === */
+        body {
+            background-color: #fdf6e3; /* 默认米白色，很温柔 */
+            margin: 0;
+            overflow: hidden; 
+            font-family: "Varela Round", "Comic Sans MS", "幼圆", sans-serif; /* 用圆润的字体 */
+            touch-action: none;
+        }
+
+        /* === 马卡龙窗口样式 === */
+        .window {
+            position: absolute;
+            /* 颜色会在JS里随机赋予，这里只写基础结构 */
+            background: #fff; 
+            border: 3px solid #fff;
+            border-radius: 20px; /* 圆角大一点 */
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.1); /* 这种扁平投影很像贴纸 */
+            width: 220px; /* 稍微做小一点，方便密集堆叠 */
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            opacity: 0; 
+            transform: scale(0.5);
+            /* Q弹的动画效果 */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        .window.show {
+            opacity: 1;
+            transform: scale(1) rotate(var(--rotation)); /* 增加随机旋转 */
+        }
+
+        /* 顶部小条 */
+        .window-header {
+            padding: 8px 15px 0 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .close-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255, 0.8);
+            cursor: pointer;
+        }
+
+        /* 内容区域 */
+        .window-body {
+            padding: 5px 15px 15px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555; /* 字体颜色深灰，不刺眼 */
+        }
+
+        .emoji {
+            font-size: 28px;
+        }
+
+        .text {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        /* === 最终大卡片 === */
+        #final-card {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            background: #fff;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: popUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popUp {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="final-card">
+        <h2 id="card-to" style="color: #ff8888; margin:0 0 10px 0;">To: 小可爱</h2>
+        <p id="card-msg" style="font-size: 18px; color: #666; margin-bottom: 20px;">这里是主祝福语</p>
+        
+    </div>
+
+    <script>
+        // === 1. 马卡龙色盘 (背景色, 边框色会稍深一点) ===
+        const palettes = [
+            { bg: "#FFB7B2", text: "#FFFFFF" }, // 桃粉
+            { bg: "#FFDAC1", text: "#555555" }, // 杏黄
+            { bg: "#E2F0CB", text: "#555555" }, // 抹茶
+            { bg: "#B5EAD7", text: "#555555" }, // 薄荷
+            { bg: "#C7CEEA", text: "#FFFFFF" }, // 蓝紫
+            { bg: "#fff0f5", text: "#555555" }, // 淡粉
+            { bg: "#e0ffff", text: "#555555" }  // 淡蓝
+        ];
+
+        const wishes = [
+            "超级超级喜欢你!", "今天也要开心呀", "好运正在派送中...", 
+            "记得想我哦", "你最可爱啦", "百事可乐", "万事胜意", 
+            "暴富! 暴瘦!", "天天好心情", "未来可期", "星河滚滚不如你",
+            "乖乖吃饭", "不许熬夜!", "想带你去吃好吃的"
+        ];
+        
+        const emojis = ["💖", "🌈", "✨", "🍓", "🧸", "🎈", "🍭", "🍬", "🎀", "🦄"];
+
+        // === 2. URL 参数获取 ===
+        const params = new URLSearchParams(window.location.search);
+        const toName = params.get('to') || "看到这里的你";
+        const mainMsg = params.get('msg') || "别太累注意休息";
+
+        // === 3. 疯狂弹窗逻辑 ===
+        let count = 0;
+        const totalPopups = 50; // 数量加到 50 个！
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        function createPopup() {
+            if (count >= totalPopups) {
+                setTimeout(showFinalCard, 500);
+                return;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'window';
+            
+            // 随机配色
+            const palette = palettes[Math.floor(Math.random() * palettes.length)];
+            div.style.backgroundColor = palette.bg;
+            div.style.color = palette.text;
+            
+            // 随机旋转角度 (-10度 到 10度)，增加活泼感
+            const rotate = (Math.random() * 20 - 10).toFixed(2);
+            div.style.setProperty('--rotation', rotate + 'deg');
+
+            // 随机位置 (允许稍微重叠，制造堆积感)
+            const x = Math.random() * (screenW - 220); // 减去宽度防止超出去
+            const y = Math.random() * (screenH - 150);
+            div.style.left = x + "px";
+            div.style.top = y + "px";
+            div.style.zIndex = 100 + count;
+
+            // 随机内容
+            const txt = wishes[Math.floor(Math.random() * wishes.length)];
+            const emj = emojis[Math.floor(Math.random() * emojis.length)];
+
+            div.innerHTML = `
+                <div class="window-header">
+                    <div class="close-dot"></div>
+                </div>
+                <div class="window-body">
+                    <div class="emoji">${emj}</div>
+                    <div class="text">${txt}</div>
+                </div>
+            `;
+
+            document.body.appendChild(div);
+
+            // 触发动画
+            requestAnimationFrame(() => {
+                div.classList.add('show');
+            });
+
+            count++;
+            
+            // === 极速模式 ===
+            // 初始很快，中间极快，最后稍微慢一点点收尾
+            // 随机间隔 50ms 到 150ms，像机关枪一样弹
+            let nextTime = Math.random() * 100 + 50; 
+            setTimeout(createPopup, nextTime);
+        }
+
+        function showFinalCard() {
+            const card = document.getElementById('final-card');
+            document.getElementById('card-to').innerText = `To: ${toName}`;
+            document.getElementById('card-msg').innerText = mainMsg;
+            card.style.display = 'block';
+        }
+
+        // === 启动 ===
+        window.onload = function() {
+            setTimeout(createPopup, 300); // 打开网页 0.3秒后直接开始
+        };
+
+    </script>
+</body>
+</html>
