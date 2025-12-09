@@ -84,7 +84,7 @@ export default function Badge3D(props: BadgeProps) {
   return (
     <div className="w-full h-full relative">
       {/* fov 改小一点，让视角更聚焦 */}
-      <Canvas camera={{ position: [0, 0, 20], fov: 35 }} dpr={[1, 2]}>
+      <Canvas camera={{ position: [0, 0, 25], fov: 35 }} dpr={[1, 2]}>
         
         {/* 环境光可以先留着，虽然 meshBasicMaterial 不受它影响 */}
         <Environment preset="studio" />
