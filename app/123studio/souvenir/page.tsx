@@ -32,14 +32,14 @@ export default function SouvenirPage() {
             style={{ touchAction: 'none' }}>
         <Badge3DModel 
           // 我们只需要正面图
-          frontImg="/badges/ziyue.png"
-          backImg="/badges/ziyue-back.png"
+          frontImg="/badges/laogou.png"
+          backImg="/badges/laogou-back.png"
           scale={1}
         />
       </div>
       
       <p className="mt-6 text-sm text-gray-400 font-mono animate-pulse">
-        ● 小紫悦
+        ● 小课代表
       </p>
 
     </div>
