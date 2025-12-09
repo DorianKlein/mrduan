@@ -3,11 +3,10 @@
 import * as THREE from 'three';
 import { useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
-import { OrbitControls, Environment, Center, Float } from '@react-three/drei';
+import { useTexture, OrbitControls, Environment, Center, Float } from '@react-three/drei';
 
-// 强制清理 THREE 缓存，防止 Context Lost
-THREE.Cache.enabled = true;
+// ❌ 删除这行，不要手动开启缓存！让它保持默认。
+// THREE.Cache.enabled = true; 
 
 interface BadgeProps {
   frontImg: string;
@@ -16,11 +15,10 @@ interface BadgeProps {
 }
 
 function BadgeModel({ frontImg, backImg, scale = 1 }: BadgeProps) {
-  // ✅ 1. 使用 useTexture (比 useLoader 更稳定)
-  // useTexture 内部自带 Suspense 缓存管理
+  // 1. 加载纹理
   const [frontTextureRaw, backTextureRaw] = useTexture([frontImg, backImg]);
 
-  // ✅ 2. 使用 useMemo 克隆并配置，防止修改原图导致报错
+  // 2. 克隆纹理 (防止修改原图)
   const frontTexture = useMemo(() => {
     const t = frontTextureRaw.clone();
     t.colorSpace = THREE.SRGBColorSpace;
@@ -39,9 +37,10 @@ function BadgeModel({ frontImg, backImg, scale = 1 }: BadgeProps) {
     return t;
   }, [backTextureRaw]);
 
-  // ✅ 3. 必须：手动销毁克隆的纹理
+  // ✅ 3. 强力清理：组件卸载时彻底销毁
   useEffect(() => {
     return () => {
+      // 销毁克隆体
       frontTexture.dispose();
       backTexture.dispose();
     };
@@ -52,13 +51,23 @@ function BadgeModel({ frontImg, backImg, scale = 1 }: BadgeProps) {
       {/* 正面 */}
       <mesh>
         <planeGeometry args={[10, 10]} />
-        <meshBasicMaterial map={frontTexture} transparent side={THREE.FrontSide} toneMapped={false} />
+        <meshBasicMaterial 
+          map={frontTexture} 
+          transparent 
+          side={THREE.FrontSide} 
+          toneMapped={false} 
+        />
       </mesh>
 
       {/* 背面 */}
       <mesh rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[10, 10]} />
-        <meshBasicMaterial map={backTexture} transparent side={THREE.FrontSide} toneMapped={false} />
+        <meshBasicMaterial 
+          map={backTexture} 
+          transparent 
+          side={THREE.FrontSide} 
+          toneMapped={false} 
+        />
       </mesh>
     </group>
   );
@@ -66,24 +75,22 @@ function BadgeModel({ frontImg, backImg, scale = 1 }: BadgeProps) {
 
 export default function Badge3D(props: BadgeProps) {
   return (
-    <div className="w-full h-full relative"
-          style={{ touchAction: 'none' }}>
-      {/* fov 改小一点，让视角更聚焦 */}
-      <Canvas camera={{ position: [0, 0, 25], fov: 35 }} dpr={1}>
-        
-        
+    // 加上 touch-action: none 防止手机滚动冲突
+    <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
+      <Canvas 
+        camera={{ position: [0, 0, 20], fov: 35 }} 
+        dpr={1} // 保持 1倍分辨率，防止显存爆炸
+        // 强制 Canvas 元素也禁止触摸滚动
+        style={{ width: '100%', height: '100%', touchAction: 'none' }}
+        // 关键：当 WebGL 上下文丢失时，尝试自动恢复
+        gl={{ preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+      >
         <Environment files="/studio.hdr" />
         
-        {/* 🔥 核心修改：限制旋转角度 */}
         <OrbitControls 
           makeDefault 
-          enablePan={false} // 禁止平移
-          enableZoom={true} // 允许缩放
-          
-          // minPolarAngle 和 maxPolarAngle 控制垂直方向的旋转角度（弧度制）
-          // 0 是头顶正上方，Math.PI (约3.14) 是脚底下正下方。
-          // Math.PI / 2 (约1.57) 刚好是水平视线（赤道）。
-          // 我们把最小值和最大值都设为 Math.PI / 2，就锁死在了水平面上。
+          enablePan={false} 
+          enableZoom={true} 
           minPolarAngle={Math.PI / 2} 
           maxPolarAngle={Math.PI / 2}
         />
