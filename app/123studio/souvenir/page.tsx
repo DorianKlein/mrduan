@@ -34,6 +34,7 @@ export default function SouvenirPage() {
           // 我们只需要正面图
           frontImg="/badges/laogou.png"
           backImg="/badges/laogou-back.png"
+          svgPath="/badges/laogou-shape.svg"
           scale={1}
         />
       </div>
