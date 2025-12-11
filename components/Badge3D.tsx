@@ -1,9 +1,9 @@
 'use client';
 
 import * as THREE from 'three';
-import { useMemo, useEffect } from 'react';
-import { Canvas, useLoader, useThree } from '@react-three/fiber';
-import { useTexture, OrbitControls, Environment, Center, Float } from '@react-three/drei';
+import { useMemo, useEffect, useRef, useState } from 'react';
+import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
+import { useTexture, OrbitControls, Environment, Center, Float, PresentationControls } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 
 interface BadgeProps {
@@ -144,10 +144,29 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
   );
 }
 
+function AutoRotator({ children, isDragging }: { children: React.ReactNode, isDragging: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state, delta) => {
+    // 只有当【没有】在拖拽时，才进行自动旋转
+    if (groupRef.current && !isDragging) {
+      groupRef.current.rotation.y += delta * 0.5; // 自转速度
+    }
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
+
 export default function Badge3D(props: BadgeProps) {
-return (
+
+  const [isDragging, setIsDragging] = useState(false);
+  return (
     // 容器设为 100% 宽高，背景透明
-    <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
+    <div className="w-full h-full relative" style={{ touchAction: 'none' }}
+      onPointerDown={() => setIsDragging(true)}
+      onPointerUp={() => setIsDragging(false)}
+      onPointerLeave={() => setIsDragging(false)}>
       <Canvas 
         camera={{ position: [0, 0, 50], fov: 40 }} // 稍微拉远一点，适应全屏
         dpr={1} // 保持性能
@@ -163,23 +182,27 @@ return (
         {/* 蓝色底光 */}
         <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
 
-        {/* 3. 控制器：开启自动旋转，增加展示感 */}
-        <OrbitControls 
-          makeDefault 
-          enablePan={false} 
-          enableZoom={true} 
-          minPolarAngle={Math.PI / 2} // 锁死上下
-          maxPolarAngle={Math.PI / 2}
-          autoRotate={true} // ✅ 开启自动旋转
-          autoRotateSpeed={2.0}
-        />
-        
-        {/* 4. 悬浮动画：幅度大一点，像在太空中 */}
-        <Float speed={3} rotationIntensity={0.5} floatIntensity={1}>
-          <Center>
-            <BadgeModel {...props} />
-          </Center>
-        </Float>
+        {/* 控制器配置 */}
+        <PresentationControls
+          global={true}
+          cursor={true}
+          snap={false} // ⚠️ 改为 false！否则松手后它会强行弹回正面，跟自动旋转打架
+          speed={1.5}
+          zoom={1}
+          rotation={[0, 0, 0]}
+          polar={[0, 0]} // 锁死上下翻转
+          azimuth={[-Infinity, Infinity]} 
+          // config={{ mass: 1, tension: 170, friction: 26 }}
+        >
+          <Float speed={3} rotationIntensity={0.5} floatIntensity={0.5}>
+            <Center>
+              {/* ✅ 4. 用 AutoRotator 包裹你的模型 */}
+              <AutoRotator isDragging={isDragging}>
+                <BadgeModel {...props} />
+              </AutoRotator>
+            </Center>
+          </Float>
+        </PresentationControls>
       </Canvas>
     </div>
   );
