@@ -13,8 +13,8 @@ const ParticleMaterial = shaderMaterial(
     uTime: 0,
     uProgress: 0, // 0 -> 1: 汇聚
     uExplode: 0,  // 0 -> 1: 爆破
-    uColorA: new THREE.Color('#d2bee6ff'), // 紫色
-    uColorB: new THREE.Color('#a9bee3ff'), // 蓝色
+    uColorA: new THREE.Color('#f05050ff'), // 紫色
+    uColorB: new THREE.Color('#005effff'), // 蓝色
   },
   // Vertex Shader
   `
@@ -79,7 +79,7 @@ const ParticleMaterial = shaderMaterial(
       vec3 gradientColor = mix(uColorB, uColorA, vUv.y + 0.2);
       
       // 加一点亮度，让它看起来像发光的实体
-      gl_FragColor = vec4(gradientColor, 1.0);
+      gl_FragColor = vec4(gradientColor, 0.9);
     }
   `
 );
@@ -122,7 +122,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
     const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry));
     sampler.build();
 
-    const count = 40000; // 4万个粒子，实心感更强
+    const count = 100000; // 10万个粒子，实心感更强
     const posArray = new Float32Array(count * 3);
     const randPosArray = new Float32Array(count * 3);
     const explodeDirArray = new Float32Array(count * 3); // 新增：爆破方向
@@ -167,10 +167,10 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
       
       // 阶段 1: 汇聚 (Progress 0 -> 1)
       if (materialRef.current.uProgress < 1) {
-        materialRef.current.uProgress += delta * 0.5;
+        materialRef.current.uProgress += delta * 0.2;
         
-        // 偷跑：汇聚到 90% 时显示实体
-        if (materialRef.current.uProgress > 0.95 && !hasReadyRef.current) {
+        // 偷跑：汇聚到 95% 时显示实体
+        if (materialRef.current.uProgress > 0.97 && !hasReadyRef.current) {
           onReady();
           hasReadyRef.current = true;
         }
@@ -360,7 +360,7 @@ export default function Badge3D(props: BadgeProps) {
   return (
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
-        camera={{ position: [0, 0, 50], fov: 35 }} 
+        camera={{ position: [0, 0, 100], fov: 35 }} 
         dpr={1}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
         gl={{ preserveDrawingBuffer: true, antialias: true }}
