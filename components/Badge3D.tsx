@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 import { useMemo, useEffect } from 'react';
-import { Canvas, useLoader } from '@react-three/fiber';
+import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { useTexture, OrbitControls, Environment, Center, Float } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 
@@ -14,6 +14,9 @@ interface BadgeProps {
 }
 
 function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
+  const { gl } = useThree();
+  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+  
   const svgData = useLoader(SVGLoader, svgPath);
   const [frontTextureRaw, backTextureRaw] = useTexture([frontImg, backImg]);
 
@@ -23,18 +26,28 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
     t.colorSpace = THREE.SRGBColorSpace;
     t.center.set(0.5, 0.5);
     t.repeat.set(1, -1);
+    
+    // 🔥 核心修复：开启满血画质 🔥
+    t.anisotropy = maxAnisotropy; // 让侧面纹理极度清晰
+    t.minFilter = THREE.LinearMipmapLinearFilter; // 开启抗锯齿
+    
     t.needsUpdate = true;
     return t;
-  }, [frontTextureRaw]);
+  }, [frontTextureRaw, maxAnisotropy]);
 
   const backTexture = useMemo(() => {
     const t = backTextureRaw.clone();
     t.colorSpace = THREE.SRGBColorSpace;
     t.center.set(0.5, 0.5);
     t.repeat.set(1, -1);
+    
+    // 🔥 背面也要加 🔥
+    t.anisotropy = maxAnisotropy;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+
     t.needsUpdate = true;
     return t;
-  }, [backTextureRaw]);
+  }, [backTextureRaw, maxAnisotropy]);
 
   // 2. ✨ 核心计算：算出 SVG 的几何中心 ✨
   const { shapes, width, height, midX, midY } = useMemo(() => {
@@ -60,7 +73,7 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
     };
   }, [svgData]);
 
-  const thickness = width * 0.02; 
+  const thickness = width * 0.05; 
   const bevel = width * 0.01; 
   const gap = width * 0.002;
 
@@ -81,13 +94,13 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
 
         {/* 1. 正面亚克力 */}
         {/* ExtrudeGeometry 会生成在 SVG 的原始位置 (比如 x=2000)，我们不动它 */}
-        <mesh material={acrylicMaterial} position={[0, 0, gap]} renderOrder={10}>
+        <mesh material={acrylicMaterial} position={[0, 0, gap - 50]} renderOrder={10}>
           <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
         </mesh>
 
         {/* 2. 正面贴纸 */}
         {/* PlaneGeometry 默认在 (0,0)，我们需要把它移到 SVG 的位置 (midX, midY) 去追亚克力 */}
-        <mesh position={[midX, midY, 0]} renderOrder={1}>
+        <mesh position={[midX, midY, 1]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshBasicMaterial map={frontTexture} transparent={false} alphaTest={0.5} side={THREE.FrontSide} toneMapped={false} />
         </mesh>
@@ -118,13 +131,13 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
             ✅ 简单做法：我们直接再生成一个 Extrude，不做 group 旋转，
             而是通过 scale z = -1 来镜像它！(Three.js 技巧)
         */}
-        <group position={[0, 0, -gap * 3]}>
+        {/* <group position={[0, 0, -gap * 3]}> */}
            {/* 技巧：用 scale-z = -1 来实现镜像，而不是 rotation-y = 180 */}
            {/* 这样它就在原地镜像了，不需要算旋转轴！ */}
-           <mesh material={acrylicMaterial} scale={[1, 1, -1]} position={[0, 0, -thickness]}>
+           {/* <mesh material={acrylicMaterial} scale={[1, 1, -1]} position={[0, 0, -thickness]}>
               <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
            </mesh>
-        </group>
+        </group> */}
 
       </group>
     </group>
@@ -132,30 +145,37 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
 }
 
 export default function Badge3D(props: BadgeProps) {
-  return (
+return (
+    // 容器设为 100% 宽高，背景透明
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
-        camera={{ position: [0, 0, 25], fov: 35 }} 
-        dpr={1}
+        camera={{ position: [0, 0, 25], fov: 40 }} // 稍微拉远一点，适应全屏
+        dpr={1} // 保持性能
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
-        gl={{ preserveDrawingBuffer: true }}
+        gl={{ preserveDrawingBuffer: true, antialias: true }}
       >
-        <Environment files="/studio.hdr" />
+        {/* 1. 环境光：降低一点亮度，制造神秘感 */}
+        <Environment files="/studio.hdr" background={false} blur={0.8} />
+        
+        {/* 2. 补光灯：加两盏有色灯，打出 Web3 的氛围感 */}
+        {/* 紫色侧逆光 */}
+        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} color="#a855f7" />
+        {/* 蓝色底光 */}
+        <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
+
+        {/* 3. 控制器：开启自动旋转，增加展示感 */}
         <OrbitControls 
           makeDefault 
           enablePan={false} 
           enableZoom={true} 
-          
-          // 👇 锁死上下视角：强制固定在 90度 (水平面)
-          minPolarAngle={Math.PI / 2} 
+          minPolarAngle={Math.PI / 2} // 锁死上下
           maxPolarAngle={Math.PI / 2}
-          
-          // (可选) 如果你想限制左右旋转角度（比如只能转180度），可以用 minAzimuthAngle / maxAzimuthAngle
-          // 不写就是 360 度无限旋转
+          autoRotate={true} // ✅ 开启自动旋转
+          autoRotateSpeed={2.0}
         />
         
-        {/* Center 依然保留作为双重保险，但上面的数学计算才是主理 */}
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+        {/* 4. 悬浮动画：幅度大一点，像在太空中 */}
+        <Float speed={3} rotationIntensity={0.5} floatIntensity={1}>
           <Center>
             <BadgeModel {...props} />
           </Center>

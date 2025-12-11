@@ -1,47 +1,81 @@
-'use client'; // 确保页面本身也是 Client Component
+'use client';
 
-// 1. 引入 dynamic
 import dynamic from 'next/dynamic';
 
-// 2. 动态引入 Badge3D，并强制关闭 SSR (服务器端渲染)
 const Badge3DModel = dynamic(() => import('@/components/Badge3D'), { 
   ssr: false,
-  // 可选：加个加载中的占位符，防止闪烁
-  loading: () => <div className="w-full h-full flex items-center justify-center text-white/50">Loading 3D Model...</div>
+  loading: () => <div className="animate-pulse text-purple-400">Loading Metadata...</div>
 });
-
 
 export default function SouvenirPage() {
   return (
-    // 修改这里：把原来的 bg-gray-100 改成黑紫色渐变
-    // bg-gradient-to-b 从上到下渐变
-    // from-purple-900 to-black 从深紫色渐变到黑色
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-black flex flex-col items-center justify-center p-8">
+    // 1. 外层容器：全屏黑色背景，禁止溢出
+    <div className="relative w-full h-screen bg-[#050505] overflow-hidden flex flex-col justify-between">
       
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
-          123 STUDIO
-        </h1>
-        <p className="text-gray-300 font-mono">
-          Limited Edition Souvenir / 2025
-        </p>
-      </div>
-      
-      {/* 3D 徽章展示容器，去掉白底和阴影，让它融入背景 */}
-      <div className="w-full h-[50vh] md:h-[500px] md:aspect-square relative touch-none"
-            style={{ touchAction: 'none' }}>
+      {/* --- 背景层：3D 画布 (Z-Index: 0) --- */}
+      {/* 绝对定位撑满全屏 */}
+      <div className="absolute inset-0 z-0">
         <Badge3DModel 
-          // 我们只需要正面图
           frontImg="/badges/laogou.png"
           backImg="/badges/laogou-back.png"
           svgPath="/badges/laogou-shape.svg"
-          scale={1}
+          scale={1.2} // 全屏可以稍微放大一点
         />
       </div>
+
+      {/* --- 前景层：UI 内容 (Z-Index: 10) --- */}
+      {/* pointer-events-none 是关键！让鼠标能穿透文字去拖拽后面的 3D 模型 */}
       
-      <p className="mt-6 text-sm text-gray-400 font-mono animate-pulse">
-        ● 小课代表
-      </p>
+      {/* 顶部导航区 */}
+      <div className="relative z-10 w-full p-8 flex justify-between items-start pointer-events-none">
+        <div>
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-tight drop-shadow-2xl">
+            123<br/>STUDIO
+          </h1>
+          <div className="mt-2 inline-block px-3 py-1 border border-purple-500/30 rounded-full bg-purple-900/20 backdrop-blur-md">
+            <span className="text-xs font-mono text-purple-300 tracking-widest">GENESIS COLLECTION</span>
+          </div>
+        </div>
+        
+        {/* 右上角装饰 */}
+        <div className="hidden md:block text-right">
+          <p className="text-xs font-mono text-gray-500">
+            BLOCK: #882192<br/>
+            MINTED: 2025
+          </p>
+        </div>
+      </div>
+
+      {/* 底部信息区 */}
+      <div className="relative z-10 w-full p-8 flex justify-between items-end pointer-events-none">
+        
+        {/* 名字介绍 */}
+        <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl max-w-sm pointer-events-auto"> 
+          {/* pointer-events-auto 让这块区域可以被点击 */}
+          <h2 className="text-2xl font-bold text-white mb-1">
+            小课代表 <span className="text-sm font-normal text-gray-400 ml-2">/ Laogou</span>
+          </h2>
+          <p className="text-sm text-gray-400 font-mono leading-relaxed">
+            Core Member badge. Access to exclusive workshops and events.
+            <br/>
+            <span className="text-purple-400 mt-2 block">● Verified Owner</span>
+          </p>
+        </div>
+
+        {/* 右下角操作提示 */}
+        <div className="text-right">
+           <p className="text-xs font-mono text-gray-600 animate-pulse mb-2">
+             INTERACTIVE 3D ASSET
+           </p>
+           {/* 一个假的 Web3 按钮 */}
+           <button className="pointer-events-auto bg-white text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform">
+             Connect Wallet
+           </button>
+        </div>
+      </div>
+
+      {/* 背景装饰：加一点噪点或光晕 (可选) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
     </div>
   );
