@@ -149,7 +149,7 @@ return (
     // 容器设为 100% 宽高，背景透明
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
-        camera={{ position: [0, 0, 25], fov: 40 }} // 稍微拉远一点，适应全屏
+        camera={{ position: [0, 0, 50], fov: 40 }} // 稍微拉远一点，适应全屏
         dpr={1} // 保持性能
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
         gl={{ preserveDrawingBuffer: true, antialias: true }}
