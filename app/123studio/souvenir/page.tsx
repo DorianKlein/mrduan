@@ -18,9 +18,9 @@ export default function SouvenirPage() {
       {/* 3D 背景层 */}
       <div className="absolute inset-0 z-0">
         <Badge3DModel 
-          frontImg="/badges/laogou.png"
-          backImg="/badges/laogou-back.png"
-          svgPath="/badges/laogou-shape.svg"
+          frontImg="/badges/ziyue.png"
+          backImg="/badges/ziyue-back.png"
+          svgPath="/badges/ziyue-shape.svg"
           scale={1.2}
           // 🔥 粒子动画结束后，触发这个回调
           onLoadComplete={() => setUiVisible(true)} 
@@ -49,7 +49,7 @@ export default function SouvenirPage() {
         <div className="flex justify-between items-end">
           <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl max-w-sm pointer-events-auto"> 
             <h2 className="text-2xl font-bold text-white mb-1">
-              小课代表 <span className="text-sm font-normal text-gray-400 ml-2">/ Laogou</span>
+              小紫悦 <span className="text-sm font-normal text-gray-400 ml-2">/ QQ弹弹</span>
             </h2>
             <p className="text-sm text-gray-400 font-mono leading-relaxed">
               Core Member badge. Access to exclusive workshops.<br/>
