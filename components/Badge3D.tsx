@@ -1,76 +1,238 @@
 'use client';
 
 import * as THREE from 'three';
-import { useMemo, useEffect, useRef, useState } from 'react';
-import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
-import { useTexture, OrbitControls, Environment, Center, Float, PresentationControls } from '@react-three/drei';
+import { useMemo, useEffect, useRef, useState, Suspense } from 'react';
+import { Canvas, useLoader, useThree, useFrame, extend } from '@react-three/fiber';
+import { useTexture, OrbitControls, Environment, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
+import { MeshSurfaceSampler } from 'three-stdlib';
+
+// --- 1. 升级版粒子着色器 (支持渐变色 + 爆破效果) ---
+const ParticleMaterial = shaderMaterial(
+  {
+    uTime: 0,
+    uProgress: 0, // 0 -> 1: 汇聚
+    uExplode: 0,  // 0 -> 1: 爆破
+    uColorA: new THREE.Color('#d2bee6ff'), // 紫色
+    uColorB: new THREE.Color('#a9bee3ff'), // 蓝色
+  },
+  // Vertex Shader
+  `
+    uniform float uTime;
+    uniform float uProgress;
+    uniform float uExplode;
+    
+    attribute vec3 aRandomPosition;
+    attribute float aRandomSize;
+    attribute vec3 aExplodeDir; // 爆破方向
+    
+    varying vec2 vUv;
+    varying float vProgress;
+
+    // 弹性缓动
+    float cubicOut(float t) {
+      float f = t - 1.0;
+      return f * f * f + 1.0;
+    }
+
+    void main() {
+      vUv = uv;
+      vProgress = uProgress;
+      
+      float t = cubicOut(uProgress);
+      
+      // 1. 汇聚阶段：从随机位置 -> 目标位置
+      vec3 pos = mix(aRandomPosition, position, t);
+      
+      // 2. 悬浮噪点 (仅在未爆破时存在)
+      float noiseStrength = (1.0 - t * 0.8) * (1.0 - uExplode); 
+      pos.x += sin(uTime * 5.0 + position.y) * 1.5 * noiseStrength;
+      pos.y += cos(uTime * 3.0 + position.x) * 1.5 * noiseStrength;
+      pos.z += sin(uTime * 4.0 + position.x) * 1.5 * noiseStrength;
+
+      // 3. 爆破阶段：沿着法线/随机方向向外飞
+      // uExplode 从 0 变到 1 时，粒子向外飞 8000 个单位距离
+      pos += aExplodeDir * uExplode * 8000.0;
+
+      vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+      gl_Position = projectionMatrix * mvPosition;
+      
+      // 粒子大小 (爆破时稍微变小一点，营造远去感)
+      float size = (40.0 * aRandomSize + 10.0) * (1.0 - uExplode * 0.5);
+      gl_PointSize = size * (3.0 / -mvPosition.z);
+    }
+  `,
+  // Fragment Shader
+  `
+    uniform vec3 uColorA;
+    uniform vec3 uColorB;
+    varying vec2 vUv;
+    varying float vProgress;
+
+    void main() {
+      // 圆形裁剪
+      vec2 coord = gl_PointCoord - vec2(0.5);
+      if(length(coord) > 0.5) discard;
+
+      // 颜色生成：基于 UV 的垂直渐变 (Web3 风格)
+      // vUv.y 从 0 到 1，混合紫色和蓝色
+      vec3 gradientColor = mix(uColorB, uColorA, vUv.y + 0.2);
+      
+      // 加一点亮度，让它看起来像发光的实体
+      gl_FragColor = vec4(gradientColor, 1.0);
+    }
+  `
+);
+extend({ ParticleMaterial });
 
 interface BadgeProps {
   frontImg: string;
   backImg: string;
   svgPath: string;
   scale?: number;
+  onLoadComplete?: () => void;
 }
 
-function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
-  const { gl } = useThree();
-  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
-  
-  const svgData = useLoader(SVGLoader, svgPath);
-  const [frontTextureRaw, backTextureRaw] = useTexture([frontImg, backImg]);
+// --- 2. 粒子组件 (生成爆破方向) ---
+// 注意：现在不需要传 frontTexture 了，因为我们用纯色渐变
+function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onReady: () => void, onComplete: () => void }) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const materialRef = useRef<any>(null);
+  const hasReadyRef = useRef(false);
 
-  // 1. 纹理配置 (保持不变)
-  const frontTexture = useMemo(() => {
-    const t = frontTextureRaw.clone();
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.center.set(0.5, 0.5);
-    t.repeat.set(1, -1);
-    
-    // 🔥 核心修复：开启满血画质 🔥
-    t.anisotropy = maxAnisotropy; // 让侧面纹理极度清晰
-    t.minFilter = THREE.LinearMipmapLinearFilter; // 开启抗锯齿
-    
-    t.needsUpdate = true;
-    return t;
-  }, [frontTextureRaw, maxAnisotropy]);
-
-  const backTexture = useMemo(() => {
-    const t = backTextureRaw.clone();
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.center.set(0.5, 0.5);
-    t.repeat.set(1, -1);
-    
-    // 🔥 背面也要加 🔥
-    t.anisotropy = maxAnisotropy;
-    t.minFilter = THREE.LinearMipmapLinearFilter;
-
-    t.needsUpdate = true;
-    return t;
-  }, [backTextureRaw, maxAnisotropy]);
-
-  // 2. ✨ 核心计算：算出 SVG 的几何中心 ✨
-  const { shapes, width, height, midX, midY } = useMemo(() => {
-    const paths = svgData.paths.flatMap((p) => p.toShapes(true));
-    
+  const { positions, randomPositions, explodeDirs, uvs, randomSizes } = useMemo(() => {
+    const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
     const tempGeo = new THREE.ShapeGeometry(paths);
     tempGeo.computeBoundingBox();
     const box = tempGeo.boundingBox!;
-    
     const w = box.max.x - box.min.x;
     const h = box.max.y - box.min.y;
-    
-    // 算出 SVG 的绝对中心坐标
-    const x = (box.max.x + box.min.x) / 2;
-    const y = (box.max.y + box.min.y) / 2;
+    const mx = (box.max.x + box.min.x) / 2;
+    const my = (box.max.y + box.min.y) / 2;
+
+    // 几何体加厚，确保包得住
+    const thickness = w * 0.15; 
+    const geometry = new THREE.ExtrudeGeometry(paths, { 
+      depth: thickness, bevelEnabled: false 
+    });
+    geometry.center();
+
+    geometry.scale(1.2, 1.2, 1.0);
+
+    const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry));
+    sampler.build();
+
+    const count = 40000; // 4万个粒子，实心感更强
+    const posArray = new Float32Array(count * 3);
+    const randPosArray = new Float32Array(count * 3);
+    const explodeDirArray = new Float32Array(count * 3); // 新增：爆破方向
+    const uvArray = new Float32Array(count * 2);
+    const sizeArray = new Float32Array(count);
+    const tempPos = new THREE.Vector3();
+    const tempNormal = new THREE.Vector3();
+
+    for (let i = 0; i < count; i++) {
+      // 采样位置和法线(法线用于确定爆破方向)
+      sampler.sample(tempPos, tempNormal);
+      
+      posArray[i * 3] = tempPos.x;
+      posArray[i * 3 + 1] = tempPos.y;
+      posArray[i * 3 + 2] = tempPos.z;
+
+      // 随机起点
+      const spread = 10000;
+      randPosArray[i * 3] = (Math.random() - 0.5) * spread;
+      randPosArray[i * 3 + 1] = (Math.random() - 0.5) * spread;
+      randPosArray[i * 3 + 2] = (Math.random() - 0.5) * spread;
+
+      // 爆破方向：使用法线方向 + 一点随机扰动，让炸开更自然
+      explodeDirArray[i * 3] = tempNormal.x + (Math.random()-0.5);
+      explodeDirArray[i * 3 + 1] = tempNormal.y + (Math.random()-0.5);
+      explodeDirArray[i * 3 + 2] = tempNormal.z + (Math.random()-0.5);
+
+      uvArray[i * 2] = (tempPos.x + w/2) / w;
+      uvArray[i * 2 + 1] = (tempPos.y + h/2) / h;
+      sizeArray[i] = Math.random();
+    }
 
     return { 
-      shapes: paths, 
-      width: w, 
-      height: h, 
-      midX: x, 
-      midY: y 
+      positions: posArray, randomPositions: randPosArray, explodeDirs: explodeDirArray,
+      uvs: uvArray, randomSizes: sizeArray 
     };
+  }, [svgData]);
+
+  useFrame((state, delta) => {
+    if (materialRef.current) {
+      materialRef.current.uTime = state.clock.elapsedTime;
+      
+      // 阶段 1: 汇聚 (Progress 0 -> 1)
+      if (materialRef.current.uProgress < 1) {
+        materialRef.current.uProgress += delta * 0.5;
+        
+        // 偷跑：汇聚到 90% 时显示实体
+        if (materialRef.current.uProgress > 0.95 && !hasReadyRef.current) {
+          onReady();
+          hasReadyRef.current = true;
+        }
+      } 
+      // 阶段 2: 爆破 (Explode 0 -> 1)
+      else {
+        materialRef.current.uProgress = 1;
+        
+        // 开始增加爆破值
+        if (materialRef.current.uExplode < 1) {
+           // 爆破速度，越快越有冲击力
+           materialRef.current.uExplode += delta * 1.2; 
+        } else {
+           // 爆破完成，卸载粒子
+           onComplete();
+        }
+      }
+    }
+  });
+
+  return (
+    <points ref={pointsRef} scale={[0.01, -0.01, 0.01]}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-aRandomPosition" args={[randomPositions, 3]} />
+        <bufferAttribute attach="attributes-aExplodeDir" args={[explodeDirs, 3]} />
+        <bufferAttribute attach="attributes-uv" args={[uvs, 2]} />
+        <bufferAttribute attach="attributes-aRandomSize" args={[randomSizes, 1]} />
+      </bufferGeometry>
+      {/* @ts-ignore */}
+      <particleMaterial 
+        ref={materialRef} 
+        transparent={true} 
+        depthWrite={true} // 开启深度写入，让粒子看起来是实心的
+        // 默认 NormalBlending，不要改
+      />
+    </points>
+  );
+}
+
+// --- 3. 实体组件 (保持不变) ---
+function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: { svgData: any, frontTexture: THREE.Texture, backTexture: THREE.Texture, scale?: number, visible: boolean }) {
+  const { gl } = useThree();
+  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+
+  useEffect(() => {
+    frontTexture.anisotropy = maxAnisotropy;
+    frontTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    frontTexture.needsUpdate = true;
+    backTexture.anisotropy = maxAnisotropy;
+    backTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    backTexture.needsUpdate = true;
+  }, [frontTexture, backTexture, maxAnisotropy]);
+
+  const { shapes, width, height, midX, midY } = useMemo(() => {
+    const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
+    const tempGeo = new THREE.ShapeGeometry(paths);
+    tempGeo.computeBoundingBox();
+    const box = tempGeo.boundingBox!;
+    const w = box.max.x - box.min.x;
+    const h = box.max.y - box.min.y;
+    return { shapes: paths, width: w, height: h, midX: (box.max.x + box.min.x) / 2, midY: (box.max.y + box.min.y) / 2 };
   }, [svgData]);
 
   const thickness = width * 0.05; 
@@ -82,63 +244,24 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
     ior: 1.5, thickness: 20, specularIntensity: 1, transparent: false, side: THREE.DoubleSide
   });
 
-  useEffect(() => {
-    return () => { frontTexture.dispose(); backTexture.dispose(); };
-  }, [frontTexture, backTexture]);
-
   return (
-    <group scale={[scale * 0.01, -scale * 0.01, scale * 0.01]}>
-      
-      {/* 🚀 全局归位：把整个组合往反方向移动，抵消掉 SVG 的偏移 */}
+    <group scale={[scale * 0.01, -scale * 0.01, scale * 0.01]} visible={visible}>
       <group position={[-midX, -midY, 0]}>
-
-        {/* 1. 正面亚克力 */}
-        {/* ExtrudeGeometry 会生成在 SVG 的原始位置 (比如 x=2000)，我们不动它 */}
         <mesh material={acrylicMaterial} position={[0, 0, gap - 50]} renderOrder={10}>
           <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
         </mesh>
-
-        {/* 2. 正面贴纸 */}
-        {/* PlaneGeometry 默认在 (0,0)，我们需要把它移到 SVG 的位置 (midX, midY) 去追亚克力 */}
         <mesh position={[midX, midY, 1]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshBasicMaterial map={frontTexture} transparent={false} alphaTest={0.5} side={THREE.FrontSide} toneMapped={false} />
         </mesh>
-
-        {/* 3. 白墨层 */}
-        {/* ShapeGeometry 天生和 ExtrudeGeometry 重合，不需要手动位移 */}
         <mesh position={[0, 0, -gap]} renderOrder={1}>
            <shapeGeometry args={[shapes]} />
            <meshBasicMaterial color="#dddddd" side={THREE.DoubleSide} />
         </mesh>
-
-        {/* 4. 背面贴纸 */}
-        {/* 也要追到 (midX, midY) */}
         <mesh position={[midX, midY, -gap * 2]} rotation={[0, Math.PI, 0]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshBasicMaterial map={backTexture} transparent={false} alphaTest={0.5} side={THREE.FrontSide} toneMapped={false} />
         </mesh>
-
-        {/* 5. 背面亚克力 */}
-        {/* 这里的旋转中心是 group 的原点。
-            因为外面的大 group 已经把原点移到了 (-midX, -midY)，
-            所以这里的 (0,0) 其实就是 SVG 的绝对中心。
-            我们需要让它绕着 (midX, midY) 旋转吗？
-            
-            不，为了简单，我们让背面亚克力也先生成在原始位置，
-            然后我们手动把这个 mesh 移回来居中，旋转，再移回去？太麻烦。
-            
-            ✅ 简单做法：我们直接再生成一个 Extrude，不做 group 旋转，
-            而是通过 scale z = -1 来镜像它！(Three.js 技巧)
-        */}
-        {/* <group position={[0, 0, -gap * 3]}> */}
-           {/* 技巧：用 scale-z = -1 来实现镜像，而不是 rotation-y = 180 */}
-           {/* 这样它就在原地镜像了，不需要算旋转轴！ */}
-           {/* <mesh material={acrylicMaterial} scale={[1, 1, -1]} position={[0, 0, -thickness]}>
-              <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
-           </mesh>
-        </group> */}
-
       </group>
     </group>
   );
@@ -146,63 +269,105 @@ function BadgeModel({ frontImg, backImg, svgPath, scale = 1 }: BadgeProps) {
 
 function AutoRotator({ children, isDragging }: { children: React.ReactNode, isDragging: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
-
   useFrame((state, delta) => {
-    // 只有当【没有】在拖拽时，才进行自动旋转
     if (groupRef.current && !isDragging) {
-      groupRef.current.rotation.y += delta * 0.5; // 自转速度
+      groupRef.current.rotation.y += delta * 0.5;
     }
   });
-
   return <group ref={groupRef}>{children}</group>;
 }
 
+// --- 4. 场景管理 ---
+function BadgeContent(props: BadgeProps) {
+  const svgData = useLoader(SVGLoader, props.svgPath);
+  const [frontTextureRaw, backTextureRaw] = useTexture([props.frontImg, props.backImg]);
 
-export default function Badge3D(props: BadgeProps) {
+  const frontTexture = useMemo(() => {
+    const t = frontTextureRaw.clone();
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.center.set(0.5, 0.5); 
+    t.repeat.set(1, -1);
+    t.needsUpdate = true;
+    return t;
+  }, [frontTextureRaw]);
+
+  const backTexture = useMemo(() => {
+    const t = backTextureRaw.clone();
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.center.set(0.5, 0.5); 
+    t.repeat.set(1, -1);
+    t.needsUpdate = true;
+    return t;
+  }, [backTextureRaw]);
+
+  useEffect(() => {
+    return () => { frontTexture.dispose(); backTexture.dispose(); };
+  }, [frontTexture, backTexture]);
 
   const [isDragging, setIsDragging] = useState(false);
-  return (
-    // 容器设为 100% 宽高，背景透明
-    <div className="w-full h-full relative" style={{ touchAction: 'none' }}
-      onPointerDown={() => setIsDragging(true)}
-      onPointerUp={() => setIsDragging(false)}
-      onPointerLeave={() => setIsDragging(false)}>
-      <Canvas 
-        camera={{ position: [0, 0, 50], fov: 40 }} // 稍微拉远一点，适应全屏
-        dpr={1} // 保持性能
-        style={{ width: '100%', height: '100%', touchAction: 'none' }}
-        gl={{ preserveDrawingBuffer: true, antialias: true }}
-      >
-        {/* 1. 环境光：降低一点亮度，制造神秘感 */}
-        <Environment files="/studio.hdr" background={false} blur={0.8} />
-        
-        {/* 2. 补光灯：加两盏有色灯，打出 Web3 的氛围感 */}
-        {/* 紫色侧逆光 */}
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} color="#a855f7" />
-        {/* 蓝色底光 */}
-        <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
+  const [showSolid, setShowSolid] = useState(false);
+  const [showParticles, setShowParticles] = useState(true);
 
-        {/* 控制器配置 */}
-        <PresentationControls
-          global={true}
-          cursor={true}
-          snap={false} // ⚠️ 改为 false！否则松手后它会强行弹回正面，跟自动旋转打架
-          speed={2.5}
-          zoom={1}
-          rotation={[0, 0, 0]}
-          polar={[0, 0]} // 锁死上下翻转
-          azimuth={[-Infinity, Infinity]} 
-          // config={{ mass: 1, tension: 170, friction: 26 }}
+  return (
+    <>
+      <Environment files="/studio.hdr" background={false} blur={0.8} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} color="#a855f7" />
+      <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
+
+      <PresentationControls
+        global cursor={true} snap={false} speed={1.5} zoom={1}
+        rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
+      >
+        <group 
+          onPointerDown={() => setIsDragging(true)} 
+          onPointerUp={() => setIsDragging(false)}
+          onPointerLeave={() => setIsDragging(false)}
         >
-          <Float speed={3} rotationIntensity={0.5} floatIntensity={0.5}>
+          <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
             <Center>
-              {/* ✅ 4. 用 AutoRotator 包裹你的模型 */}
               <AutoRotator isDragging={isDragging}>
-                <BadgeModel {...props} />
+                
+                {showParticles && (
+                  <BadgeParticles 
+                    svgData={svgData} 
+                    // 粒子现在不需要贴图了，所以不传 frontTexture
+                    onReady={() => setShowSolid(true)}
+                    onComplete={() => {
+                        setShowParticles(false);
+                        if (props.onLoadComplete) props.onLoadComplete();
+                    }} 
+                  />
+                )}
+
+                <BadgeModel 
+                  svgData={svgData}
+                  frontTexture={frontTexture}
+                  backTexture={backTexture}
+                  scale={props.scale}
+                  visible={showSolid} 
+                />
+
               </AutoRotator>
             </Center>
           </Float>
-        </PresentationControls>
+        </group>
+      </PresentationControls>
+    </>
+  );
+}
+
+export default function Badge3D(props: BadgeProps) {
+  return (
+    <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
+      <Canvas 
+        camera={{ position: [0, 0, 50], fov: 35 }} 
+        dpr={1}
+        style={{ width: '100%', height: '100%', touchAction: 'none' }}
+        gl={{ preserveDrawingBuffer: true, antialias: true }}
+      >
+        <Suspense fallback={null}>
+          <BadgeContent {...props} />
+        </Suspense>
       </Canvas>
     </div>
   );
