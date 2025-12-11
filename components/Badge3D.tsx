@@ -187,7 +187,7 @@ export default function Badge3D(props: BadgeProps) {
           global={true}
           cursor={true}
           snap={false} // ⚠️ 改为 false！否则松手后它会强行弹回正面，跟自动旋转打架
-          speed={1.5}
+          speed={2.5}
           zoom={1}
           rotation={[0, 0, 0]}
           polar={[0, 0]} // 锁死上下翻转
