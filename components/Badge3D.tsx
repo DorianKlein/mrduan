@@ -250,20 +250,34 @@ function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: 
   return (
     <group scale={[scale * 0.01, -scale * 0.01, scale * 0.01]} visible={visible}>
       <group position={[-midX, -midY, 0]}>
-        <mesh material={acrylicMaterial} position={[0, 0, gap - 50]} renderOrder={10}>
+        <mesh material={acrylicMaterial} position={[0, 0, gap - 50]} renderOrder={10} castShadow receiveShadow>
           <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
         </mesh>
-        <mesh position={[midX, midY, 1]} renderOrder={1}>
+        <mesh position={[midX, midY, 1]} renderOrder={1} castShadow receiveShadow>
           <planeGeometry args={[width, height]} />
-          <meshBasicMaterial map={frontTexture} transparent={false} alphaTest={0.5} side={THREE.FrontSide} toneMapped={false} />
+          <meshStandardMaterial
+            map={frontTexture}
+            transparent={false}
+            alphaTest={0.5}
+            side={THREE.FrontSide}
+            metalness={0.1}
+            roughness={0.35}
+          />
         </mesh>
-        <mesh position={[0, 0, -gap]} renderOrder={1}>
+        {/* <mesh position={[0, 0, -gap]} renderOrder={1} receiveShadow>
            <shapeGeometry args={[shapes]} />
-           <meshBasicMaterial color="#dddddd" side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[midX, midY, -gap * 2]} rotation={[0, Math.PI, 0]} renderOrder={1}>
+           <meshStandardMaterial color="#dddddd" side={THREE.DoubleSide} metalness={0} roughness={0.6} />
+        </mesh> */}
+        <mesh position={[midX, midY, -gap * 2]} rotation={[0, Math.PI, 0]} renderOrder={1} castShadow receiveShadow>
           <planeGeometry args={[width, height]} />
-          <meshBasicMaterial map={backTexture} transparent={false} alphaTest={0.5} side={THREE.FrontSide} toneMapped={false} />
+          <meshStandardMaterial
+            map={backTexture}
+            transparent={false}
+            alphaTest={0.5}
+            side={THREE.FrontSide}
+            metalness={0.1}
+            roughness={0.45}
+          />
         </mesh>
       </group>
     </group>
@@ -321,34 +335,30 @@ function BadgeContent(props: BadgeProps) {
   return (
     <>
       {/* <Environment files="/studio.hdr" background={false} blur={0.8} /> */}
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0} color="#a855f7" />
-      <pointLight position={[-10, -10, -10]} intensity={0} color="#3b82f6" />
+      <spotLight position={[12, 14, 18]} angle={0.4} penumbra={0.9} intensity={6} color="#a855f7" castShadow />
+      <pointLight position={[-8, -8, -6]} intensity={3} color="#3b82f6" />
 
-      {/* ✅ 新增：纯色光照组合 */}
-      {/* 1. 环境光：提供全局的、均匀的基础亮度，避免死黑 */}
-      <ambientLight intensity={0} color="#ffffff" />
+      {/* ✅ 纯色光照组合 */}
+      <ambientLight intensity={0.45} color="#ffffff" />
 
-      {/* 2. 主光源 (紫色)：从右上方照射，提供主光影和高光 */}
       <spotLight
-        position={[20, 20, 20]} // 位置在右上方
-        angle={2}            // 光束角度
-        penumbra={1}           // 边缘柔和度
-        intensity={0}         // 强度
-        color="#a855f7"        // 紫色
-        castShadow             // 开启投影（可选，增加真实感）
+        position={[22, 24, 30]} // 右上方主光
+        angle={0.5}
+        penumbra={1}
+        intensity={10}
+        color="#a855f7"
+        castShadow
       />
 
-      {/* 3. 补光灯 (蓝色)：从左下方照射，勾勒轮廓，增加层次感 */}
       <spotLight
-        position={[-20, -10, 10]} // 位置在左下方
-        angle={0.3}
+        position={[-18, -12, 12]} // 左下方补光
+        angle={0.6}
         penumbra={1}
-        intensity={0}          // 强度稍弱
-        color="#3b82f6"        // 蓝色
+        intensity={5}
+        color="#3b82f6"
       />
       
-      {/* 4. 顶部光：照亮顶部边缘 */}
-      <directionalLight position={[0, 10, 0]} intensity={0} color="#ffffff" />
+      <directionalLight position={[0, 16, 6]} intensity={2.5} color="#f5f5ff" />
 
       <PresentationControls
         global cursor={true} snap={false} speed={1.5} zoom={1}
@@ -396,6 +406,7 @@ export default function Badge3D(props: BadgeProps) {
   return (
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
+        shadows
         camera={{ position: [0, 0, 100], fov: 35 }} 
         dpr={1}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
