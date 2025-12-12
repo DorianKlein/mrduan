@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { useMemo, useEffect, useRef, useState, Suspense } from 'react';
 import { Canvas, useLoader, useThree, useFrame, extend } from '@react-three/fiber';
-import { useTexture, Environment, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
+import { useTexture, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { MeshSurfaceSampler } from 'three-stdlib';
 
@@ -90,8 +90,10 @@ interface BadgeProps {
   backImg: string;
   svgPath: string;
   scale?: number;
+  autoRotate?: boolean;
   onLoadComplete?: () => void;
 }
+
 
 // --- 2. 粒子组件 (生成爆破方向) ---
 // 注意：现在不需要传 frontTexture 了，因为我们用纯色渐变
@@ -268,10 +270,10 @@ function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: 
   );
 }
 
-function AutoRotator({ children, isDragging }: { children: React.ReactNode, isDragging: boolean }) {
+function AutoRotator({ children, isDragging, autoRotate = true }: { children: React.ReactNode, isDragging: boolean, autoRotate?: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
   useFrame((state, delta) => {
-    if (groupRef.current && !isDragging) {
+    if (groupRef.current && !isDragging && autoRotate) {
       groupRef.current.rotation.y += delta * 0.5;
     }
   });
@@ -318,7 +320,7 @@ function BadgeContent(props: BadgeProps) {
 
   return (
     <>
-      <Environment files="/studio.hdr" background={false} blur={0.8} />
+      {/* <Environment files="/studio.hdr" background={false} blur={0.8} /> */}
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} color="#a855f7" />
       <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
 
@@ -333,7 +335,7 @@ function BadgeContent(props: BadgeProps) {
         >
           <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
             <Center>
-              <AutoRotator isDragging={isDragging}>
+              <AutoRotator isDragging={isDragging} autoRotate={props.autoRotate}>
                 
                 {showParticles && (
                   <BadgeParticles 
