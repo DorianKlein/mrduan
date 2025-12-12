@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { useMemo, useEffect, useRef, useState, Suspense } from 'react';
 import { Canvas, useLoader, useThree, useFrame, extend } from '@react-three/fiber';
-import { useTexture, OrbitControls, Environment, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
+import { useTexture, Environment, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { MeshSurfaceSampler } from 'three-stdlib';
 
@@ -13,8 +13,8 @@ const ParticleMaterial = shaderMaterial(
     uTime: 0,
     uProgress: 0, // 0 -> 1: 汇聚
     uExplode: 0,  // 0 -> 1: 爆破
-    uColorA: new THREE.Color('#f05050ff'), // 紫色
-    uColorB: new THREE.Color('#005effff'), // 蓝色
+    uColorA: new THREE.Color('#ddb7f7'), // 紫色
+    uColorB: new THREE.Color('#6a89be'), // 蓝色
   },
   // Vertex Shader
   `
@@ -79,7 +79,7 @@ const ParticleMaterial = shaderMaterial(
       vec3 gradientColor = mix(uColorB, uColorA, vUv.y + 0.2);
       
       // 加一点亮度，让它看起来像发光的实体
-      gl_FragColor = vec4(gradientColor, 0.9);
+      gl_FragColor = vec4(gradientColor, 1.0);
     }
   `
 );
@@ -95,20 +95,21 @@ interface BadgeProps {
 
 // --- 2. 粒子组件 (生成爆破方向) ---
 // 注意：现在不需要传 frontTexture 了，因为我们用纯色渐变
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onReady: () => void, onComplete: () => void }) {
   const pointsRef = useRef<THREE.Points>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const materialRef = useRef<any>(null);
   const hasReadyRef = useRef(false);
 
   const { positions, randomPositions, explodeDirs, uvs, randomSizes } = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
     const tempGeo = new THREE.ShapeGeometry(paths);
     tempGeo.computeBoundingBox();
     const box = tempGeo.boundingBox!;
     const w = box.max.x - box.min.x;
     const h = box.max.y - box.min.y;
-    const mx = (box.max.x + box.min.x) / 2;
-    const my = (box.max.y + box.min.y) / 2;
 
     // 几何体加厚，确保包得住
     const thickness = w * 0.15; 
@@ -141,17 +142,24 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
 
       // 随机起点
       const spread = 10000;
+      // eslint-disable-next-line react-hooks/purity
       randPosArray[i * 3] = (Math.random() - 0.5) * spread;
+      // eslint-disable-next-line react-hooks/purity
       randPosArray[i * 3 + 1] = (Math.random() - 0.5) * spread;
+      // eslint-disable-next-line react-hooks/purity
       randPosArray[i * 3 + 2] = (Math.random() - 0.5) * spread;
 
       // 爆破方向：使用法线方向 + 一点随机扰动，让炸开更自然
+      // eslint-disable-next-line react-hooks/purity
       explodeDirArray[i * 3] = tempNormal.x + (Math.random()-0.5);
+      // eslint-disable-next-line react-hooks/purity
       explodeDirArray[i * 3 + 1] = tempNormal.y + (Math.random()-0.5);
+      // eslint-disable-next-line react-hooks/purity
       explodeDirArray[i * 3 + 2] = tempNormal.z + (Math.random()-0.5);
 
       uvArray[i * 2] = (tempPos.x + w/2) / w;
       uvArray[i * 2 + 1] = (tempPos.y + h/2) / h;
+      // eslint-disable-next-line react-hooks/purity
       sizeArray[i] = Math.random();
     }
 
@@ -200,6 +208,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
         <bufferAttribute attach="attributes-uv" args={[uvs, 2]} />
         <bufferAttribute attach="attributes-aRandomSize" args={[randomSizes, 1]} />
       </bufferGeometry>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
       {/* @ts-ignore */}
       <particleMaterial 
         ref={materialRef} 
@@ -212,20 +221,12 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
 }
 
 // --- 3. 实体组件 (保持不变) ---
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: { svgData: any, frontTexture: THREE.Texture, backTexture: THREE.Texture, scale?: number, visible: boolean }) {
-  const { gl } = useThree();
-  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
-
-  useEffect(() => {
-    frontTexture.anisotropy = maxAnisotropy;
-    frontTexture.minFilter = THREE.LinearMipmapLinearFilter;
-    frontTexture.needsUpdate = true;
-    backTexture.anisotropy = maxAnisotropy;
-    backTexture.minFilter = THREE.LinearMipmapLinearFilter;
-    backTexture.needsUpdate = true;
-  }, [frontTexture, backTexture, maxAnisotropy]);
+  
 
   const { shapes, width, height, midX, midY } = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
     const tempGeo = new THREE.ShapeGeometry(paths);
     tempGeo.computeBoundingBox();
@@ -282,23 +283,30 @@ function BadgeContent(props: BadgeProps) {
   const svgData = useLoader(SVGLoader, props.svgPath);
   const [frontTextureRaw, backTextureRaw] = useTexture([props.frontImg, props.backImg]);
 
+  const { gl } = useThree();
+  const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+
   const frontTexture = useMemo(() => {
     const t = frontTextureRaw.clone();
     t.colorSpace = THREE.SRGBColorSpace;
     t.center.set(0.5, 0.5); 
     t.repeat.set(1, -1);
+    t.anisotropy = maxAnisotropy;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
     t.needsUpdate = true;
     return t;
-  }, [frontTextureRaw]);
+  }, [frontTextureRaw, maxAnisotropy]);
 
   const backTexture = useMemo(() => {
     const t = backTextureRaw.clone();
     t.colorSpace = THREE.SRGBColorSpace;
     t.center.set(0.5, 0.5); 
     t.repeat.set(1, -1);
+    t.anisotropy = maxAnisotropy;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
     t.needsUpdate = true;
     return t;
-  }, [backTextureRaw]);
+  }, [backTextureRaw, maxAnisotropy]);
 
   useEffect(() => {
     return () => { frontTexture.dispose(); backTexture.dispose(); };
