@@ -321,8 +321,34 @@ function BadgeContent(props: BadgeProps) {
   return (
     <>
       {/* <Environment files="/studio.hdr" background={false} blur={0.8} /> */}
-      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} color="#a855f7" />
-      <pointLight position={[-10, -10, -10]} intensity={5} color="#3b82f6" />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0} color="#a855f7" />
+      <pointLight position={[-10, -10, -10]} intensity={0} color="#3b82f6" />
+
+      {/* ✅ 新增：纯色光照组合 */}
+      {/* 1. 环境光：提供全局的、均匀的基础亮度，避免死黑 */}
+      <ambientLight intensity={0} color="#ffffff" />
+
+      {/* 2. 主光源 (紫色)：从右上方照射，提供主光影和高光 */}
+      <spotLight
+        position={[20, 20, 20]} // 位置在右上方
+        angle={2}            // 光束角度
+        penumbra={1}           // 边缘柔和度
+        intensity={0}         // 强度
+        color="#a855f7"        // 紫色
+        castShadow             // 开启投影（可选，增加真实感）
+      />
+
+      {/* 3. 补光灯 (蓝色)：从左下方照射，勾勒轮廓，增加层次感 */}
+      <spotLight
+        position={[-20, -10, 10]} // 位置在左下方
+        angle={0.3}
+        penumbra={1}
+        intensity={0}          // 强度稍弱
+        color="#3b82f6"        // 蓝色
+      />
+      
+      {/* 4. 顶部光：照亮顶部边缘 */}
+      <directionalLight position={[0, 10, 0]} intensity={0} color="#ffffff" />
 
       <PresentationControls
         global cursor={true} snap={false} speed={1.5} zoom={1}
