@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import InfoCard from '@/components/InfoCard';
+import AmbientBackground from '@/components/AmbientBackground';
 
 const Badge3DModel = dynamic(() => import('@/components/Badge3D'), { 
   ssr: false,
@@ -70,9 +72,23 @@ export default function SouvenirPage() {
 
   const JOIN_DATE = "2023-09-01 10:00:00"; 
 
+  const LETTER_TO_ZIYUE = `
+    紫悦，很高兴你能成为工作室的第一批核心成员。
+    
+    还记得你刚来面试的时候，带着那本厚厚的手绘本，眼神里既紧张又充满光芒。这两年，看着你从一个只会画草图的新生，变成现在能独当一面的设计负责人，我真的很骄傲。
+    
+    这枚徽章不仅仅是个纪念品，它是你在这里留下的痕迹。无论未来你去哪里读研、去哪里工作，这里永远是你的起点。
+    
+    Keep creating, keep shining.
+    —— 你的技术总监 & 朋友
+  `;
+
+
   return (
-    <div className="relative w-full h-screen bg-[#050505] overflow-hidden flex flex-col justify-between">
+    <div className="relative w-full h-screen overflow-hidden flex flex-col justify-between">
       
+      <AmbientBackground />
+
       {/* 3D 背景层 */}
       <div className="absolute inset-0 z-0">
         <Badge3DModel 
@@ -91,11 +107,11 @@ export default function SouvenirPage() {
         {/* 顶部 Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
+            <h1 className="text-3xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
               123<br/>STUDIO
             </h1>
             <div className="mt-2 inline-block px-3 py-1 border border-purple-500/30 rounded-full bg-purple-900/20 backdrop-blur-md">
-              <span className="text-xs font-mono text-purple-300 tracking-widest">Year-end commemoration</span>
+              <span className="text-xs font-mono text-purple-300 tracking-widest">2025年终 · 纪念</span>
             </div>
           </div>
 
@@ -107,31 +123,23 @@ export default function SouvenirPage() {
             >
               {isAutoRotating ? <PauseIcon /> : <PlayIcon />}
               <span className="text-xs font-mono tracking-widest uppercase hidden md:inline-block">
-                {isAutoRotating ? 'Auto Rotate On' : 'Auto Rotate Off'}
+                {isAutoRotating ? '自动旋转 开启' : '自动旋转 关闭'}
               </span>
             </button>
           </div>
         </div>
 
-        {/* 底部 Info */}
-        <div className="flex justify-between items-end">
-          <div className="bg-black/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl max-w-sm pointer-events-auto"> 
-            <h2 className="text-2xl font-bold text-white mb-1">
-              小紫悦 <span className="text-sm font-normal text-gray-400 ml-2">/ QQ弹弹</span>
-            </h2>
-            <p className="text-sm text-gray-400 font-mono leading-relaxed mb-4">
-              Core Member badge. Access to exclusive workshops.<br/>
-              <span className="text-purple-400 mt-1 block text-xs">● Verified Owner</span>
-            </p>
-
-            <div className="border-t border-white/10 pt-3 mt-3">
-              <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">加入工作室时长</p>
-              <JoinTimer startDate={JOIN_DATE} />
-            </div>
-          </div>
-
-          {/* ✅ 已移除原来的 Connect Wallet 按钮 */}
-        </div>
+        {/* 🔥 底部：使用新的 InfoCard 组件 */}
+        {/* 注意：InfoCard 内部自带 pointer-events-auto，所以不用担心点击问题 */}
+        <InfoCard 
+          name="程紫月"
+          nickname="紫悦"
+          joinDate="2023-09-01 10:00:00"
+          letterContent={LETTER_TO_ZIYUE}
+        >
+          {/* 把计时器作为 children 传进去 */}
+          <JoinTimer startDate="2023-09-01 10:00:00" />
+        </InfoCard>
 
       </div>
     </div>

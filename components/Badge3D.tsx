@@ -13,8 +13,8 @@ const ParticleMaterial = shaderMaterial(
     uTime: 0,
     uProgress: 0, // 0 -> 1: 汇聚
     uExplode: 0,  // 0 -> 1: 爆破
-    uColorA: new THREE.Color('#ddb7f7'), // 紫色
-    uColorB: new THREE.Color('#6a89be'), // 蓝色
+    uColorA: new THREE.Color('#fddfff'), // 紫色
+    uColorB: new THREE.Color('#dde9ff'), // 蓝色
   },
   // Vertex Shader
   `

@@ -24,3 +24,67 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes cyber-float {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  25% {
+    transform: translate(50px, -50px) scale(1.1);
+  }
+  50% {
+    transform: translate(-30px, 30px) scale(0.9);
+  }
+  75% {
+    transform: translate(30px, 20px) scale(1.05);
+  }
+}
+
+/* 应用动画类 */
+.animate-cyber {
+  animation: cyber-float 10s infinite ease-in-out;
+  /* 开启 GPU 加速，防止手机发热卡顿 */
+  will-change: transform; 
+}
+
+/* 不同的延迟，防止光斑同步运动 */
+.delay-0 { animation-delay: 0s; }
+.delay-2000 { animation-delay: 2s; }
+.delay-4000 { animation-delay: 4s; }
+
+
+/* --- 新增：赛博流光动画定义 --- */
+
+@keyframes flow-1 {
+  0% { transform: translate(0%, 0%) rotate(-45deg) scale(1); }
+  50% { transform: translate(20%, 20%) rotate(-45deg) scale(1.1); }
+  100% { transform: translate(0%, 0%) rotate(-45deg) scale(1); }
+}
+
+@keyframes flow-2 {
+  0% { transform: translate(0%, 0%) rotate(15deg) scale(1.2); }
+  50% { transform: translate(-15%, 10%) rotate(15deg) scale(1); }
+  100% { transform: translate(0%, 0%) rotate(15deg) scale(1.2); }
+}
+
+@keyframes flow-3 {
+  0% { transform: translate(0%, 0%) rotate(-12deg) scale(1); }
+  50% { transform: translate(10%, -20%) rotate(-12deg) scale(1.3); }
+  100% { transform: translate(0%, 0%) rotate(-12deg) scale(1); }
+}
+
+/* 动画工具类 */
+.animate-flow-1 {
+  animation: flow-1 18s infinite ease-in-out;
+  will-change: transform; /* 开启硬件加速 */
+}
+
+.animate-flow-2 {
+  animation: flow-2 23s infinite ease-in-out;
+  will-change: transform;
+}
+
+.animate-flow-3 {
+  animation: flow-3 20s infinite ease-in-out;
+  will-change: transform;
+}
