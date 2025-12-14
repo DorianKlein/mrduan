@@ -10,6 +10,8 @@ const Badge3DModel = dynamic(() => import('@/components/Badge3D'), {
   loading: () => <div className="animate-pulse text-purple-500 text-center mt-40">Loading Assets...</div>
 });
 
+const PASSWORD = 'duankaiyi';
+
 // 加入时长计时器组件
 function JoinTimer({ startDate }: { startDate: string }) {
   const [duration, setDuration] = useState<string>('');
@@ -69,6 +71,9 @@ const PlayIcon = () => (
 export default function SouvenirPage() {
   const [uiVisible, setUiVisible] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(true); // ✅ 新增：控制旋转状态
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const JOIN_DATE = "2023-09-01 10:00:00"; 
 
@@ -83,6 +88,54 @@ export default function SouvenirPage() {
     —— 你的技术总监 & 朋友
   `;
 
+  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (passwordInput.trim() === PASSWORD) {
+      setIsAuthorized(true);
+      setAuthError('');
+      setPasswordInput('');
+      return;
+    }
+
+    setAuthError('密码错误，无法访问。');
+  };
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] px-6 text-white">
+        <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur">
+          <h1 className="text-lg font-semibold uppercase tracking-[0.4em] text-purple-200">Access Required</h1>
+          <p className="mt-3 text-sm text-purple-100/80">请输入访问密码以继续浏览 123 Studio Souvenir 页面。</p>
+          <form className="mt-6 space-y-4" onSubmit={handleUnlock}>
+            <div>
+              <label className="text-xs uppercase tracking-[0.3em] text-purple-200/90">Password</label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(event) => {
+                  setPasswordInput(event.target.value);
+                  if (authError) setAuthError('');
+                }}
+                className="mt-2 w-full rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm text-white placeholder-purple-200/40 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                placeholder="输入密码"
+                autoFocus
+              />
+            </div>
+            {authError && (
+              <p className="text-xs font-medium text-rose-300">{authError}</p>
+            )}
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:from-purple-400 hover:to-indigo-400"
+            >
+              Unlock
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col justify-between">
