@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { useMemo, useEffect, useRef, useState, Suspense } from 'react';
 import { Canvas, useLoader, useThree, useFrame, extend } from '@react-three/fiber';
-import { useTexture, Center, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
+import { useTexture, Center, Environment, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { MeshSurfaceSampler } from 'three-stdlib';
 
@@ -13,8 +13,8 @@ const ParticleMaterial = shaderMaterial(
     uTime: 0,
     uProgress: 0, // 0 -> 1: 汇聚
     uExplode: 0,  // 0 -> 1: 爆破
-    uColorA: new THREE.Color('#fddfff'), // 紫色
-    uColorB: new THREE.Color('#dde9ff'), // 蓝色
+    uColorA: new THREE.Color('#fceffd'), // 紫色
+    uColorB: new THREE.Color('#ecf1fb'), // 蓝色
   },
   // Vertex Shader
   `
@@ -94,7 +94,6 @@ interface BadgeProps {
   onLoadComplete?: () => void;
 }
 
-
 // --- 2. 粒子组件 (生成爆破方向) ---
 // 注意：现在不需要传 frontTexture 了，因为我们用纯色渐变
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,12 +119,12 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
     });
     geometry.center();
 
-    geometry.scale(1.2, 1.2, 1.0);
+    geometry.scale(0.5, 0.5, 0.5);
 
     const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry));
     sampler.build();
 
-    const count = 100000; // 10万个粒子，实心感更强
+    const count = 50000; // 5万个粒子，实心感更强
     const posArray = new Float32Array(count * 3);
     const randPosArray = new Float32Array(count * 3);
     const explodeDirArray = new Float32Array(count * 3); // 新增：爆破方向
@@ -143,7 +142,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
       posArray[i * 3 + 2] = tempPos.z;
 
       // 随机起点
-      const spread = 10000;
+      const spread = 5000;
       // eslint-disable-next-line react-hooks/purity
       randPosArray[i * 3] = (Math.random() - 0.5) * spread;
       // eslint-disable-next-line react-hooks/purity
@@ -179,7 +178,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
       if (materialRef.current.uProgress < 1) {
         materialRef.current.uProgress += delta * 0.2;
         
-        // 偷跑：汇聚到 95% 时显示实体
+        // 偷跑：汇聚到 97% 时显示实体
         if (materialRef.current.uProgress > 0.97 && !hasReadyRef.current) {
           onReady();
           hasReadyRef.current = true;
@@ -215,7 +214,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
       <particleMaterial 
         ref={materialRef} 
         transparent={true} 
-        depthWrite={true} // 开启深度写入，让粒子看起来是实心的
+        depthWrite={false} // 开启深度写入，让粒子看起来是实心的
         // 默认 NormalBlending，不要改
       />
     </points>
@@ -227,56 +226,111 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
 function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: { svgData: any, frontTexture: THREE.Texture, backTexture: THREE.Texture, scale?: number, visible: boolean }) {
   
 
-  const { shapes, width, height, midX, midY } = useMemo(() => {
+  const { shapes, width, height, midX, midY, scaleRatio } = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
+
     const tempGeo = new THREE.ShapeGeometry(paths);
     tempGeo.computeBoundingBox();
-    const box = tempGeo.boundingBox!;
-    const w = box.max.x - box.min.x;
-    const h = box.max.y - box.min.y;
-    return { shapes: paths, width: w, height: h, midX: (box.max.x + box.min.x) / 2, midY: (box.max.y + box.min.y) / 2 };
+    const rawBox = tempGeo.boundingBox!;
+    const rawW = rawBox.max.x - rawBox.min.x;
+    const rawH = rawBox.max.y - rawBox.min.y;
+
+    const k = 5 / rawW;
+    
+    return { 
+    shapes: paths, // 用缩放后的形状
+    width: rawW,   // 现在 w 应该是 5
+    height: rawH, 
+    midX: (rawBox.max.x + rawBox.min.x) / 2, 
+    midY: (rawBox.max.y + rawBox.min.y) / 2,
+    scaleRatio: k
+    };
   }, [svgData]);
 
-  const thickness = width * 0.05; 
-  const bevel = width * 0.01; 
-  const gap = width * 0.002;
+  const realThickness = 0.4;  //厚度
+  const realBevel = 0.1;     //倒角
 
-  const acrylicMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, transmission: 1, opacity: 1, roughness: 0,
-    ior: 1.5, thickness: 20, specularIntensity: 1, transparent: false, side: THREE.DoubleSide
-  });
+  //计算内部厚度
+  const internalDepth = realThickness / scaleRatio;
+
+  const extrusionSettings = useMemo(() => ({
+    depth: internalDepth, 
+    bevelEnabled: true, 
+    bevelThickness: realBevel / scaleRatio, 
+    bevelSize: realBevel / scaleRatio, 
+    bevelSegments: 5 
+  }), [internalDepth, realBevel, scaleRatio]);
 
   return (
-    <group scale={[scale * 0.01, -scale * 0.01, scale * 0.01]} visible={visible}>
+    <group scale={[scaleRatio, -scaleRatio, scaleRatio]} visible={visible}>
       <group position={[-midX, -midY, 0]}>
-        <mesh material={acrylicMaterial} position={[0, 0, gap - 50]} renderOrder={10} castShadow receiveShadow>
-          <extrudeGeometry args={[shapes, { depth: thickness, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4 }]} />
+        {/* 亚克力 */}
+        <mesh 
+          position={[0, 0, -internalDepth / 2]} 
+          renderOrder={10} 
+          castShadow 
+          receiveShadow
+        >
+          {/* 几何体：直接渲染，不需要材质数组 */}
+          <extrudeGeometry args={[shapes, extrusionSettings]} />
+
+          {/* 统一材质：全抛光高透亚克力 */}
+          <meshPhysicalMaterial
+            // --- 核心：开启物理传输 ---
+            transmission={1}   // 全透射
+            transparent={false}
+
+            thickness={3.5}    // ✅ 加厚！让光线在内部多跑一会儿，折射扭曲更明显
+            
+            // --- 表面质感 ---
+            roughness={0.05}   // 给一点点微小的磨砂，让高光更柔和，不那么“脆”
+            ior={1.7}          // 亚克力折射率
+            
+            // --- 颜色与衰减 (灵魂所在) ---
+            color="#ffffff"    // 表面保持纯净
+            
+            // 衰减色：这是物体内部的“本体色”
+            // 设为淡青色/淡蓝色，越厚的地方颜色越深
+            attenuationColor="#cceeff" 
+            
+            // 衰减距离：控制颜色的深浅
+            // 这个值越小，颜色越浓（像深水）；这个值越大，越清澈
+            // 配合 thickness={3.5}，设为 4.0 左右能得到很好的层次感
+            attenuationDistance={1.0} 
+
+            // --- 高光与反射 ---
+            specularIntensity={1}
+            specularColor="#ffffff"
+            envMapIntensity={2} // 配合暗 HDR，这里要强一点
+            
+            clearcoat={1}       // 双层高光
+            clearcoatRoughness={0}
+
+            side={THREE.DoubleSide} 
+          />
         </mesh>
-        <mesh position={[midX, midY, 1]} renderOrder={1} castShadow receiveShadow>
+        {/* 正面贴图 */}
+        <mesh position={[midX, midY, 1]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
             map={frontTexture}
             transparent={false}
-            alphaTest={0.5}
+            alphaTest={0.45}
             side={THREE.FrontSide}
-            metalness={0.1}
-            roughness={0.35}
+            metalness={0.05}
+            roughness={0.22}
           />
         </mesh>
-        {/* <mesh position={[0, 0, -gap]} renderOrder={1} receiveShadow>
-           <shapeGeometry args={[shapes]} />
-           <meshStandardMaterial color="#dddddd" side={THREE.DoubleSide} metalness={0} roughness={0.6} />
-        </mesh> */}
-        <mesh position={[midX, midY, -gap * 2]} rotation={[0, Math.PI, 0]} renderOrder={1} castShadow receiveShadow>
+        <mesh position={[midX, midY, -0.01]} rotation={[0, Math.PI, 0]} renderOrder={1} castShadow receiveShadow>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
             map={backTexture}
             transparent={false}
-            alphaTest={0.5}
+            alphaTest={0.45}
             side={THREE.FrontSide}
-            metalness={0.1}
-            roughness={0.45}
+            metalness={0.05}
+            roughness={0.28}
           />
         </mesh>
       </group>
@@ -329,37 +383,21 @@ function BadgeContent(props: BadgeProps) {
   }, [frontTexture, backTexture]);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [showSolid, setShowSolid] = useState(false);
+  const [showSolid, setShowSolid] = useState(false); // 控制实体显示
   const [showParticles, setShowParticles] = useState(true);
+
 
   return (
     <>
-      {/* <Environment files="/studio.hdr" background={false} blur={0.8} /> */}
-      <spotLight position={[12, 14, 18]} angle={0.4} penumbra={0.9} intensity={6} color="#a855f7" castShadow />
-      <pointLight position={[-8, -8, -6]} intensity={3} color="#3b82f6" />
-
-      {/* ✅ 纯色光照组合 */}
-      <ambientLight intensity={0.45} color="#ffffff" />
-
-      <spotLight
-        position={[22, 24, 30]} // 右上方主光
-        angle={0.5}
-        penumbra={1}
-        intensity={10}
-        color="#a855f7"
-        castShadow
-      />
-
-      <spotLight
-        position={[-18, -12, 12]} // 左下方补光
-        angle={0.6}
-        penumbra={1}
-        intensity={5}
-        color="#3b82f6"
-      />
       
-      <directionalLight position={[0, 16, 6]} intensity={2.5} color="#f5f5ff" />
-
+      {/* <Environment 
+      preset="city"  // 1. 加载本地文件 (路径对应 public/studio.hdr)
+      background={false}   // 2. 隐藏背景图，只保留光照
+      
+      blur={1}          // 3. 适度模糊，保留柔和反射同时增添透明感
+      environmentRotation={[0, 180, 0]}
+      environmentIntensity={0}
+      /> */}
       <PresentationControls
         global cursor={true} snap={false} speed={1.5} zoom={1}
         rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
@@ -407,11 +445,22 @@ export default function Badge3D(props: BadgeProps) {
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
         shadows
-        camera={{ position: [0, 0, 100], fov: 35 }} 
+        // 1. 关键：开启 alpha 通道，允许透明背景
+        gl={{ 
+          alpha: true, 
+          antialias: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.0
+        }}
+        // 2. 关键：不要设置 scene.background，或者显式设为 null
+        onCreated={({ scene }) => {
+          scene.background = null; 
+        }}
+        camera={{ position: [0, 0, 15], fov: 35 }} 
         dpr={1}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
-        gl={{ preserveDrawingBuffer: true, antialias: true }}
       >
+        {/* <color attach="background" args={['#006414']} /> */}
         <Suspense fallback={null}>
           <BadgeContent {...props} />
         </Suspense>

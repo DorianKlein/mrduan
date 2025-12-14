@@ -87,7 +87,9 @@ export default function SouvenirPage() {
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col justify-between">
       
-      <AmbientBackground />
+      <div className="absolute inset-0 z-0">
+        <AmbientBackground />
+      </div>
 
       {/* 3D 背景层 */}
       <div className="absolute inset-0 z-0">
