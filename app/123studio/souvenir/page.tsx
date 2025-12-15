@@ -74,8 +74,7 @@ export default function SouvenirPage() {
   const [passwordInput, setPasswordInput] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [authError, setAuthError] = useState('');
-
-  const JOIN_DATE = "2023-09-01 10:00:00"; 
+  const currentThemeColor = '#241229';
 
   const LETTER_TO_ZIYUE = `
     紫悦，很高兴你能成为工作室的第一批核心成员。
@@ -139,7 +138,6 @@ export default function SouvenirPage() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col justify-between">
-      
       <div className="absolute inset-0 z-0">
         <AmbientBackground />
       </div>
@@ -152,6 +150,9 @@ export default function SouvenirPage() {
           svgPath="/badges/ziyue-shape.svg"
           scale={1.2}
           autoRotate={isAutoRotating} // ✅ 传入控制信号
+
+          themeColor={currentThemeColor}
+
           onLoadComplete={() => setUiVisible(true)} 
         />
       </div>

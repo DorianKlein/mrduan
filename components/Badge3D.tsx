@@ -91,6 +91,9 @@ interface BadgeProps {
   svgPath: string;
   scale?: number;
   autoRotate?: boolean;
+
+  themeColor?: string;
+
   onLoadComplete?: () => void;
 }
 
@@ -223,7 +226,19 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
 
 // --- 3. 实体组件 (保持不变) ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: { svgData: any, frontTexture: THREE.Texture, backTexture: THREE.Texture, scale?: number, visible: boolean }) {
+function BadgeModel({ 
+  svgData,
+  frontTexture,
+  backTexture, 
+  scale = 1, 
+  visible, 
+  themeColor 
+}: { svgData: any, 
+  frontTexture: THREE.Texture,
+  backTexture: THREE.Texture, 
+  scale?: number, 
+  visible: boolean, 
+  themeColor?: string}) {
   
 
   const { shapes, width, height, midX, midY, scaleRatio } = useMemo(() => {
@@ -248,7 +263,7 @@ function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: 
     };
   }, [svgData]);
 
-  const realThickness = 0.4;  //厚度
+  const realThickness = 0.3;  //厚度
   const realBevel = 0.1;     //倒角
 
   //计算内部厚度
@@ -281,27 +296,27 @@ function BadgeModel({ svgData, frontTexture, backTexture, scale = 1, visible }: 
             transmission={1}   // 全透射
             transparent={false}
 
-            thickness={3.5}    // ✅ 加厚！让光线在内部多跑一会儿，折射扭曲更明显
+            thickness={3}    // ✅ 加厚！让光线在内部多跑一会儿，折射扭曲更明显
             
             // --- 表面质感 ---
             roughness={0.05}   // 给一点点微小的磨砂，让高光更柔和，不那么“脆”
-            ior={1.7}          // 亚克力折射率
+            ior={1.5}          // 亚克力折射率
             
             // --- 颜色与衰减 (灵魂所在) ---
             color="#ffffff"    // 表面保持纯净
             
             // 衰减色：这是物体内部的“本体色”
             // 设为淡青色/淡蓝色，越厚的地方颜色越深
-            attenuationColor="#cceeff" 
+            attenuationColor={ themeColor}
             
             // 衰减距离：控制颜色的深浅
             // 这个值越小，颜色越浓（像深水）；这个值越大，越清澈
             // 配合 thickness={3.5}，设为 4.0 左右能得到很好的层次感
-            attenuationDistance={1.0} 
+            attenuationDistance={0.3} 
 
             // --- 高光与反射 ---
             specularIntensity={1}
-            specularColor="#ffffff"
+            specularColor="#d232fa"
             envMapIntensity={2} // 配合暗 HDR，这里要强一点
             
             clearcoat={1}       // 双层高光
@@ -390,14 +405,19 @@ function BadgeContent(props: BadgeProps) {
   return (
     <>
       
-      {/* <Environment 
-      preset="city"  // 1. 加载本地文件 (路径对应 public/studio.hdr)
+      <Environment 
+      files={"/puresky.hdr"}  // 1. 加载本地文件 (路径对应 public/studio.hdr)
       background={false}   // 2. 隐藏背景图，只保留光照
       
       blur={1}          // 3. 适度模糊，保留柔和反射同时增添透明感
       environmentRotation={[0, 180, 0]}
-      environmentIntensity={0}
-      /> */}
+      environmentIntensity={1.2}
+      />
+
+      
+      <directionalLight position={[0, 0, -5]} intensity={1} castShadow color={"#7700ff"} />
+      <pointLight position={[0, 0, -1]} intensity={4} color={"#13a851"}/>
+      
       <PresentationControls
         global cursor={true} snap={false} speed={1.5} zoom={1}
         rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
@@ -429,6 +449,7 @@ function BadgeContent(props: BadgeProps) {
                   backTexture={backTexture}
                   scale={props.scale}
                   visible={showSolid} 
+                  themeColor={props.themeColor}
                 />
 
               </AutoRotator>
@@ -460,7 +481,7 @@ export default function Badge3D(props: BadgeProps) {
         dpr={1}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
       >
-        {/* <color attach="background" args={['#006414']} /> */}
+        <color attach="background" args={['#31073a']} />
         <Suspense fallback={null}>
           <BadgeContent {...props} />
         </Suspense>
