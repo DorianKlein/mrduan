@@ -5,7 +5,16 @@ import { useMemo, useEffect, useRef, useState, Suspense } from 'react';
 import { Canvas, useLoader, useThree, useFrame, extend } from '@react-three/fiber';
 import { useTexture, Center, Environment, Float, PresentationControls, shaderMaterial } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-import { MeshSurfaceSampler } from 'three-stdlib';
+import { MeshSurfaceSampler, mergeVertices } from 'three-stdlib';
+import ThreeBackground from './ThreeBackground';
+
+const themes = {
+  neon: {
+    primary: '#8e0f8e',
+    secondary: '#2cb084',
+    bottom: '#54289b',
+  }
+};
 
 // --- 1. 升级版粒子着色器 (支持渐变色 + 爆破效果) ---
 const ParticleMaterial = shaderMaterial(
@@ -224,7 +233,7 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
   );
 }
 
-// --- 3. 实体组件 (保持不变) ---
+// --- 3. 实体组件 (优化版：平滑着色) ---
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BadgeModel({ 
   svgData,
@@ -242,6 +251,7 @@ function BadgeModel({
   
 
   const { shapes, width, height, midX, midY, scaleRatio } = useMemo(() => {
+    // ⚠️注意：toShapes 的第三个参数在标准 Three.js 中是无效的，精度由 ExtrudeGeometry 控制
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paths = svgData.paths.flatMap((p: any) => p.toShapes(true));
 
@@ -254,78 +264,69 @@ function BadgeModel({
     const k = 5 / rawW;
     
     return { 
-    shapes: paths, // 用缩放后的形状
-    width: rawW,   // 现在 w 应该是 5
-    height: rawH, 
-    midX: (rawBox.max.x + rawBox.min.x) / 2, 
-    midY: (rawBox.max.y + rawBox.min.y) / 2,
-    scaleRatio: k
+      shapes: paths, 
+      width: rawW,   
+      height: rawH, 
+      midX: (rawBox.max.x + rawBox.min.x) / 2, 
+      midY: (rawBox.max.y + rawBox.min.y) / 2,
+      scaleRatio: k
     };
   }, [svgData]);
 
-  const realThickness = 0.3;  //厚度
-  const realBevel = 0.1;     //倒角
-
-  //计算内部厚度
+  const realThickness = 0.3;
+  const realBevel = 0.05;
   const internalDepth = realThickness / scaleRatio;
 
+  // 1. 优化配置：增加 curveSegments
   const extrusionSettings = useMemo(() => ({
     depth: internalDepth, 
     bevelEnabled: true, 
     bevelThickness: realBevel / scaleRatio, 
     bevelSize: realBevel / scaleRatio, 
-    bevelSegments: 5 
+    bevelSegments: 5, 
+    // 🔥 核心修改：默认是 12，改成 64 或 96 消除棱角感
+    curveSegments: 128 
   }), [internalDepth, realBevel, scaleRatio]);
+
+  // 2. 优化几何体：计算法线以获得平滑光照
+  const geometry = useMemo(() => {
+    const geo = new THREE.ExtrudeGeometry(shapes, extrusionSettings);
+    // 🔥 核心修改：计算平滑法线，让光照在曲面上平滑过渡，而不是一块一块的
+    geo.computeVertexNormals(); 
+    return geo;
+  }, [shapes, extrusionSettings]);
 
   return (
     <group scale={[scaleRatio, -scaleRatio, scaleRatio]} visible={visible}>
       <group position={[-midX, -midY, 0]}>
         {/* 亚克力 */}
         <mesh 
+          // 使用我们手动生成的 geometry，而不是声明式的 <extrudeGeometry>
+          geometry={geometry}
           position={[0, 0, -internalDepth / 2]} 
-          renderOrder={10} 
-          castShadow 
+          renderOrder={10}  
           receiveShadow
         >
-          {/* 几何体：直接渲染，不需要材质数组 */}
-          <extrudeGeometry args={[shapes, extrusionSettings]} />
-
           {/* 统一材质：全抛光高透亚克力 */}
           <meshPhysicalMaterial
-            // --- 核心：开启物理传输 ---
-            transmission={1}   // 全透射
+            transmission={1}
             transparent={false}
-
-            thickness={3}    // ✅ 加厚！让光线在内部多跑一会儿，折射扭曲更明显
-            
-            // --- 表面质感 ---
-            roughness={0.05}   // 给一点点微小的磨砂，让高光更柔和，不那么“脆”
-            ior={1.5}          // 亚克力折射率
-            
-            // --- 颜色与衰减 (灵魂所在) ---
-            color="#ffffff"    // 表面保持纯净
-            
-            // 衰减色：这是物体内部的“本体色”
-            // 设为淡青色/淡蓝色，越厚的地方颜色越深
-            attenuationColor={ themeColor}
-            
-            // 衰减距离：控制颜色的深浅
-            // 这个值越小，颜色越浓（像深水）；这个值越大，越清澈
-            // 配合 thickness={3.5}，设为 4.0 左右能得到很好的层次感
+            thickness={1}
+            roughness={0}   
+            ior={1.4}
+            color="#ffffff"
+            attenuationColor={themeColor}
             attenuationDistance={0.3} 
-
-            // --- 高光与反射 ---
             specularIntensity={1}
-            specularColor="#d232fa"
-            envMapIntensity={2} // 配合暗 HDR，这里要强一点
-            
-            clearcoat={1}       // 双层高光
+            specularColor="#ffffff"
+            envMapIntensity={1} 
+            clearcoat={1}
             clearcoatRoughness={0}
-
             side={THREE.DoubleSide} 
           />
         </mesh>
-        {/* 正面贴图 */}
+        
+        {/* 正面贴图 (保持不变) */}
         <mesh position={[midX, midY, 1]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
@@ -337,6 +338,8 @@ function BadgeModel({
             roughness={0.22}
           />
         </mesh>
+        
+        {/* 背面贴图 (保持不变) */}
         <mesh position={[midX, midY, -0.01]} rotation={[0, Math.PI, 0]} renderOrder={1} castShadow receiveShadow>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
@@ -401,23 +404,28 @@ function BadgeContent(props: BadgeProps) {
   const [showSolid, setShowSolid] = useState(false); // 控制实体显示
   const [showParticles, setShowParticles] = useState(true);
 
+  const currentTheme = themes.neon;
 
   return (
     <>
       
-      <Environment 
+      {/* <Environment 
       files={"/puresky.hdr"}  // 1. 加载本地文件 (路径对应 public/studio.hdr)
       background={false}   // 2. 隐藏背景图，只保留光照
       
       blur={1}          // 3. 适度模糊，保留柔和反射同时增添透明感
       environmentRotation={[0, 180, 0]}
       environmentIntensity={1.2}
-      />
+      /> */}
 
       
-      <directionalLight position={[0, 0, -5]} intensity={1} castShadow color={"#7700ff"} />
+      {/* {/* <directionalLight position={[0, 0, -5]} intensity={1} castShadow color={"#7700ff"} /> */}
+      <ambientLight intensity={0.4} color={"#ffffff"} />
+      <directionalLight position={[-5, 5, 5]} intensity={2} castShadow color={"#ffffff"} />
+      
       <pointLight position={[0, 0, -1]} intensity={4} color={"#13a851"}/>
       
+      <ThreeBackground theme={currentTheme} />
       <PresentationControls
         global cursor={true} snap={false} speed={1.5} zoom={1}
         rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
