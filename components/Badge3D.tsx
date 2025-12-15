@@ -22,8 +22,8 @@ const ParticleMaterial = shaderMaterial(
     uTime: 0,
     uProgress: 0, // 0 -> 1: 汇聚
     uExplode: 0,  // 0 -> 1: 爆破
-    uColorA: new THREE.Color('#fceffd'), // 紫色
-    uColorB: new THREE.Color('#ecf1fb'), // 蓝色
+    uColorA: new THREE.Color('#b18bb1ff'), // 紫色
+    uColorB: new THREE.Color('#7d8db1ff'), // 蓝色
   },
   // Vertex Shader
   `
@@ -106,9 +106,7 @@ interface BadgeProps {
   onLoadComplete?: () => void;
 }
 
-// --- 2. 粒子组件 (生成爆破方向) ---
-// 注意：现在不需要传 frontTexture 了，因为我们用纯色渐变
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onReady: () => void, onComplete: () => void }) {
   const pointsRef = useRef<THREE.Points>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,12 +129,12 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
     });
     geometry.center();
 
-    geometry.scale(0.5, 0.5, 0.5);
+    geometry.scale(0.4, 0.4, 0.4);
 
     const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry));
     sampler.build();
 
-    const count = 50000; // 5万个粒子，实心感更强
+    const count = 20000; // 5万个粒子，实心感更强
     const posArray = new Float32Array(count * 3);
     const randPosArray = new Float32Array(count * 3);
     const explodeDirArray = new Float32Array(count * 3); // 新增：爆破方向
@@ -213,7 +211,8 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
   });
 
   return (
-    <points ref={pointsRef} scale={[0.01, -0.01, 0.01]}>
+    <points ref={pointsRef} scale={[0.01, -0.01, 0.01]} raycast={ () => {} }>
+      
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         <bufferAttribute attach="attributes-aRandomPosition" args={[randomPositions, 3]} />
@@ -313,7 +312,7 @@ function BadgeModel({
             transparent={false}
             thickness={1}
             roughness={0}   
-            ior={1.4}
+            ior={1.5}
             color="#ffffff"
             attenuationColor={themeColor}
             attenuationDistance={0.3} 
@@ -485,7 +484,7 @@ export default function Badge3D(props: BadgeProps) {
         onCreated={({ scene }) => {
           scene.background = null; 
         }}
-        camera={{ position: [0, 0, 15], fov: 35 }} 
+        camera={{ position: [0, 0, 20], fov: 35 }} 
         dpr={1}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
       >
