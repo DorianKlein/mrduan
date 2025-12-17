@@ -15,10 +15,9 @@
             font-family: 'Noto Serif SC', serif;
             overflow: hidden;
             background-color: #f0f0f0;
-            /* 背景调整：深邃的径向渐变，更加简洁 */
             background: radial-gradient(circle at center, #333333 0%, #000000 100%);
             color: #e5e7eb;
-            /* 禁止文字选中，提升交互体验 */
+            /* 禁止文字选中 */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -49,11 +48,12 @@
     <div id="loader">
         <div class="text-center">
             <h2 class="text-2xl text-emerald-500 mb-2 tracking-widest">正在布置展台</h2>
-            <p class="text-gray-500 text-sm">加载珍品模型中...</p>
+            <p id="loading-text" class="text-gray-500 text-sm">智能寻址中...</p>
+            <p id="loading-debug" class="text-gray-600 text-xs mt-2 font-mono"></p>
         </div>
     </div>
 
-    <!-- UI 层: 标题与介绍 -->
+    <!-- UI 层 -->
     <div class="absolute top-0 left-0 p-8 z-10 w-full md:w-1/3 pointer-events-none">
         <h1 class="text-4xl font-bold mb-2 text-white tracking-widest">珍品鉴赏</h1>
         <p class="text-emerald-400/80 text-sm mb-6 tracking-wider uppercase border-b border-gray-600 pb-4 inline-block">Exclusive Artifact Exhibition</p>
@@ -69,7 +69,6 @@
         </div>
     </div>
 
-    <!-- UI 层: 操作提示 -->
     <div class="absolute bottom-8 right-8 z-10 hidden md:block pointer-events-none">
         <div class="text-right text-gray-400 text-xs space-y-1">
             <p>左键旋转 • 滚轮缩放 • 右键平移</p>
@@ -83,8 +82,6 @@
         // === 1. 初始化场景 ===
         const canvas = document.querySelector('#webgl-canvas');
         const scene = new THREE.Scene();
-        
-        // 雾气稍微调淡一点，配合深红木底座
         scene.fog = new THREE.FogExp2(0x111111, 0.02);
 
         const sizes = {
@@ -118,7 +115,6 @@
         controls.maxDistance = 25;
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.8;
-        // 让相机注视点稍微抬高一点，聚焦在展品中心
         controls.target.set(0, 1.5, 0);
 
         // === 3. 灯光系统 ===
@@ -147,135 +143,141 @@
         backLight.position.set(0, 3, -5);
         scene.add(backLight);
 
-        // === 4. 创建优化后的展台 (Pedestal) ===
-        
+        // === 4. 创建展台 ===
         const pedestalGroup = new THREE.Group();
         scene.add(pedestalGroup);
 
-        // === 材质调整：深红檀木色 (Dark Reddish Wood) ===
         const baseMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x3d231d,  // 深红褐色/紫檀色
-            roughness: 0.2,   // 稍微有点粗糙，像木头
-            metalness: 0.1,   // 低金属度
-            clearcoat: 0.4,   // 表面有一层薄蜡
+            color: 0x3d231d,  
+            roughness: 0.3,   
+            metalness: 0.1,   
+            clearcoat: 0.4,   
             clearcoatRoughness: 0.2
         });
 
-        // 1. 主柱体 (高度降低：原2 -> 1.2)
         const mainBaseGeo = new THREE.CylinderGeometry(3.5, 3.8, 1.2, 64);
         const mainBase = new THREE.Mesh(mainBaseGeo, baseMaterial);
-        // 调整位置使其顶部大约在 y=0 附近 (1.2的一半是0.6, 放在-0.6位置则顶部在0)
         mainBase.position.y = -0.6; 
         mainBase.receiveShadow = true;
         pedestalGroup.add(mainBase);
 
-        // 2. 顶部托盘 (更薄、更精致)
         const topPlateGeo = new THREE.CylinderGeometry(3.6, 3.6, 0.15, 64);
         const topPlate = new THREE.Mesh(topPlateGeo, baseMaterial);
-        topPlate.position.y = 0.075; // 放在主柱体上面
+        topPlate.position.y = 0.075; 
         topPlate.receiveShadow = true;
         pedestalGroup.add(topPlate);
         
-        // 3. 装饰环 (改为柔和的金色，与红木搭配)
         const ringGeo = new THREE.TorusGeometry(3.55, 0.04, 16, 100);
         const ringMat = new THREE.MeshStandardMaterial({ 
-            color: 0xcca352, // 香槟金
+            color: 0xcca352,
             roughness: 0.2,
             metalness: 0.8
         });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.rotation.x = Math.PI / 2;
-        ring.position.y = -0.05; // 嵌在缝隙处
+        ring.position.y = -0.05; 
         pedestalGroup.add(ring);
 
-        // === 已删除地板 (Floor) ===
 
-
-        // === 5. 加载您的模型 ===
+        // === 5. 智能模型加载系统 (Smart Loader) ===
         
         const displayGroup = new THREE.Group();
         scene.add(displayGroup);
-
         const gltfLoader = new THREE.GLTFLoader();
-        
-        // ****** 路径策略调整 ******
-        // 既然绝对路径在服务器上报错 404，但本地 3000 端口正常
-        // 说明服务器的根目录映射可能与本地不同，或者存在反向代理路径问题。
-        // 改回使用【相对路径】，并自动适配当前页面所在位置。
-        // 只要 index.html 和 .glb 文件在同一个文件夹内，这种方式最稳妥。
-        const modelUrl = 'Jade-long.glb'; 
 
-        const dummyGeo = new THREE.SphereGeometry(0.1);
-        const dummyMat = new THREE.MeshBasicMaterial({ visible: false });
-        const dummy = new THREE.Mesh(dummyGeo, dummyMat);
-        displayGroup.add(dummy);
+        // 关键：定义可能的文件路径列表
+        // 1. Jade-long.glb: 适用于当前目录（通用）
+        // 2. /Jade/Jade-long.glb: 适用于 Next.js Public 目录标准路径
+        // 3. /Jade-long.glb: 适用于文件意外在根目录的情况
+        const candidatePaths = [
+            'Jade-long.glb',
+            '/Jade/Jade-long.glb',
+            '/Jade-long.glb'
+        ];
 
-        gltfLoader.load(
-            modelUrl,
-            (gltf) => {
-                console.log('用户模型加载成功:', modelUrl);
-                const model = gltf.scene;
-                
-                const box = new THREE.Box3().setFromObject(model);
-                const size = box.getSize(new THREE.Vector3());
-                const center = box.getCenter(new THREE.Vector3());
-                
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scaleFactor = 5.0 / maxDim;
-                
-                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                
-                // === 位置调整 ===
-                // 之前 +1，现在底座变矮了，且托盘顶部在 y=0.15 左右
-                // 稍微留一点缝隙或者刚好贴合，改为 +0.25 让它稳稳落在托盘上
-                model.position.x = -center.x * scaleFactor;
-                model.position.y = -center.y * scaleFactor + (size.y * scaleFactor / 2) + 1.5; 
-                model.position.z = -center.z * scaleFactor;
+        let loadedSuccessfully = false;
 
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        
-                        if (child.material) {
-                            child.material.envMapIntensity = 2.0; 
-                            child.material.needsUpdate = true;
-                        }
-                    }
-                });
-
-                displayGroup.add(model);
-                document.getElementById('artifact-desc').innerText = "模型加载完毕。通过鼠标拖拽可全方位欣赏细节。";
-                hideLoader();
-            },
-            undefined,
-            (error) => {
-                console.warn('模型加载失败，尝试路径:', modelUrl, error);
-                
-                // 更详细的错误提示
-                const loadingText = document.getElementById('loading-text');
-                loadingText.innerText = `加载失败: 未找到 ${modelUrl}`;
-                loadingText.style.color = "#ef4444";
-                
-                // 提示用户可能的原因
-                const errorDetail = document.createElement('div');
-                errorDetail.innerText = "请检查文件名大小写(Linux敏感)或文件位置";
-                errorDetail.className = "text-xs text-gray-500 mt-2";
-                loadingText.parentElement.appendChild(errorDetail);
-                
-                const fallbackGeo = new THREE.IcosahedronGeometry(2, 0);
-                const fallbackMat = new THREE.MeshPhysicalMaterial({ 
-                    color: 0x10b981, 
-                    wireframe: true,
-                    emissive: 0x002211
-                });
-                const fallback = new THREE.Mesh(fallbackGeo, fallbackMat);
-                fallback.position.y = 2.0; // 调整替代品位置
-                displayGroup.add(fallback);
-                
-                setTimeout(hideLoader, 1000);
+        function loadModelRecursively(pathIndex) {
+            if (pathIndex >= candidatePaths.length) {
+                // 所有路径都失败了
+                handleLoadError("所有路径均尝试失败");
+                return;
             }
-        );
+
+            const currentPath = candidatePaths[pathIndex];
+            const debugText = document.getElementById('loading-debug');
+            debugText.innerText = `尝试路径 [${pathIndex+1}/${candidatePaths.length}]: ${currentPath}`;
+            
+            console.log(`正在尝试加载: ${currentPath}`);
+
+            gltfLoader.load(
+                currentPath,
+                (gltf) => {
+                    // === 成功 ===
+                    loadedSuccessfully = true;
+                    console.log(`成功加载模型，路径为: ${currentPath}`);
+                    
+                    const model = gltf.scene;
+                    const box = new THREE.Box3().setFromObject(model);
+                    const size = box.getSize(new THREE.Vector3());
+                    const center = box.getCenter(new THREE.Vector3());
+                    
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scaleFactor = 5.0 / maxDim;
+                    
+                    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    model.position.x = -center.x * scaleFactor;
+                    model.position.y = -center.y * scaleFactor + (size.y * scaleFactor / 2) + 0.25; 
+                    model.position.z = -center.z * scaleFactor;
+
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            if (child.material) {
+                                child.material.envMapIntensity = 2.0; 
+                                child.material.needsUpdate = true;
+                            }
+                        }
+                    });
+
+                    displayGroup.add(model);
+                    document.getElementById('artifact-desc').innerText = "模型加载完毕。通过鼠标拖拽可全方位欣赏细节。";
+                    hideLoader();
+                },
+                undefined, // Progress
+                (error) => {
+                    // === 失败，尝试下一个 ===
+                    console.warn(`路径 ${currentPath} 加载失败，尝试下一个...`);
+                    loadModelRecursively(pathIndex + 1);
+                }
+            );
+        }
+
+        // 启动加载链
+        loadModelRecursively(0);
+
+
+        function handleLoadError(msg) {
+            const loadingText = document.getElementById('loading-text');
+            const debugText = document.getElementById('loading-debug');
+            loadingText.innerText = "加载失败: 未找到模型文件";
+            loadingText.style.color = "#ef4444";
+            debugText.innerText = "请检查：1.文件名大小写是否一致 2.public/Jade文件夹是否存在";
+            
+            // 加载替代品
+            const fallbackGeo = new THREE.IcosahedronGeometry(2, 0);
+            const fallbackMat = new THREE.MeshPhysicalMaterial({ 
+                color: 0x10b981, 
+                wireframe: true,
+                emissive: 0x002211
+            });
+            const fallback = new THREE.Mesh(fallbackGeo, fallbackMat);
+            fallback.position.y = 2.0;
+            displayGroup.add(fallback);
+            
+            setTimeout(hideLoader, 2000); // 延迟关闭以便用户看到报错
+        }
 
         function hideLoader() {
             const loader = document.getElementById('loader');
@@ -295,7 +297,6 @@
             window.requestAnimationFrame(tick);
         };
 
-        // === 7. 响应式调整 ===
         window.addEventListener('resize', () => {
             sizes.width = window.innerWidth;
             sizes.height = window.innerHeight;
@@ -306,7 +307,6 @@
         });
 
         tick();
-
     </script>
 </body>
 </html>
