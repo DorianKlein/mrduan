@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>珍品鉴赏 - 3D 展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Serif SC', serif;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            /* 背景调整：深邃的径向渐变，更加简洁 */
+            background: radial-gradient(circle at center, #333333 0%, #000000 100%);
+            color: #e5e7eb;
+            /* 禁止文字选中，提升交互体验 */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #111;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-left: 3px solid #10b981;
+        }
+    </style>
+</head>
+<body class="relative h-screen w-screen">
+
+    <!-- 加载遮罩 -->
+    <div id="loader">
+        <div class="text-center">
+            <h2 class="text-2xl text-emerald-500 mb-2 tracking-widest">正在布置展台</h2>
+            <p class="text-gray-500 text-sm">加载珍品模型中...</p>
+        </div>
+    </div>
+
+    <!-- UI 层: 标题与介绍 -->
+    <div class="absolute top-0 left-0 p-8 z-10 w-full md:w-1/3 pointer-events-none">
+        <h1 class="text-4xl font-bold mb-2 text-white tracking-widest">珍品鉴赏</h1>
+        <p class="text-emerald-400/80 text-sm mb-6 tracking-wider uppercase border-b border-gray-600 pb-4 inline-block">Exclusive Artifact Exhibition</p>
+        
+        <div id="info-panel" class="info-card p-6 rounded-r-lg transition-all duration-500 transform pointer-events-auto">
+            <h2 id="artifact-title" class="text-2xl font-bold text-white mb-2">大C龙</h2>
+            <p id="artifact-desc" class="text-gray-300 leading-relaxed text-sm text-justify">
+                正在展示您的专属藏品。
+            </p>
+            <div class="mt-4 flex gap-4 text-xs text-emerald-500/90">
+                <span id="artifact-material">✦ 材质：高精度3D扫描 / 岫岩玉</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI 层: 操作提示 -->
+    <div class="absolute bottom-8 right-8 z-10 hidden md:block pointer-events-none">
+        <div class="text-right text-gray-400 text-xs space-y-1">
+            <p>左键旋转 • 滚轮缩放 • 右键平移</p>
+            <p>WebGL 3D Viewer</p>
+        </div>
+    </div>
+
+    <canvas id="webgl-canvas" class="outline-none"></canvas>
+
+    <script>
+        // === 1. 初始化场景 ===
+        const canvas = document.querySelector('#webgl-canvas');
+        const scene = new THREE.Scene();
+        
+        // 雾气稍微调淡一点，配合深红木底座
+        scene.fog = new THREE.FogExp2(0x111111, 0.02);
+
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+
+        const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
+        // === 调整相机位置：Y轴拉高 (8 -> 10)，Z轴稍微拉远一点点以保持整体感，形成俯视视角 ===
+        camera.position.set(0, 10, 16); 
+        scene.add(camera);
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: true
+        });
+        renderer.setSize(sizes.width, sizes.height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.physicallyCorrectLights = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.8;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // === 2. 交互控制 ===
+        const controls = new THREE.OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 2;
+        controls.maxDistance = 25;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.8;
+        // 让相机注视点稍微抬高一点，聚焦在展品中心
+        controls.target.set(0, 1.5, 0);
+
+        // === 3. 灯光系统 ===
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);
+
+        const spotLight = new THREE.SpotLight(0xfffff0, 15);
+        spotLight.position.set(5, 12, 8);
+        spotLight.angle = Math.PI / 5;
+        spotLight.penumbra = 0.3;
+        spotLight.castShadow = true;
+        spotLight.shadow.bias = -0.0001;
+        spotLight.shadow.mapSize.width = 2048;
+        spotLight.shadow.mapSize.height = 2048;
+        scene.add(spotLight);
+
+        const fillLight1 = new THREE.DirectionalLight(0xcceeff, 4);
+        fillLight1.position.set(-8, 2, 2);
+        scene.add(fillLight1);
+
+        const fillLight2 = new THREE.DirectionalLight(0xffeedd, 3);
+        fillLight2.position.set(8, 2, -2);
+        scene.add(fillLight2);
+        
+        const backLight = new THREE.PointLight(0xffffff, 5, 15);
+        backLight.position.set(0, 3, -5);
+        scene.add(backLight);
+
+        // === 4. 创建优化后的展台 (Pedestal) ===
+        
+        const pedestalGroup = new THREE.Group();
+        scene.add(pedestalGroup);
+
+        // === 材质调整：深红檀木色 (Dark Reddish Wood) ===
+        const baseMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x3d231d,  // 深红褐色/紫檀色
+            roughness: 0.2,   // 稍微有点粗糙，像木头
+            metalness: 0.1,   // 低金属度
+            clearcoat: 0.4,   // 表面有一层薄蜡
+            clearcoatRoughness: 0.2
+        });
+
+        // 1. 主柱体 (高度降低：原2 -> 1.2)
+        const mainBaseGeo = new THREE.CylinderGeometry(3.5, 3.8, 1.2, 64);
+        const mainBase = new THREE.Mesh(mainBaseGeo, baseMaterial);
+        // 调整位置使其顶部大约在 y=0 附近 (1.2的一半是0.6, 放在-0.6位置则顶部在0)
+        mainBase.position.y = -0.6; 
+        mainBase.receiveShadow = true;
+        pedestalGroup.add(mainBase);
+
+        // 2. 顶部托盘 (更薄、更精致)
+        const topPlateGeo = new THREE.CylinderGeometry(3.6, 3.6, 0.15, 64);
+        const topPlate = new THREE.Mesh(topPlateGeo, baseMaterial);
+        topPlate.position.y = 0.075; // 放在主柱体上面
+        topPlate.receiveShadow = true;
+        pedestalGroup.add(topPlate);
+        
+        // 3. 装饰环 (改为柔和的金色，与红木搭配)
+        const ringGeo = new THREE.TorusGeometry(3.55, 0.04, 16, 100);
+        const ringMat = new THREE.MeshStandardMaterial({ 
+            color: 0xcca352, // 香槟金
+            roughness: 0.2,
+            metalness: 0.8
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -0.05; // 嵌在缝隙处
+        pedestalGroup.add(ring);
+
+        // === 已删除地板 (Floor) ===
+
+
+        // === 5. 加载您的模型 ===
+        
+        const displayGroup = new THREE.Group();
+        scene.add(displayGroup);
+
+        const gltfLoader = new THREE.GLTFLoader();
+        const modelUrl = 'Jade-long.glb'; 
+
+        const dummyGeo = new THREE.SphereGeometry(0.1);
+        const dummyMat = new THREE.MeshBasicMaterial({ visible: false });
+        const dummy = new THREE.Mesh(dummyGeo, dummyMat);
+        displayGroup.add(dummy);
+
+        gltfLoader.load(
+            modelUrl,
+            (gltf) => {
+                console.log('用户模型加载成功');
+                const model = gltf.scene;
+                
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scaleFactor = 5.0 / maxDim;
+                
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                
+                // === 位置调整 ===
+                // 之前 +1，现在底座变矮了，且托盘顶部在 y=0.15 左右
+                // 稍微留一点缝隙或者刚好贴合，改为 +0.25 让它稳稳落在托盘上
+                model.position.x = -center.x * scaleFactor;
+                model.position.y = -center.y * scaleFactor + (size.y * scaleFactor / 2) + 1.5; 
+                model.position.z = -center.z * scaleFactor;
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        
+                        if (child.material) {
+                            child.material.envMapIntensity = 2.0; 
+                            child.material.needsUpdate = true;
+                        }
+                    }
+                });
+
+                displayGroup.add(model);
+                document.getElementById('artifact-desc').innerText = "模型加载完毕。通过鼠标拖拽可全方位欣赏细节。";
+                hideLoader();
+            },
+            undefined,
+            (error) => {
+                console.warn('未找到模型文件:', error);
+                document.getElementById('loading-text').innerText = "未找到 Jade-long.glb 文件";
+                document.getElementById('loading-text').style.color = "#ef4444";
+                
+                const fallbackGeo = new THREE.IcosahedronGeometry(2, 0);
+                const fallbackMat = new THREE.MeshPhysicalMaterial({ 
+                    color: 0x10b981, 
+                    wireframe: true,
+                    emissive: 0x002211
+                });
+                const fallback = new THREE.Mesh(fallbackGeo, fallbackMat);
+                fallback.position.y = 2.0; // 调整替代品位置
+                displayGroup.add(fallback);
+                
+                setTimeout(hideLoader, 1000);
+            }
+        );
+
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 1000);
+        }
+
+        // === 6. 动画循环 ===
+        const clock = new THREE.Clock();
+
+        const tick = () => {
+            const elapsedTime = clock.getElapsedTime();
+            controls.update();
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(tick);
+        };
+
+        // === 7. 响应式调整 ===
+        window.addEventListener('resize', () => {
+            sizes.width = window.innerWidth;
+            sizes.height = window.innerHeight;
+            camera.aspect = sizes.width / sizes.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sizes.width, sizes.height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+
+        tick();
+
+    </script>
+</body>
+</html>
