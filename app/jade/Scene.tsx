@@ -1,78 +1,88 @@
 'use client';
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+// 引入采样器，用于生成海量粒子
+import { MeshSurfaceSampler } from 'three-stdlib';
 import { useHandTracking } from './useHandTracking';
 
-// --- 完整的 Vertex Shader (顶点着色器) ---
+// --- Vertex Shader ---
 const vertexShader = `
   uniform float uExplosion;
   attribute vec3 aRandom;
   varying vec3 vColor;
   
   void main() {
-    // 原始位置
-    vec3 pos = position;
+    // 【改动1】初始位置缩小
+    // position * 0.92 让粒子云的初始体积比实物模型小一圈
+    // 这样在没爆炸时，粒子会完全藏在实物里面
+    vec3 pos = position * 0.95;
     
-    // 爆炸逻辑: 沿着法线方向或者随机方向扩散
+    // 爆炸逻辑
     vec3 direction = normalize(position) * aRandom; 
-    
-    // 增加一点旋转扭曲感
     float angle = uExplosion * 3.0 * aRandom.x;
     float s = sin(angle);
     float c = cos(angle);
     mat2 rot = mat2(c, -s, s, c);
     pos.xy = rot * pos.xy;
-
+    
     // 移动位置
     pos += direction * uExplosion * 3.0;
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     
-    // 粒子大小随爆炸减小
-    gl_PointSize = (4.0 * (1.0 - uExplosion * 0.5)) * (10.0 / -mvPosition.z);
+    // 【改动2】调整粒子大小
+    // 因为数量增加了，单个粒子最好改小一点(1.5)，否则会糊成一团
+    gl_PointSize = (1.5 * (1.0 - uExplosion * 0.3)) * (10.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
     
-    // 传递颜色
-    vColor = mix(vec3(0.1, 0.6, 0.4), vec3(0.8, 1.0, 0.9), aRandom.y);
+    // 颜色逻辑 (保持玉石色调)
+    vec3 colorDeep = vec3(0.0, 0.35, 0.25);
+    vec3 colorPale = vec3(0.2, 0.5, 0.4);
+    vColor = mix(colorDeep, colorPale, aRandom.y);
+    vColor += aRandom.z * 0.1; 
   }
 `;
 
-// --- 完整的 Fragment Shader (片元着色器) ---
+// --- Fragment Shader (保持不变) ---
 const fragmentShader = `
   varying vec3 vColor;
   uniform float uExplosion;
-
   void main() {
-    // 圆形粒子裁切
     if (length(gl_PointCoord - vec2(0.5, 0.5)) > 0.5) discard;
-    
-    // 随着爆炸透明度降低
-    float alpha = 1.0 - uExplosion;
-    gl_FragColor = vec4(vColor, alpha);
+    // 稍微降低一点透明度，因为粒子变多了，叠加起来会很亮
+    float alpha = 0.4 * (1.0 - uExplosion * 0.8);
+    gl_FragColor = vec4(vColor * 1.5, alpha);
   }
 `;
 
-// --- 玉石模型组件 ---
 function JadeModel({ data }: { data: { explosion: number, rotation: number } }) {
-  const { nodes } = useGLTF('/jade-stone.glb'); 
+  const { nodes } = useGLTF('/jade-stone.glb');
   
-  // 指定 Ref 类型为 Points，包含 BufferGeometry 和 ShaderMaterial
+  const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>>(null);
 
-  // 查找 Mesh
-  const mesh = useMemo(() => {
-    const foundMesh = Object.values(nodes).find((n) => n instanceof THREE.Mesh);
-    return foundMesh as THREE.Mesh;
+  // 1. 提取原始 Mesh
+  const originalMesh = useMemo(() => {
+    const foundMesh = Object.values(nodes).find((n) => n instanceof THREE.Mesh) as THREE.Mesh;
+    if (foundMesh) {
+      if (foundMesh.geometry) foundMesh.geometry.center(); 
+      // 开启透明材质支持
+      if (foundMesh.material) {
+        const mats = Array.isArray(foundMesh.material) ? foundMesh.material : [foundMesh.material];
+        mats.forEach(mat => {
+            mat.transparent = true;
+        });
+      }
+    }
+    return foundMesh;
   }, [nodes]);
 
-  // Shader 参数
+  // 2. Shader 参数
   const shaderArgs = useMemo(() => ({
-    uniforms: {
-      uExplosion: { value: 0 }
-    },
+    uniforms: { uExplosion: { value: 0 } },
     vertexShader,
     fragmentShader,
     transparent: true,
@@ -80,70 +90,181 @@ function JadeModel({ data }: { data: { explosion: number, rotation: number } }) 
     blending: THREE.AdditiveBlending
   }), []);
 
-  // 生成几何体
-  const geometry = useMemo(() => {
-    if (!mesh || !mesh.geometry) return null;
-    const geo = mesh.geometry.clone();
-    geo.center();
-    const count = geo.attributes.position.count;
-    const randoms = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) {
-      randoms[i] = Math.random(); 
+  // 3. 【核心改动】使用 Sampler 生成海量粒子
+  const particleGeometry = useMemo(() => {
+    if (!originalMesh || !originalMesh.geometry) return null;
+    
+    // 定义粒子数量 (例如 20,000 个)
+    const particleCount = 20000;
+    
+    // 创建采样器
+    const sampler = new MeshSurfaceSampler(originalMesh).build();
+    
+    // 创建数据数组
+    const positions = new Float32Array(particleCount * 3);
+    const randoms = new Float32Array(particleCount * 3);
+    
+    // 临时变量
+    const tempPosition = new THREE.Vector3();
+    
+    for (let i = 0; i < particleCount; i++) {
+      // 在模型表面随机采样一个点
+      sampler.sample(tempPosition);
+      
+      // 存入位置数组
+      positions[i * 3] = tempPosition.x;
+      positions[i * 3 + 1] = tempPosition.y;
+      positions[i * 3 + 2] = tempPosition.z;
+      
+      // 生成随机属性
+      randoms[i * 3] = Math.random();     // x: 用于旋转/方向噪点
+      randoms[i * 3 + 1] = Math.random(); // y: 用于颜色混合
+      randoms[i * 3 + 2] = Math.random(); // z: 用于亮度噪点
     }
-    geo.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
-    return geo;
-  }, [mesh]);
+    
+    // 构建 Geometry
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+    
+    return geometry;
+  }, [originalMesh]);
 
-  // 动画帧循环
+  // 4. 动画循环
   useFrame(() => {
+    if (!groupRef.current) return;
+
+    // 旋转
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(
+      groupRef.current.rotation.y,
+      data.rotation,
+      0.1
+    );
+
+    // 粒子爆炸
     if (pointsRef.current) {
-      // 1. 爆炸插值
       pointsRef.current.material.uniforms.uExplosion.value = THREE.MathUtils.lerp(
         pointsRef.current.material.uniforms.uExplosion.value,
         data.explosion,
         0.1
       );
+    }
 
-      // 2. 旋转插值
-      pointsRef.current.rotation.y = THREE.MathUtils.lerp(
-        pointsRef.current.rotation.y,
-        data.rotation,
-        0.1
-      );
+    // 实物消失
+    if (originalMesh && originalMesh.material) {
+      const targetOpacity = 1.0 - data.explosion;
+      const mats = Array.isArray(originalMesh.material) ? originalMesh.material : [originalMesh.material];
+      mats.forEach((mat) => {
+        const stdMat = mat as THREE.MeshStandardMaterial;
+        stdMat.opacity = THREE.MathUtils.lerp(stdMat.opacity, targetOpacity, 0.1);
+        stdMat.visible = stdMat.opacity > 0.01;
+      });
     }
   });
 
-  if (!geometry) return null;
+  if (!originalMesh || !particleGeometry) return null;
 
   return (
-    <points ref={pointsRef} geometry={geometry}>
-      <shaderMaterial attach="material" args={[shaderArgs]} />
-    </points>
+    <group ref={groupRef}>
+      {/* 实物模型 */}
+      <mesh 
+        geometry={originalMesh.geometry} 
+        material={originalMesh.material}
+        scale={[1, 1, 1]} 
+      />
+
+      {/* 粒子模型 */}
+      <points ref={pointsRef} geometry={particleGeometry}>
+        <shaderMaterial attach="material" args={[shaderArgs]} />
+      </points>
+    </group>
   );
 }
 
-// --- 主场景组件 ---
-export default function Scene() {
-  const controls = useHandTracking();
+// --- 新增：摄像头预览组件 ---
+function CameraPreview({ stream }: { stream: MediaStream | null }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // 当 stream 变化或开关打开时，将流赋给 video 标签
+  useEffect(() => {
+    if (isOpen && videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [isOpen, stream]);
 
   return (
-    <div className="w-full h-screen bg-black relative">
+    <div className="absolute bottom-5 right-5 z-50 flex flex-col items-end gap-2">
+      {/* 预览窗口 */}
+      {isOpen && (
+        <div className="w-48 h-36 bg-black/80 rounded-lg overflow-hidden border border-white/20 shadow-xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-4">
+          {stream ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover transform -scale-x-100" // 镜像翻转，符合照镜子习惯
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white/50 text-xs">
+              Waiting for camera...
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 切换按钮 */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10 transition-all active:scale-95"
+      >
+        <span className="text-sm font-medium">
+            {isOpen ? 'Close Cam' : 'Check Hand'}
+        </span>
+        {/* 一个简单的相机图标 SVG */}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="16" height="16" viewBox="0 0 24 24" 
+          fill="none" stroke="currentColor" strokeWidth="2" 
+          strokeLinecap="round" strokeLinejoin="round"
+          className={`transition-transform ${isOpen ? 'text-green-400' : 'text-white'}`}
+        >
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+          <circle cx="12" cy="13" r="3"/>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+// --- 主组件 ---
+export default function Scene() {
+  // 从 Hook 中获取 stream
+  const { cameraStream, ...controls } = useHandTracking();
+
+  return (
+    <div className="w-full h-screen bg-black relative overflow-hidden">
+      {/* 左上角提示 */}
       <div className="absolute top-5 left-5 text-white z-10 font-mono pointer-events-none select-none">
         <h1 className="text-xl font-bold">Jade Interactive</h1>
-        <p>拇指食指控制收拢与爆炸</p>
-        <p>移动手指旋转</p>
+        <p>🤏 拇指食指捏和/张开 缩放粒子</p>
+        <p>手指滑动旋转</p>
         <div className="mt-2 text-xs opacity-50">
            Explosion: {controls.explosion.toFixed(2)} <br/>
            Rotation: {controls.rotation.toFixed(2)} rad
         </div>
       </div>
 
+      {/* 右下角相机预览 (新增) */}
+      <CameraPreview stream={cameraStream} />
+
       <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
         <color attach="background" args={['#050505']} />
         
+        {/* 这里只传 controls 数据给模型，不传 stream */}
         <JadeModel data={controls} />
         
-        {/* 禁用 OrbitControls 旋转，防止冲突，保留缩放 */}
         <OrbitControls makeDefault enableRotate={false} />
         <Environment preset="city" />
       </Canvas>

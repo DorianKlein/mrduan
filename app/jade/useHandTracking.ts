@@ -4,15 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 
 export function useHandTracking() {
-  // 现在的状态包含两个值：爆炸程度 和 旋转角度
+  // 状态：包含爆炸程度、旋转角度
   const [controls, setControls] = useState({ explosion: 0, rotation: 0 });
-  
+  // 状态：视频流 (用于 UI 预览)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const handLandmarkerRef = useRef<HandLandmarker | null>(null);
   
   // 用于计算滑动的临时变量
   const lastXRef = useRef<number | null>(null);
-  const currentRotationRef = useRef(0); // 使用 ref 累加旋转值，防止闭包问题
+  const currentRotationRef = useRef(0); 
 
   useEffect(() => {
     let animationFrameId: number;
@@ -44,12 +46,17 @@ export function useHandTracking() {
       navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
         video.srcObject = stream;
         videoRef.current = video;
+        
+        // 保存流供外部使用
+        setCameraStream(stream);
+
         video.addEventListener("loadeddata", predictWebcam);
       });
     };
 
     const predictWebcam = () => {
       if (videoRef.current && handLandmarkerRef.current) {
+        // 确保视频尺寸可用
         if(videoRef.current.videoWidth > 0 && videoRef.current.videoHeight > 0) {
             const startTimeMs = performance.now();
             const results = handLandmarkerRef.current.detectForVideo(videoRef.current, startTimeMs);
@@ -60,24 +67,23 @@ export function useHandTracking() {
               const landmarks = results.landmarks[0];
               
               // --- 1. 计算捏合 (爆炸) ---
+              // 拇指(4) 和 食指(8)
               const thumb = landmarks[4];
               const index = landmarks[8];
               const distance = Math.hypot(thumb.x - index.x, thumb.y - index.y);
               newExplosion = Math.min(Math.max((distance - 0.05) * 5, 0), 1);
 
               // --- 2. 计算食指滑动 (旋转) ---
-              // 食指尖端的 X 坐标 (MediaPipe 的坐标是 0-1，且 1 在右边，但摄像头是镜像的)
-              // 我们通常希望手往右滑，模型往右转，所以可能需要反转一下 delta
               const currentX = index.x;
 
               if (lastXRef.current !== null) {
                 // 计算这一帧移动了多少 (Delta)
                 const deltaX = currentX - lastXRef.current;
                 
-                // 设置一个死区 (Deadzone)，防止手抖导致模型微颤
+                // 设置死区防止抖动
                 if (Math.abs(deltaX) > 0.002) {
-                    // 灵敏度系数，负号是因为摄像头通常是镜像的，需要反直觉调整
                     const sensitivity = 5.0; 
+                    // 负号是因为镜像翻转
                     currentRotationRef.current -= deltaX * sensitivity;
                 }
               }
@@ -85,7 +91,7 @@ export function useHandTracking() {
               lastXRef.current = currentX;
 
             } else {
-              // 如果没有检测到手，重置 lastX，防止下次手进来时产生巨大的 delta 跳变
+              // 没有检测到手，重置滑动坐标
               lastXRef.current = null;
             }
 
@@ -95,6 +101,8 @@ export function useHandTracking() {
                 rotation: currentRotationRef.current
             });
         }
+        
+        // 循环调用
         animationFrameId = requestAnimationFrame(predictWebcam);
       }
     };
@@ -111,5 +119,6 @@ export function useHandTracking() {
     };
   }, []);
 
-  return controls;
+  // 重要：把 controls 和 cameraStream 一起返回
+  return { ...controls, cameraStream };
 }
