@@ -247,7 +247,7 @@ export default function Scene() {
     <div className="w-full h-screen bg-black relative overflow-hidden">
       {/* 左上角提示 */}
       <div className="absolute top-5 left-5 text-white z-10 font-mono pointer-events-none select-none">
-        <h1 className="text-xl font-bold">Jade Interactive</h1>
+        <h1 className="text-xl font-bold">岫岩玉雕</h1>
         <p>🤏 拇指食指捏和/张开 缩放粒子</p>
         <p>手指滑动旋转</p>
         <div className="mt-2 text-xs opacity-50">
