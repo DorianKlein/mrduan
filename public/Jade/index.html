@@ -197,7 +197,13 @@
         scene.add(displayGroup);
 
         const gltfLoader = new THREE.GLTFLoader();
-        const modelUrl = '/Jade/Jade-long.glb'; 
+        
+        // ****** 路径策略调整 ******
+        // 既然绝对路径在服务器上报错 404，但本地 3000 端口正常
+        // 说明服务器的根目录映射可能与本地不同，或者存在反向代理路径问题。
+        // 改回使用【相对路径】，并自动适配当前页面所在位置。
+        // 只要 index.html 和 .glb 文件在同一个文件夹内，这种方式最稳妥。
+        const modelUrl = 'Jade-long.glb'; 
 
         const dummyGeo = new THREE.SphereGeometry(0.1);
         const dummyMat = new THREE.MeshBasicMaterial({ visible: false });
@@ -207,7 +213,7 @@
         gltfLoader.load(
             modelUrl,
             (gltf) => {
-                console.log('用户模型加载成功');
+                console.log('用户模型加载成功:', modelUrl);
                 const model = gltf.scene;
                 
                 const box = new THREE.Box3().setFromObject(model);
@@ -244,9 +250,18 @@
             },
             undefined,
             (error) => {
-                console.warn('未找到模型文件:', error);
-                document.getElementById('loading-text').innerText = "未找到 Jade-long.glb 文件";
-                document.getElementById('loading-text').style.color = "#ef4444";
+                console.warn('模型加载失败，尝试路径:', modelUrl, error);
+                
+                // 更详细的错误提示
+                const loadingText = document.getElementById('loading-text');
+                loadingText.innerText = `加载失败: 未找到 ${modelUrl}`;
+                loadingText.style.color = "#ef4444";
+                
+                // 提示用户可能的原因
+                const errorDetail = document.createElement('div');
+                errorDetail.innerText = "请检查文件名大小写(Linux敏感)或文件位置";
+                errorDetail.className = "text-xs text-gray-500 mt-2";
+                loadingText.parentElement.appendChild(errorDetail);
                 
                 const fallbackGeo = new THREE.IcosahedronGeometry(2, 0);
                 const fallbackMat = new THREE.MeshPhysicalMaterial({ 
