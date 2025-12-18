@@ -145,7 +145,7 @@ export default function SouvenirPage() {
       {/* 3D 背景层 */}
       <div className="absolute inset-0 z-0">
         <Badge3DModel 
-          frontImg="/badges/ziyue.png"
+          frontImg="/badges/ziyue-black.png"
           backImg="/badges/ziyue-back.png"
           svgPath="/badges/ziyue-shape.svg"
           scale={1.2}

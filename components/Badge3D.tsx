@@ -454,6 +454,7 @@ function BadgeContent(props: BadgeProps) {
     t.repeat.set(1, -1);
     t.anisotropy = maxAnisotropy;
     t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.magFilter = THREE.LinearFilter;
     t.needsUpdate = true;
     return t;
   }, [frontTextureRaw, maxAnisotropy]);
@@ -465,6 +466,7 @@ function BadgeContent(props: BadgeProps) {
     t.repeat.set(1, -1);
     t.anisotropy = maxAnisotropy;
     t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.magFilter = THREE.LinearFilter;
     t.needsUpdate = true;
     return t;
   }, [backTextureRaw, maxAnisotropy]);
@@ -494,10 +496,10 @@ function BadgeContent(props: BadgeProps) {
 
       
       {/* {/* <directionalLight position={[0, 0, -5]} intensity={1} castShadow color={"#7700ff"} /> */}
-      <ambientLight intensity={0.4} color={"#ffffff"} />
+      <ambientLight intensity={1.9} color={"#ffffff"} />
       <directionalLight position={[-5, 5, 5]} intensity={2} castShadow color={"#ffffff"} />
       
-      <pointLight position={[0, 0, -1]} intensity={4} color={"#13a851"}/>
+      {/* <pointLight position={[0, 0, -1]} intensity={1} color={"#13a851"}/> */}
       
       <ThreeBackground theme={currentTheme} />
       <PresentationControls
@@ -560,7 +562,7 @@ export default function Badge3D(props: BadgeProps) {
           scene.background = null; 
         }}
         camera={{ position: [0, 0, 20], fov: 35 }} 
-        dpr={1}
+        dpr={[2, 3]}
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
       >
         <color attach="background" args={['#31073a']} />

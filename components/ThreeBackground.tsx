@@ -46,8 +46,8 @@ const BackgroundMaterial = shaderMaterial(
     // 柔和的光斑函数 (模拟 CSS 的 blur)
     float blob(vec2 uv, vec2 position, float size) {
         float d = length(uv - position);
-        // 使用指数衰减来模拟高斯模糊效果
-        return exp(-d * d / (size * size)); 
+        // 使用更柔和的衰减参数减少涟漪感
+        return exp(-d * d / (size * size * 1.5)); 
     }
 
     void main() {
