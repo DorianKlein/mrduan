@@ -29,7 +29,7 @@ const BackgroundMaterial = shaderMaterial(
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
-  // Fragment Shader (核心：复刻 CSS 流光效果)
+  // Fragment Shader (平滑流动的光源效果)
   `
     uniform float uTime;
     uniform vec3 uColorPrimary;
@@ -38,57 +38,80 @@ const BackgroundMaterial = shaderMaterial(
     uniform vec2 uResolution;
     varying vec2 vUv;
 
-    // 简单的伪随机噪点函数
-    float random(vec2 st) {
-        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    // 改进的噪声函数 - 用于创建自然的流动感
+    float noise(vec2 st) {
+        vec2 i = floor(st);
+        vec2 f = fract(st);
+        
+        float a = fract(sin(dot(i, vec2(12.9898, 78.233))) * 43758.5453);
+        float b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(12.9898, 78.233))) * 43758.5453);
+        float c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
+        float d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
+        
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
     }
-
-    // 柔和的光斑函数 (模拟 CSS 的 blur)
-    float blob(vec2 uv, vec2 position, float size) {
-        float d = length(uv - position);
-        // 使用更柔和的衰减参数减少涟漪感
-        return exp(-d * d / (size * size * 1.5)); 
+    
+    // 分形布朗运动 - 创建多层次的噪声
+    float fbm(vec2 st) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        float frequency = 2.0;
+        
+        for(int i = 0; i < 4; i++) {
+            value += amplitude * noise(st * frequency);
+            frequency *= 2.0;
+            amplitude *= 0.5;
+        }
+        return value;
     }
 
     void main() {
-        // 修正 UV 比例，防止光斑被拉伸
         vec2 uv = vUv;
-        uv.x *= uResolution.x / uResolution.y;
-
-        // 基础底色 (深黑)
-        vec3 color = vec3(0.02, 0.02, 0.02);
-
-        // --- 1. 模拟三个流动的光斑 ---
         
-        // 主光 (Primary) - 对应 CSS animate-flow-1
-        // 运动轨迹：大范围的圆周/正弦运动
-        vec2 pos1 = vec2(0.5, 0.5); 
-        pos1.x += sin(uTime * 0.3) * 0.4;
-        pos1.y += cos(uTime * 0.2) * 0.3;
-        // 叠加颜色 (Screen 混合模式在 Shader 里近似于加法)
-        color += blob(vUv, pos1, 0.6) * uColorPrimary * 0.4;
-
-        // 副光 (Secondary) - 对应 CSS animate-flow-2
-        vec2 pos2 = vec2(0.8, 0.2);
-        pos2.x += cos(uTime * 0.4 + 2.0) * 0.4;
-        pos2.y += sin(uTime * 0.3 + 1.0) * 0.4;
-        color += blob(vUv, pos2, 0.5) * uColorSecondary * 0.35;
-
-        // 底光 (Bottom) - 对应 CSS animate-flow-3
-        vec2 pos3 = vec2(0.2, 0.1);
-        pos3.x += sin(uTime * 0.25 - 1.0) * 0.5;
-        color += blob(vUv, pos3, 0.7) * uColorBottom * 0.3;
-
-        // --- 2. 噪点层 (Noise) ---
-        //float noise = random(vUv * 999.0 + uTime); // 动态噪点
-        //color += (noise - 0.5) * 0.05; // 叠加微弱的噪点
-
-        // --- 3. 暗角 (Vignette) ---
-        float dist = length(vUv - 0.5);
-        // 边缘压暗，中心亮
-        float vignette = 1.0 - smoothstep(0.3, 1.2, dist);
-        color *= vignette;
-
+        // 基础深色背景
+        vec3 color = vec3(0.01, 0.01, 0.02);
+        
+        // --- 创建流动的渐变效果 ---
+        
+        // 第一层：主色调流动
+        vec2 flow1 = uv + vec2(sin(uTime * 0.15 + uv.y * 2.0) * 0.3, cos(uTime * 0.1 + uv.x * 1.5) * 0.2);
+        float pattern1 = fbm(flow1 * 2.0 + uTime * 0.1);
+        
+        // 第二层：次要色调流动
+        vec2 flow2 = uv + vec2(cos(uTime * 0.12 - uv.y * 1.5) * 0.25, sin(uTime * 0.18 - uv.x * 2.0) * 0.3);
+        float pattern2 = fbm(flow2 * 1.8 - uTime * 0.08);
+        
+        // 第三层：底色流动
+        vec2 flow3 = uv + vec2(sin(uTime * 0.08 + uv.x * 3.0) * 0.2, cos(uTime * 0.13 + uv.y * 2.5) * 0.25);
+        float pattern3 = fbm(flow3 * 2.2 + uTime * 0.05);
+        
+        // 创建平滑的位置权重
+        float horizontalGrad = smoothstep(0.0, 0.5, uv.x) * (1.0 - smoothstep(0.5, 1.0, uv.x));
+        float verticalGrad = smoothstep(0.0, 0.6, uv.y) * (1.0 - smoothstep(0.4, 1.0, uv.y));
+        
+        // 混合颜色 - 使用 pattern 和位置创建自然过渡
+        vec3 primaryContribution = uColorPrimary * pattern1 * 0.4 * (horizontalGrad + 0.3);
+        vec3 secondaryContribution = uColorSecondary * pattern2 * 0.35 * (verticalGrad + 0.3);
+        vec3 bottomContribution = uColorBottom * pattern3 * 0.3 * (1.0 - uv.y * 0.7);
+        
+        // 柔和地混合所有层
+        color += primaryContribution;
+        color += secondaryContribution;
+        color += bottomContribution;
+        
+        // 添加整体的流动感
+        float globalFlow = sin(uTime * 0.2 + uv.x * 3.14159) * cos(uTime * 0.15 + uv.y * 3.14159);
+        color *= 1.0 + globalFlow * 0.15;
+        
+        // 柔和的暗角效果
+        float dist = length(uv - 0.5);
+        float vignette = 1.0 - smoothstep(0.3, 1.5, dist * 1.2);
+        color *= mix(0.7, 1.0, vignette);
+        
+        // 细微的色彩变化让画面更生动
+        color = pow(color, vec3(0.95)); // 轻微的 gamma 校正
+        
         gl_FragColor = vec4(color, 1.0);
     }
   `

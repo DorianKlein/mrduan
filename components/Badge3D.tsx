@@ -11,7 +11,7 @@ import ThreeBackground from './ThreeBackground';
 const themes = {
   neon: {
     primary: '#8e0f8e',
-    secondary: '#2cb084',
+    secondary: '#109e6a',
     bottom: '#54289b',
   }
 };
