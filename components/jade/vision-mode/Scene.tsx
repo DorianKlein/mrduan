@@ -6,7 +6,9 @@ import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 // 引入采样器，用于生成海量粒子
 import { MeshSurfaceSampler } from 'three-stdlib';
-import { useHandTracking } from './useHandTracking';
+
+import { useHandTracking } from '@/components/jade/shared/useHandTracking';
+import CameraPreview from '@/components/jade/shared/CameraPreview';
 
 // --- Vertex Shader ---
 const vertexShader = `
@@ -181,62 +183,6 @@ function JadeModel({ data }: { data: { explosion: number, rotation: number } }) 
   );
 }
 
-// --- 新增：摄像头预览组件 ---
-function CameraPreview({ stream }: { stream: MediaStream | null }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // 当 stream 变化或开关打开时，将流赋给 video 标签
-  useEffect(() => {
-    if (isOpen && videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [isOpen, stream]);
-
-  return (
-    <div className="absolute bottom-5 right-5 z-50 flex flex-col items-end gap-2">
-      {/* 预览窗口 */}
-      {isOpen && (
-        <div className="w-48 h-36 bg-black/80 rounded-lg overflow-hidden border border-white/20 shadow-xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-4">
-          {stream ? (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover transform -scale-x-100" // 镜像翻转，符合照镜子习惯
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/50 text-xs">
-              Waiting for camera...
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 切换按钮 */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10 transition-all active:scale-95"
-      >
-        <span className="text-sm font-medium">
-            {isOpen ? 'Close Cam' : 'Check Hand'}
-        </span>
-        {/* 一个简单的相机图标 SVG */}
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="16" height="16" viewBox="0 0 24 24" 
-          fill="none" stroke="currentColor" strokeWidth="2" 
-          strokeLinecap="round" strokeLinejoin="round"
-          className={`transition-transform ${isOpen ? 'text-green-400' : 'text-white'}`}
-        >
-          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-          <circle cx="12" cy="13" r="3"/>
-        </svg>
-      </button>
-    </div>
-  );
-}
 
 // --- 主组件 ---
 export default function Scene() {
