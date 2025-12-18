@@ -54,8 +54,8 @@ function InteractiveStone({
       }
     }
     else if (stage === 'STAGE_3_CARVING') {
-      if (gesture === 'POINT') {
-        progressIncrement = 0.2;
+      if (gesture === 'POINT' && velocity > 0.002) {
+        progressIncrement = 5.0;
         const s = 1 + Math.sin(state.clock.elapsedTime * 10) * 0.01;
         meshRef.current.scale.setScalar(s);
       }
