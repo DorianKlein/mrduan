@@ -365,6 +365,80 @@ function AutoRotator({ children, isDragging, autoRotate = true }: { children: Re
   return <group ref={groupRef}>{children}</group>;
 }
 
+// --- 相机缩放控制 ---
+function CameraZoom() {
+  const { camera, gl } = useThree();
+  const targetZoom = useRef(20); // 目标缩放距离
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      // 根据滚轮方向调整目标距离
+      const delta = e.deltaY * 0.01;
+      targetZoom.current = THREE.MathUtils.clamp(
+        targetZoom.current + delta,
+        10,  // 最近距离
+        40   // 最远距离
+      );
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        
+        // 计算两指之间的距离
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const dx = touch2.clientX - touch1.clientX;
+        const dy = touch2.clientY - touch1.clientY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (lastTouchDistance !== null) {
+          // 根据距离变化调整缩放
+          const delta = (lastTouchDistance - distance) * 0.05;
+          targetZoom.current = THREE.MathUtils.clamp(
+            targetZoom.current + delta,
+            10,
+            40
+          );
+        }
+        
+        setLastTouchDistance(distance);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setLastTouchDistance(null);
+    };
+
+    const domElement = gl.domElement;
+    
+    // 添加事件监听
+    domElement.addEventListener('wheel', handleWheel, { passive: false });
+    domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    domElement.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      domElement.removeEventListener('wheel', handleWheel);
+      domElement.removeEventListener('touchmove', handleTouchMove);
+      domElement.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gl, lastTouchDistance]);
+
+  // 平滑过渡相机位置
+  useFrame(() => {
+    camera.position.z = THREE.MathUtils.lerp(
+      camera.position.z,
+      targetZoom.current,
+      0.1 // 平滑系数
+    );
+  });
+
+  return null;
+}
+
 // --- 4. 场景管理 ---
 function BadgeContent(props: BadgeProps) {
   const svgData = useLoader(SVGLoader, props.svgPath);
@@ -407,6 +481,7 @@ function BadgeContent(props: BadgeProps) {
 
   return (
     <>
+      <CameraZoom />
       
       {/* <Environment 
       files={"/puresky.hdr"}  // 1. 加载本地文件 (路径对应 public/studio.hdr)

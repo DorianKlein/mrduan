@@ -107,12 +107,24 @@ declare global {
 
 export default function ThreeBackground({ theme }: { theme: ThemeColors }) {
   const materialRef = useRef<any>(null);
-  const { viewport } = useThree();
+  const meshRef = useRef<THREE.Mesh>(null);
+  const { viewport, camera } = useThree();
 
-  // 实时更新时间
+  // 实时更新时间和背景尺寸
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uTime = state.clock.elapsedTime;
+    }
+
+    // 根据相机距离动态调整背景平面的尺寸
+    if (meshRef.current && camera) {
+      const distance = Math.abs(camera.position.z + 10); // +10 是因为背景在 z=-10
+      const scale = distance / 10; // 基础缩放比例
+      meshRef.current.scale.set(
+        viewport.width * scale * 1.5,
+        viewport.height * scale * 1.5,
+        1
+      );
     }
   });
 
@@ -127,7 +139,7 @@ export default function ThreeBackground({ theme }: { theme: ThemeColors }) {
 
   return (
     //创建一个填满视口的平面
-    <mesh position={[0, 0, -10]} scale={[viewport.width * 2, viewport.height * 2, 1]}>
+    <mesh ref={meshRef} position={[0, 0, -10]}>
       <planeGeometry />
       {/* @ts-ignore */}
       <backgroundMaterial 
