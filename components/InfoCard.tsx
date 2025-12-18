@@ -30,8 +30,9 @@ export default function InfoCard({ name, nickname, letterContent, children }: In
     <div 
       className={`
         pointer-events-auto 
-        fixed bottom-0 left-0 w-full z-50
+        fixed bottom-0 left-0 right-0 w-full z-50
         md:absolute md:bottom-8 md:w-[800px] md:left-1/2 md:-translate-x-1/2 md:rounded-2xl
+        mx-0 md:mx-auto
         
         bg-black/60 backdrop-blur-xl border-t md:border border-white/10
         transition-all duration-500 ease-in-out
@@ -42,37 +43,39 @@ export default function InfoCard({ name, nickname, letterContent, children }: In
       
       {/* --- Header --- */}
       <div 
-        className="flex justify-between items-center p-6 cursor-pointer group"
+        className="flex justify-between items-center p-4 md:p-6 cursor-pointer group"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight group-hover:text-purple-300 transition-colors">
-            {name} <span className="text-base font-normal text-white/40 ml-1">/ {nickname}</span>
+        <div className="flex-1 min-w-0 pr-2">
+          <h2 className="text-lg md:text-2xl font-bold text-white tracking-tight group-hover:text-purple-300 transition-colors">
+            {name} <span className="text-sm md:text-base font-normal text-white/40 ml-1">/ {nickname}</span>
           </h2>
           <p className={`text-xs text-purple-400 font-mono mt-1 transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`}>
           </p>
-          <p className="text-xs text-white/40 uppercase tracking-widest font-mono mb-1">你已经加入工作室</p>
+          <p className="text-[10px] md:text-xs text-white/40 uppercase tracking-widest font-mono mb-1">你已经加入工作室</p>
               {children}
         </div>
-        <ChevronIcon isOpen={isOpen} />
+        <div className="flex-shrink-0">
+          <ChevronIcon isOpen={isOpen} />
+        </div>
       </div>
 
       {/* --- Body --- */}
       <div 
         className={`
           overflow-hidden transition-all duration-500 ease-in-out
-          ${isOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'}
+          ${isOpen ? 'max-h-[70vh] md:max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <div className="px-6 pb-8 max-h-[70vh] overflow-y-auto">
+        <div className="px-4 md:px-6 pb-6 md:pb-8 max-h-[60vh] md:max-h-[70vh] overflow-y-auto">
           
           {/* 分割线 */}
           <div className="h-px w-full bg-white/10 my-6" />
 
           {/* 信件区域 */}
           <div className="relative pb-4">
-             <p className="text-xs text-purple-400 font-mono mb-3">A MESSAGE FROM DIRECTOR</p>
-             <article className="text-gray-300 leading-relaxed font-serif text-lg whitespace-pre-line">
+             <p className="text-[10px] md:text-xs text-purple-400 font-mono mb-3">A MESSAGE FROM DIRECTOR</p>
+             <article className="text-gray-300 leading-relaxed font-serif text-sm md:text-lg whitespace-pre-line">
                 {letterContent}
              </article>
           </div>

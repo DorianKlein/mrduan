@@ -158,27 +158,28 @@ export default function SouvenirPage() {
       </div>
 
       {/* UI 层 */}
-      <div className={`relative z-10 w-full h-full flex flex-col justify-between p-8 pointer-events-none transition-opacity duration-1000 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 w-full h-full flex flex-col justify-between px-4 py-safe pointer-events-none transition-opacity duration-1000 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* 顶部 Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
+        <div className="flex justify-between items-start gap-2 pt-4 md:pt-8">
+          <div className="flex-shrink min-w-0">
+            <h1 className="text-2xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
               123<br/>STUDIO
             </h1>
-            <div className="mt-2 inline-block px-3 py-1 border border-purple-500/30 rounded-full bg-purple-900/20 backdrop-blur-md">
-              <span className="text-xs font-mono text-purple-300 tracking-widest">2025年终 · 纪念</span>
+            <div className="mt-2 inline-block px-2 md:px-3 py-1 border border-purple-500/30 rounded-full bg-purple-900/20 backdrop-blur-md">
+              <span className="text-[10px] md:text-xs font-mono text-purple-300 tracking-widest">2025年终 · 纪念</span>
             </div>
           </div>
 
-          {/* ✅ 右上角：旋转控制按钮 (替换了原来的 BLOCK 信息) */}
-          <div className="pointer-events-auto">
+          {/* ✅ 右上角：旋转控制按钮 */}
+          <div className="pointer-events-auto flex-shrink-0">
             <button 
               onClick={() => setIsAutoRotating(!isAutoRotating)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all text-white/80 hover:text-white group"
+              className="flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all text-white/80 hover:text-white group min-w-[44px]"
+              aria-label={isAutoRotating ? '暂停旋转' : '开始旋转'}
             >
               {isAutoRotating ? <PauseIcon /> : <PlayIcon />}
-              <span className="text-xs font-mono tracking-widest uppercase hidden md:inline-block">
+              <span className="text-xs font-mono tracking-widest uppercase hidden lg:inline-block">
                 {isAutoRotating ? '自动旋转 开启' : '自动旋转 关闭'}
               </span>
             </button>
