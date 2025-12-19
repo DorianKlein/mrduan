@@ -135,9 +135,9 @@ export const badgesConfig: BadgeConfig[] = [
     name: '英凯歌',
     nickname: 'Kevin',
     joinDate: '2025-09-01 00:00:00',
-    frontImg: '/badges/kevin.png',
-    backImg: '/badges/kevin-back.png',
-    svgPath: '/badges/kevin-shape.svg',
+    frontImg: '/badges/Kevin.png',
+    backImg: '/badges/Kevin-back.png',
+    svgPath: '/badges/Kevin-shape.svg',
     themeColor: '#241229',
     letterContent: `
       
