@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </head>
       {/* ❌ 3. 把 className 里的字体变量删掉，只保留 antialiased (如果有的话) */}
       {/* <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}> */}
       

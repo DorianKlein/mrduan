@@ -116,7 +116,7 @@ export default function SouvenirPage() {
                   setPasswordInput(event.target.value);
                   if (authError) setAuthError('');
                 }}
-                className="mt-2 w-full rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm text-white placeholder-purple-200/40 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                className="mt-2 w-full rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-base text-white placeholder-purple-200/40 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40"
                 placeholder="输入密码"
                 autoFocus
               />
