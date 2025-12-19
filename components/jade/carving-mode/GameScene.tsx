@@ -16,36 +16,30 @@ type GameStage = 'STAGE_1_PEELING' | 'STAGE_2_CUTTING' | 'STAGE_3_CARVING' | 'ST
 function Level1_Skin({ progress, visible }: { progress: number, visible: boolean }) {
   const { scene } = useGLTF('/models/jade/carving/level1_skin.glb');
   const groupRef = useRef<THREE.Group>(null);
-
-  // 克隆场景以防止材质污染
   const clone = useMemo(() => scene.clone(), [scene]);
 
   useFrame(() => {
     if (!groupRef.current) return;
     
+    // 强制隐藏逻辑
     if (!visible) {
         groupRef.current.visible = false;
         return;
     }
-    // 根据进度计算透明度：进度 0 -> 透明度 1; 进度 100 -> 透明度 0
+
     const opacity = Math.max(0, 1 - progress / 100);
     
-    // 遍历模型修改材质透明度
     groupRef.current.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
-        // 确保材质是支持透明的
         if (mesh.material) {
           const mat = mesh.material as THREE.MeshStandardMaterial;
           mat.transparent = true;
           mat.opacity = opacity;
-          // 稍微给点土黄色
-          // mat.color.lerp(new THREE.Color('#ffffff'), 0.1); 
         }
       }
     });
     
-    // 如果完全透明了，隐藏它以节省性能
     groupRef.current.visible = opacity > 0.01;
   });
 
@@ -85,14 +79,12 @@ function Level2_Rock({ triggered, visible }: { triggered: boolean, visible: bool
   useFrame(() => {
     if (!groupRef.current) return;
 
-    // 🔥 核心修复：如果外部要求隐藏（比如到了 Stage 4），直接隐藏
     if (!visible) {
         groupRef.current.visible = false;
         return;
     }
     groupRef.current.visible = true;
 
-    // 只有触发爆炸后才开始动
     if (triggered) {
         fragments.forEach((frag) => {
           frag.mesh.position.addScaledVector(frag.dir, frag.speed);
@@ -121,13 +113,12 @@ function Level3_Rough({ progress, visible }: { progress: number, visible: boolea
         groupRef.current.visible = false;
         return;
     }
+    // 必须显式设为 true，否则可能被之前的逻辑隐藏
+    groupRef.current.visible = true;
 
-    // 进度越高，模型越小，模拟被“刮掉”了
-    // 从 1.0 缩放到 0.8 (刚好露出里面的成品)
     const scale = THREE.MathUtils.lerp(1.05, 0.95, progress / 100);
     groupRef.current.scale.setScalar(scale);
 
-    // 同时淡出
     const opacity = Math.max(0, 1 - progress / 100);
     groupRef.current.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -136,12 +127,10 @@ function Level3_Rough({ progress, visible }: { progress: number, visible: boolea
           const mat = mesh.material as THREE.MeshStandardMaterial;
           mat.transparent = true;
           mat.opacity = opacity;
-          mat.roughness = 0.8; // 粗糙的质感
+          mat.roughness = 0.8; 
         }
       }
     });
-    
-    groupRef.current.visible = opacity > 0.01;
   });
 
   return <primitive object={clone} ref={groupRef} />;
@@ -166,12 +155,9 @@ function Level4_Final({
   useFrame(() => {
     if (!groupRef.current) return;
     
-    // 控制显示
     groupRef.current.visible = visible;
 
-    // 只有在显示时才进行材质增强和变换计算
     if (visible) {
-      // 1. 材质增强 (让玉更透亮)
       groupRef.current.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
@@ -184,15 +170,12 @@ function Level4_Final({
         }
       });
 
-      // 2. 旋转 (直接基于模型自身的中心轴)
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         rotationValue,
         0.3
       );
 
-      // 3. 缩放 (直接基于模型自身的中心轴)
-      // 因为你在建模软件里居中了，所以这里直接 scale 就会以中心放大
       const targetScale = 1 + zoomValue * 2.5;
       groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
@@ -203,37 +186,53 @@ function Level4_Final({
 
 
 // ==========================================================
-// 主场景逻辑
+// 主场景逻辑 (🔥 核心修改区域)
 // ==========================================================
 export default function GameScene() {
   const { cameraStream, gesture, velocity, rotation, explosion } = useHandTracking();
   const [stage, setStage] = useState<GameStage>('STAGE_1_PEELING');
-  
-  // 进度状态
   const [progress, setProgress] = useState(0);
 
-  // 每一帧更新游戏逻辑
-  // 注意：逻辑放在这里可以控制全局，不需要放在 Canvas 里面
+  // 1. 创建 Refs 来存储最新数据，防止闭包陷阱
+  const gestureRef = useRef(gesture);
+  const velocityRef = useRef(velocity);
+  const stageRef = useRef(stage);
+
+  // 2. 时刻同步 Ref 的值
+  useEffect(() => {
+    gestureRef.current = gesture;
+    velocityRef.current = velocity;
+    stageRef.current = stage;
+  }, [gesture, velocity, stage]);
+
+  // 3. 游戏主循环 (依赖数组为空，永不重启定时器！)
   useEffect(() => {
     const timer = setInterval(() => {
+      // 从 Ref 中读取最新值
+      const currentGesture = gestureRef.current;
+      const currentVelocity = velocityRef.current;
+      const currentStage = stageRef.current;
+      
       let increment = 0;
 
       // --- 阶段 1: 去皮 ---
-      if (stage === 'STAGE_1_PEELING') {
-        if (gesture === 'OPEN' && velocity > 0.001) increment = 5.0; 
+      if (currentStage === 'STAGE_1_PEELING') {
+        // 🔥 Windows 修正: 阈值降低到 0.0005，确保稍微动一下就能触发
+        if (currentGesture === 'OPEN' && currentVelocity > 0.0005) {
+             increment = 1.0; 
+        } 
       }
-      // --- 阶段 2: 切割 (无需进度条，一刀切) ---
-      else if (stage === 'STAGE_2_CUTTING') {
-        if (gesture === 'FIST' && velocity > 0.002) {
-          // 检测到强力挥拳，直接切换下一关
+      // --- 阶段 2: 切割 ---
+      else if (currentStage === 'STAGE_2_CUTTING') {
+        if (currentGesture === 'FIST' && currentVelocity > 0.002) {
           setStage('STAGE_3_CARVING'); 
           setProgress(0);
-          return; // 跳过本次进度更新
+          return; 
         }
       }
       // --- 阶段 3: 雕刻 ---
-      else if (stage === 'STAGE_3_CARVING') {
-        if (gesture === 'POINT') increment = 2.0;
+      else if (currentStage === 'STAGE_3_CARVING') {
+        if (currentGesture === 'POINT') increment = 1.0;
       }
 
       // 更新进度
@@ -241,23 +240,23 @@ export default function GameScene() {
         setProgress((p) => {
           const next = p + increment;
           if (next >= 100) {
-            // 切换阶段逻辑
-            if (stage === 'STAGE_1_PEELING') {
+            // 切换阶段
+            if (currentStage === 'STAGE_1_PEELING') {
                 setStage('STAGE_2_CUTTING');
-                return 0; // 重置进度
+                return 0; 
             }
-            if (stage === 'STAGE_3_CARVING') {
+            if (currentStage === 'STAGE_3_CARVING') {
                 setStage('STAGE_4_VIEWING');
-                return 100; // 保持 100
+                return 100; 
             }
           }
           return next;
         });
       }
-    }, 1000 / 60); // 60 FPS Check
+    }, 33); // 33ms (约30FPS)，更稳定
 
     return () => clearInterval(timer);
-  }, [gesture, velocity, stage]);
+  }, []); // 👈 这里的依赖数组必须是空的！
 
   return (
     <div className="h-full w-full bg-neutral-900 relative">
@@ -288,29 +287,24 @@ export default function GameScene() {
           <group rotation={[0, Math.PI / 4, 0]}>
               
               {/* Level 1: 泥皮 */}
-              {/* 逻辑：只在 Stage 1 显示。一旦进入 Stage 2，立刻消失 */}
               <Level1_Skin 
                 progress={progress} 
                 visible={stage === 'STAGE_1_PEELING'} 
               />
 
               {/* Level 2: 碎石 */}
-              {/* 逻辑：在 Stage 1, 2, 3 都存在。只有到了 Stage 4 (鉴赏) 才彻底消失 */}
-              {/* 触发爆炸：只要不是 Stage 1 和 2，就说明已经炸了 (进入 Stage 3 瞬间炸) */}
               <Level2_Rock 
                 visible={stage !== 'STAGE_4_VIEWING'}
                 triggered={stage === 'STAGE_3_CARVING' || stage === 'STAGE_4_VIEWING'} 
               />
 
               {/* Level 3: 粗胚 */}
-              {/* 逻辑：只在 Stage 3 (雕刻) 显示 */}
               <Level3_Rough 
                 progress={progress} 
                 visible={stage === 'STAGE_3_CARVING'} 
               />
 
               {/* Level 4: 成品 */}
-              {/* 逻辑：在 Stage 3 (作为内核隐约显示) 和 Stage 4 (完全展示) */}
               <Level4_Final 
                 visible={stage === 'STAGE_3_CARVING' || stage === 'STAGE_4_VIEWING'} 
                 rotationValue={stage === 'STAGE_4_VIEWING' ? rotation : 0} 
@@ -343,7 +337,7 @@ function getStageName(s: GameStage) {
     }
 }
 
-useGLTF.preload('/models/level1_skin.glb');
-useGLTF.preload('/models/level2_rock.glb');
-useGLTF.preload('/models/level3_rough.glb');
-useGLTF.preload('/models/level4_jade.glb');
+useGLTF.preload('/models/jade/carving/level1_skin.glb');
+useGLTF.preload('/models/jade/carving/level2_rock.glb');
+useGLTF.preload('/models/jade/carving/level3_rough.glb');
+useGLTF.preload('/models/jade/carving/level4_jade.glb');
