@@ -134,7 +134,9 @@ function BadgeParticles({ svgData, onReady, onComplete }: { svgData: any, onRead
     const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry));
     sampler.build();
 
-    const count = 20000; // 5万个粒子，实心感更强
+    // 移动端降低粒子数以提升性能
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const count = isMobile ? 8000 : 20000;
     const posArray = new Float32Array(count * 3);
     const randPosArray = new Float32Array(count * 3);
     const explodeDirArray = new Float32Array(count * 3); // 新增：爆破方向
@@ -276,16 +278,19 @@ function BadgeModel({
   const realBevel = 0.05;
   const internalDepth = realThickness / scaleRatio;
 
-  // 1. 优化配置：增加 curveSegments
-  const extrusionSettings = useMemo(() => ({
-    depth: internalDepth, 
-    bevelEnabled: true, 
-    bevelThickness: realBevel / scaleRatio, 
-    bevelSize: realBevel / scaleRatio, 
-    bevelSegments: 5, 
-    // 🔥 核心修改：默认是 12，改成 64 或 96 消除棱角感
-    curveSegments: 128 
-  }), [internalDepth, realBevel, scaleRatio]);
+  // 1. 优化配置：移动端降低精度，桌面端保持高质量
+  const extrusionSettings = useMemo(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    return {
+      depth: internalDepth, 
+      bevelEnabled: true, 
+      bevelThickness: realBevel / scaleRatio, 
+      bevelSize: realBevel / scaleRatio, 
+      bevelSegments: isMobile ? 3 : 5, 
+      // 移动端48保证流畅，桌面端128保持高质量
+      curveSegments: isMobile ? 48 : 128
+    };
+  }, [internalDepth, realBevel, scaleRatio]);
 
   // 2. 优化几何体：计算法线以获得平滑光照
   const geometry = useMemo(() => {
@@ -546,6 +551,9 @@ function BadgeContent(props: BadgeProps) {
 }
 
 export default function Badge3D(props: BadgeProps) {
+  // 检测移动设备
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
   return (
     <div className="w-full h-full relative" style={{ touchAction: 'none' }}>
       <Canvas 
@@ -555,14 +563,15 @@ export default function Badge3D(props: BadgeProps) {
           alpha: true, 
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.0
+          toneMappingExposure: 1.0,
+          powerPreference: isMobile ? 'default' : 'high-performance'
         }}
         // 2. 关键：不要设置 scene.background，或者显式设为 null
         onCreated={({ scene }) => {
           scene.background = null; 
         }}
         camera={{ position: [0, 0, 20], fov: 35 }} 
-        dpr={[2, 3]}
+        dpr={isMobile ? [1, 1.5] : [2, 3]} // 移动端降低像素比，桌面端保持高清
         style={{ width: '100%', height: '100%', touchAction: 'none' }}
       >
         <color attach="background" args={['#31073a']} />
