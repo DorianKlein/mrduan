@@ -1,5 +1,10 @@
 import Link from 'next/link';
 
+export const metadata = {
+  title: '岫岩交互选择',
+  description: 'Interactive 3D particle explosion controlled by MediaPipe hand tracking.',
+};
+
 export default function JadeMenu() {
   return (
     <main className="w-full h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-8">
