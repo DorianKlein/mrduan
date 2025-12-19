@@ -158,10 +158,10 @@ export default function SouvenirPage() {
       </div>
 
       {/* UI 层 */}
-      <div className={`relative z-10 w-full h-full flex flex-col justify-between px-4 py-safe pointer-events-none transition-opacity duration-1000 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 w-full h-full flex flex-col justify-between px-3 md:px-4 py-3 md:py-safe pointer-events-none transition-opacity duration-1000 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* 顶部 Header */}
-        <div className="flex justify-between items-start gap-2 pt-4 md:pt-8">
+        <div className="flex justify-between items-start gap-2 pt-2 md:pt-8">
           <div className="flex-shrink min-w-0">
             <h1 className="text-2xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
               123<br/>STUDIO
