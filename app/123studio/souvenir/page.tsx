@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InfoCard from '@/components/InfoCard';
 import AmbientBackground from '@/components/AmbientBackground';
+import { getBadgeById, type BadgeConfig } from './badges-config';
 
 const Badge3DModel = dynamic(() => import('@/components/Badge3D'), { 
   ssr: false,
   loading: () => <div className="animate-pulse text-purple-500 text-center mt-40">Loading Assets...</div>
 });
-
-const PASSWORD = 'duankaiyi';
 
 // 加入时长计时器组件
 function JoinTimer({ startDate }: { startDate: string }) {
@@ -69,69 +69,32 @@ const PlayIcon = () => (
 );
 
 export default function SouvenirPage() {
+  const searchParams = useSearchParams();
+  const badgeId = searchParams.get('id') || 'ziyue'; // 默认使用 ziyue
+  
+  const [currentBadge, setCurrentBadge] = useState<BadgeConfig | null>(null);
   const [uiVisible, setUiVisible] = useState(false);
-  const [isAutoRotating, setIsAutoRotating] = useState(true); // ✅ 新增：控制旋转状态
-  const [passwordInput, setPasswordInput] = useState('');
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [authError, setAuthError] = useState('');
-  const currentThemeColor = '#241229';
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
 
-  const LETTER_TO_ZIYUE = `
-    紫悦，很高兴你能成为工作室的第一批核心成员。
-    
-    还记得你刚来面试的时候，带着那本厚厚的手绘本，眼神里既紧张又充满光芒。这两年，看着你从一个只会画草图的新生，变成现在能独当一面的设计负责人，我真的很骄傲。
-    
-    这枚徽章不仅仅是个纪念品，它是你在这里留下的痕迹。无论未来你去哪里读研、去哪里工作，这里永远是你的起点。
-    
-    Keep creating, keep shining.
-    —— 你的技术总监 & 朋友
-  `;
-
-  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (passwordInput.trim() === PASSWORD) {
-      setIsAuthorized(true);
-      setAuthError('');
-      setPasswordInput('');
-      return;
+  // 加载勋章配置
+  useEffect(() => {
+    const badge = getBadgeById(badgeId);
+    if (badge) {
+      setCurrentBadge(badge);
+    } else {
+      // 如果找不到勋章，使用默认的 ziyue
+      const defaultBadge = getBadgeById('ziyue');
+      setCurrentBadge(defaultBadge || null);
     }
+    // 每次切换勋章时重置UI
+    setUiVisible(false);
+  }, [badgeId]);
 
-    setAuthError('密码错误，无法访问。');
-  };
-
-  if (!isAuthorized) {
+  // 如果还没加载到勋章数据，显示加载中
+  if (!currentBadge) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] px-6 text-white">
-        <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur">
-          <h1 className="text-lg font-semibold uppercase tracking-[0.4em] text-purple-200">Access Required</h1>
-          <p className="mt-3 text-sm text-purple-100/80">请输入访问密码以继续浏览 123 Studio Souvenir 页面。</p>
-          <form className="mt-6 space-y-4" onSubmit={handleUnlock}>
-            <div>
-              <label className="text-xs uppercase tracking-[0.3em] text-purple-200/90">Password</label>
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={(event) => {
-                  setPasswordInput(event.target.value);
-                  if (authError) setAuthError('');
-                }}
-                className="mt-2 w-full rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-base text-white placeholder-purple-200/40 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40"
-                placeholder="输入密码"
-                autoFocus
-              />
-            </div>
-            {authError && (
-              <p className="text-xs font-medium text-rose-300">{authError}</p>
-            )}
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:from-purple-400 hover:to-indigo-400"
-            >
-              Unlock
-            </button>
-          </form>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white">
+        <div className="animate-pulse text-purple-500">正在加载勋章信息...</div>
       </div>
     );
   }
@@ -145,14 +108,12 @@ export default function SouvenirPage() {
       {/* 3D 背景层 */}
       <div className="absolute inset-0 z-0">
         <Badge3DModel 
-          frontImg="/badges/ziyue-black.png"
-          backImg="/badges/ziyue-back.png"
-          svgPath="/badges/ziyue-shape.svg"
+          frontImg={currentBadge.frontImg}
+          backImg={currentBadge.backImg}
+          svgPath={currentBadge.svgPath}
           scale={1.2}
-          autoRotate={isAutoRotating} // ✅ 传入控制信号
-
-          themeColor={currentThemeColor}
-
+          autoRotate={isAutoRotating}
+          themeColor={currentBadge.themeColor}
           onLoadComplete={() => setUiVisible(true)} 
         />
       </div>
@@ -171,7 +132,7 @@ export default function SouvenirPage() {
             </div>
           </div>
 
-          {/* ✅ 右上角：旋转控制按钮 */}
+          {/* 右上角：旋转控制按钮 */}
           <div className="pointer-events-auto flex-shrink-0">
             <button 
               onClick={() => setIsAutoRotating(!isAutoRotating)}
@@ -186,16 +147,15 @@ export default function SouvenirPage() {
           </div>
         </div>
 
-        {/* 🔥 底部：使用新的 InfoCard 组件 */}
-        {/* 注意：InfoCard 内部自带 pointer-events-auto，所以不用担心点击问题 */}
+        {/* 底部：使用新的 InfoCard 组件 */}
         <InfoCard 
-          name="程紫月"
-          nickname="紫悦"
-          joinDate="2023-09-01 10:00:00"
-          letterContent={LETTER_TO_ZIYUE}
+          name={currentBadge.name}
+          nickname={currentBadge.nickname}
+          joinDate={currentBadge.joinDate}
+          letterContent={currentBadge.letterContent}
         >
           {/* 把计时器作为 children 传进去 */}
-          <JoinTimer startDate="2023-09-01 10:00:00" />
+          <JoinTimer startDate={currentBadge.joinDate} />
         </InfoCard>
 
       </div>
