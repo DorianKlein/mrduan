@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+// 1. 引入 Suspense
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InfoCard from '@/components/InfoCard';
@@ -68,7 +69,8 @@ const PlayIcon = () => (
   </svg>
 );
 
-export default function SouvenirPage() {
+// 2. 将原本的主页面逻辑改名为 SouvenirContent（不再是 default export）
+function SouvenirContent() {
   const searchParams = useSearchParams();
   const badgeId = searchParams.get('id') || 'ziyue'; // 默认使用 ziyue
   
@@ -160,5 +162,18 @@ export default function SouvenirPage() {
 
       </div>
     </div>
+  );
+}
+
+// 3. 创建一个新的 default export 组件，包裹 Suspense
+export default function SouvenirPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white">
+        <div className="animate-pulse text-purple-500">Loading...</div>
+      </div>
+    }>
+      <SouvenirContent />
+    </Suspense>
   );
 }
