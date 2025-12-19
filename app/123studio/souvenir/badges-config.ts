@@ -101,14 +101,7 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/ziyue-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      紫悦，很高兴你能成为工作室的第一批核心成员。
       
-      还记得你刚来面试的时候，带着那本厚厚的手绘本，眼神里既紧张又充满光芒。这两年，看着你从一个只会画草图的新生，变成现在能独当一面的设计负责人，我真的很骄傲。
-      
-      这枚徽章不仅仅是个纪念品，它是你在这里留下的痕迹。无论未来你去哪里读研、去哪里工作，这里永远是你的起点。
-      
-      Keep creating, keep shining.
-      —— 你的技术总监 & 朋友
     `,
   },
   {
