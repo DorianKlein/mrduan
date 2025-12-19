@@ -28,7 +28,7 @@ export const badgesConfig: BadgeConfig[] = [
   },
   {
     id: 'wangzai7777',
-    name: '赵新旺',
+    name: '赵心旺',
     nickname: '旺仔',
     joinDate: '2024-08-08 00:00:00',
     frontImg: '/badges/wangzai.png',
@@ -132,7 +132,7 @@ export const badgesConfig: BadgeConfig[] = [
   },
   {
     id: 'kevin123',
-    name: '英凯哥',
+    name: '英凯歌',
     nickname: 'Kevin',
     joinDate: '2025-09-01 00:00:00',
     frontImg: '/badges/kevin.png',
