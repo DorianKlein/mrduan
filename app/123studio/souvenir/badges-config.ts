@@ -14,7 +14,7 @@ export interface BadgeConfig {
 // 15个勋章配置
 export const badgesConfig: BadgeConfig[] = [
   {
-    id: 'long0617',
+    id: 'MVP',
     name: '工作室MVP',
     nickname: '龙哥',
     joinDate: '2024-08-08 00:00:00',
@@ -27,7 +27,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'wangzai7777',
+    id: '639841',
     name: '赵心旺',
     nickname: '旺仔',
     joinDate: '2024-08-08 00:00:00',
@@ -40,7 +40,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'xiongbao123',
+    id: '512784',
     name: '熊芮琪',
     nickname: '熊宝',
     joinDate: '2024-11-13 00:00:00',
@@ -53,7 +53,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'shanze123',
+    id: '924356',
     name: '崔芳泽',
     nickname: '山泽',
     joinDate: '2024-11-15 00:00:00',
@@ -66,7 +66,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'yaozi123',
+    id: '768231',
     name: '关璐瑶',
     nickname: '瑶子',
     joinDate: '2024-11-15 00:00:00',
@@ -79,7 +79,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'dabing123',
+    id: '453897',
     name: '夏颖悦',
     nickname: '大饼',
     joinDate: '2024-11-15 00:00:00',
@@ -92,7 +92,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'iah0921',
+    id: '291564',
     name: '程紫月',
     nickname: '紫悦',
     joinDate: '2024-12-01 00:00:00',
@@ -105,7 +105,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'erchen123',
+    id: '837621',
     name: '梁晨',
     nickname: '二晨',
     joinDate: '2025-02-16 00:00:00',
@@ -118,7 +118,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'xiaojiu123',
+    id: '674529',
     name: '郭雨彤',
     nickname: '小玖',
     joinDate: '2025-03-23 00:00:00',
@@ -131,7 +131,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'kevin123',
+    id: '528937',
     name: '英凯歌',
     nickname: 'Kevin',
     joinDate: '2025-09-01 00:00:00',
@@ -144,7 +144,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'goubao0908',
+    id: '419276',
     name: '赵圆圆',
     nickname: '老狗',
     joinDate: '2025-11-01 00:00:00',
@@ -157,7 +157,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'bread123',
+    id: '786354',
     name: '陈可欣',
     nickname: '面包',
     joinDate: '2025-11-05 00:00:00',
@@ -170,7 +170,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'guobaorou123',
+    id: '345798',
     name: '陈思洁',
     nickname: '锅包肉',
     joinDate: '2025-11-05 00:00:00',
@@ -183,7 +183,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'shiliu123',
+    id: '912485',
     name: '李宇涵',
     nickname: '石榴',
     joinDate: '2025-11-05 00:00:00',
@@ -196,7 +196,7 @@ export const badgesConfig: BadgeConfig[] = [
     `,
   },
   {
-    id: 'xiaomie123',
+    id: '563147',
     name: '刘瑞馨',
     nickname: '小咩',
     joinDate: '2025-11-05 00:00:00',
