@@ -487,7 +487,7 @@ function BadgeContent(props: BadgeProps) {
   // 检测移动设备
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   // 移动端往上移动更多，桌面端保持原位或少量移动
-  const yPosition = isMobile ? 1.5 : 0;
+  const yPosition = isMobile ? 1.0 : 0;
 
   const currentTheme = themes.neon;
 
