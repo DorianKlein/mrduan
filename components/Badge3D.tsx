@@ -484,6 +484,11 @@ function BadgeContent(props: BadgeProps) {
   const [showSolid, setShowSolid] = useState(false); // 控制实体显示
   const [showParticles, setShowParticles] = useState(true);
 
+  // 检测移动设备
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // 移动端往上移动更多，桌面端保持原位或少量移动
+  const yPosition = isMobile ? 1.5 : 0;
+
   const currentTheme = themes.neon;
 
   return (
@@ -512,13 +517,12 @@ function BadgeContent(props: BadgeProps) {
         rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
       >
         <group 
-          position={[0, 1.0, 0]}
           onPointerDown={() => setIsDragging(true)} 
           onPointerUp={() => setIsDragging(false)}
           onPointerLeave={() => setIsDragging(false)}
         >
           <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-            <Center>
+            <Center position={[0, yPosition, 0]}>
               <AutoRotator isDragging={isDragging} autoRotate={props.autoRotate}>
                 
                 {showParticles && (
