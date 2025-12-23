@@ -512,6 +512,7 @@ function BadgeContent(props: BadgeProps) {
         rotation={[0, 0, 0]} polar={[0, 0]} azimuth={[-Infinity, Infinity]} 
       >
         <group 
+          position={[0, 1.0, 0]}
           onPointerDown={() => setIsDragging(true)} 
           onPointerUp={() => setIsDragging(false)}
           onPointerLeave={() => setIsDragging(false)}
