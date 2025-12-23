@@ -72,17 +72,26 @@ const PlayIcon = () => (
 // 2. 将原本的主页面逻辑改名为 SouvenirContent（不再是 default export）
 function SouvenirContent() {
   const searchParams = useSearchParams();
-  const badgeId = searchParams.get('id') || 'ziyue'; // 默认使用 ziyue
+  const urlBadgeId = searchParams.get('id');
   
+  const [inputBadgeId, setInputBadgeId] = useState('');
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null); // 用户选择的徽章ID
+  const [showInput, setShowInput] = useState(!urlBadgeId);
   const [currentBadge, setCurrentBadge] = useState<BadgeConfig | null>(null);
   const [uiVisible, setUiVisible] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [error, setError] = useState('');
 
   // 加载勋章配置
   useEffect(() => {
+    // 优先使用 URL 参数，其次使用用户选择的ID
+    const badgeId = urlBadgeId || selectedBadgeId;
+    if (!badgeId) return;
+    
     const badge = getBadgeById(badgeId);
     if (badge) {
       setCurrentBadge(badge);
+      setError('');
     } else {
       // 如果找不到勋章，使用默认的 ziyue
       const defaultBadge = getBadgeById('ziyue');
@@ -90,13 +99,78 @@ function SouvenirContent() {
     }
     // 每次切换勋章时重置UI
     setUiVisible(false);
-  }, [badgeId]);
+  }, [urlBadgeId, selectedBadgeId]);
+
+  // 处理ID提交
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedId = inputBadgeId.trim();
+    const badge = getBadgeById(trimmedId);
+    if (badge) {
+      setSelectedBadgeId(trimmedId); // 保存用户选择的ID
+      setShowInput(false);
+      setError('');
+    } else {
+      setError('未找到该徽章，请检查ID是否正确');
+    }
+  };
+
+  // 如果需要显示输入框
+  if (showInput) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white px-4">
+        <div className="absolute inset-0 z-0">
+          <AmbientBackground />
+        </div>
+        <div className="relative z-10 w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-2xl mb-4">
+              123 STUDIO
+            </h1>
+            <p className="text-purple-300 text-sm">请输ID查看您的纪念徽章</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={inputBadgeId}
+                onChange={(e) => setInputBadgeId(e.target.value)}
+                placeholder="输入徽章ID"
+                className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg backdrop-blur-md text-white placeholder-purple-300/50 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+                style={{ fontSize: '16px' }}
+                autoFocus
+              />
+            </div>
+            
+            {error && (
+              <div className="text-red-400 text-sm text-center animate-pulse">
+                {error}
+              </div>
+            )}
+            
+            <button
+              type="submit"
+              className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 active:scale-95"
+              style={{ fontSize: '16px' }}
+            >
+              查看徽章
+            </button>
+          </form>
+          
+          <div className="mt-6 text-center text-xs text-purple-300/50">
+            提示：id在盒子背面
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 如果还没加载到勋章数据，显示加载中
   if (!currentBadge) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white">
-        <div className="animate-pulse text-purple-500">正在加载勋章信息...</div>
+        <div className="animate-pulse text-purple-500">正在加载...</div>
       </div>
     );
   }
@@ -148,6 +222,22 @@ function SouvenirContent() {
             </button>
           </div>
         </div>
+
+        {/* 左上角返回按钮（仅在非URL模式下显示） */}
+        {!urlBadgeId && (
+          <div className="absolute top-3 left-3 md:top-8 md:left-4 pointer-events-auto">
+            <button
+              onClick={() => {
+                setShowInput(true);
+                setSelectedBadgeId(null);
+                setInputBadgeId('');
+              }}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all text-white/80 hover:text-white text-xs"
+            >
+              ← 返回选择
+            </button>
+          </div>
+        )}
 
         {/* 底部：使用新的 InfoCard 组件 */}
         <InfoCard 
