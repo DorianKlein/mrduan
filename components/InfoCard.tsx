@@ -31,8 +31,7 @@ export default function InfoCard({ name, nickname, letterContent, children }: In
       className={`
         pointer-events-auto 
         fixed bottom-0 left-0 right-0 w-full z-50
-        md:absolute md:bottom-8 md:w-[800px] md:left-1/2 md:-translate-x-1/2 md:rounded-2xl
-        mx-0 md:mx-auto
+        md:fixed md:bottom-8 md:w-[800px] md:left-1/2 md:-translate-x-1/2 md:rounded-2xl
         
         bg-black/60 backdrop-blur-xl border-t md:border border-white/10
         transition-all duration-500 ease-in-out
