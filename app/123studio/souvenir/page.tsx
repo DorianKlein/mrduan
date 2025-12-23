@@ -92,13 +92,13 @@ function SouvenirContent() {
     if (badge) {
       setCurrentBadge(badge);
       setError('');
+      setUiVisible(false);
     } else {
-      // 如果找不到勋章，使用默认的 ziyue
-      const defaultBadge = getBadgeById('ziyue');
-      setCurrentBadge(defaultBadge || null);
+      // 如果找不到勋章，显示错误并返回输入页面
+      setError('未找到该徽章，请检查ID是否正确');
+      setShowInput(true);
+      setCurrentBadge(null);
     }
-    // 每次切换勋章时重置UI
-    setUiVisible(false);
   }, [urlBadgeId, selectedBadgeId]);
 
   // 处理ID提交
