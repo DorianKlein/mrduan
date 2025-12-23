@@ -6,11 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InfoCard from '@/components/InfoCard';
 import AmbientBackground from '@/components/AmbientBackground';
+import ParticleLoading from '@/components/ParticleLoading';
 import { getBadgeById, type BadgeConfig } from './badges-config';
 
 const Badge3DModel = dynamic(() => import('@/components/Badge3D'), { 
   ssr: false,
-  loading: () => <div className="animate-pulse text-purple-500 text-center mt-40">Loading Assets...</div>
+  loading: () => <ParticleLoading />
 });
 
 // 加入时长计时器组件
@@ -168,11 +169,7 @@ function SouvenirContent() {
 
   // 如果还没加载到勋章数据，显示加载中
   if (!currentBadge) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white">
-        <div className="animate-pulse text-purple-500">正在加载...</div>
-      </div>
-    );
+    return <ParticleLoading />;
   }
 
   return (
@@ -224,7 +221,7 @@ function SouvenirContent() {
         </div>
 
         {/* 左上角返回按钮（仅在非URL模式下显示） */}
-        {!urlBadgeId && (
+        {/* {!urlBadgeId && (
           <div className="absolute top-3 left-3 md:top-8 md:left-4 pointer-events-auto">
             <button
               onClick={() => {
@@ -237,7 +234,7 @@ function SouvenirContent() {
               ← 返回选择
             </button>
           </div>
-        )}
+        )} */}
 
         {/* 底部：使用新的 InfoCard 组件 */}
         <InfoCard 
@@ -258,11 +255,7 @@ function SouvenirContent() {
 // 3. 创建一个新的 default export 组件，包裹 Suspense
 export default function SouvenirPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0933] via-[#05010c] to-[#0a1229] text-white">
-        <div className="animate-pulse text-purple-500">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={<ParticleLoading />}>
       <SouvenirContent />
     </Suspense>
   );
