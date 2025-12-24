@@ -262,12 +262,14 @@ function BadgeModel({
     const rawW = rawBox.max.x - rawBox.min.x;
     const rawH = rawBox.max.y - rawBox.min.y;
 
-    const k = 5 / rawW;
+    // 固定尺寸：所有徽章统一使用2048x2048的空间（与图片尺寸一致）
+    const targetSize = 2048;
+    const k = 5 / targetSize;
     
     return { 
       shapes: paths, 
-      width: rawW,   
-      height: rawH, 
+      width: targetSize,   // 固定为2048
+      height: targetSize,  // 固定为2048
       midX: (rawBox.max.x + rawBox.min.x) / 2, 
       midY: (rawBox.max.y + rawBox.min.y) / 2,
       scaleRatio: k
@@ -330,7 +332,7 @@ function BadgeModel({
           />
         </mesh>
         
-        {/* 正面贴图 (保持不变) */}
+        {/* 正面贴图 - 使用固定2048x2048尺寸，与图片一致 */}
         <mesh position={[midX, midY, 1]} renderOrder={1}>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
@@ -343,7 +345,7 @@ function BadgeModel({
           />
         </mesh>
         
-        {/* 背面贴图 (保持不变) */}
+        {/* 背面贴图 - 使用固定2048x2048尺寸，与图片一致 */}
         <mesh position={[midX, midY, -0.01]} rotation={[0, Math.PI, 0]} renderOrder={1} castShadow receiveShadow>
           <planeGeometry args={[width, height]} />
           <meshStandardMaterial
