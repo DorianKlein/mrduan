@@ -23,7 +23,12 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/yilong-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      汉末建安年间，孙策势单力薄，为了闯出一片天地，选择暂时离开故地，去前线冲杀、向袁术借兵起家；而周瑜则留在后方，修缮军备，囤积粮草。两人为了同一个目标，暂时兵分两路，各自在不同的战场上修炼。直到孙策打回江东，行至历阳渡口，周瑜带着完善的船队和物资前来赴约，两军汇合那一刻，孙策大喜过望，对周瑜说道：“吾得卿，谐也！”双剑合璧之时，便是东吴基业奠定之始。
+      汉末建安年间，孙策势单力薄，为了闯出一片天地，\
+      选择暂时离开故地，去前线冲杀、向袁术借兵起家；\
+      而周瑜则留在后方，修缮军备，囤积粮草。两人为了同一个目标，\
+      暂时兵分两路，各自在不同的战场上修炼。直到孙策打回江东，\
+      行至历阳渡口，周瑜带着完善的船队和物资前来赴约，两军汇合那一刻，\
+      孙策大喜过望，对周瑜说道：“吾得卿，谐也！”双剑合璧之时，便是东吴基业奠定之始。
       我的意思是，我终于要来了，也不想说太多煽情的话，不如就用这个故事祝我们未来势如破竹，也正如里面的一句话，吾得师，谐也！
     `,
   },
@@ -102,7 +107,17 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/ziyue-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 小紫悦：
+      这是独属于你的20%。
+      我理解你疑惑，为什么加入工作室一年，邵老师和我一下都这么关注你？\
+      其实每次组会之后，他和我都会再开个小会，你周总结的内容和质量我们每次都会提及，\
+      虽然跟你没有太多的交流，但你的态度和进步我们都看在眼里。\
+      如果不是因为我不在学校，咱俩可能早就很熟了。\
+      也很感谢邵老师能把这个工作交给你，让我能早些熟悉你。
+      本学期接近尾声，但我没有对你明年更多的要求，\
+      早在一次组会的时候我就说过，你是一个目标明确的人，\
+      前进的路上保持这种状态就好。我会尽我所能帮助你成为更好的自己。
+      每天都要开心是我对你今年最大的祝愿！
     `,
   },
   {
@@ -154,6 +169,7 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/laogou-shape.svg',
     themeColor: '#241229',
     letterContent: `
+      To 狗宝：
       
     `,
   },
@@ -167,7 +183,8 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/mianbao-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 面包：
+      再次欢迎你加入123工作室，明年也要继续加油哦！
     `,
   },
   {
@@ -180,7 +197,8 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/guobaorou-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 锅包肉：
+      再次欢迎你加入123工作室，明年也要继续加油哦！
     `,
   },
   {
@@ -193,7 +211,8 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/shiliu-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 石榴：
+      再次欢迎你加入123工作室，明年也要继续加油哦！
     `,
   },
   {
@@ -206,7 +225,8 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/xiaomie-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 小咩：
+      再次欢迎你加入123工作室，明年也要继续加油哦！
     `,
   },
   
