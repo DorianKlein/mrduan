@@ -74,8 +74,15 @@ export default function InfoCard({ name, nickname, letterContent, children }: In
           {/* 信件区域 */}
           <div className="relative pb-4">
              <p className="text-[10px] md:text-xs text-purple-400 font-mono mb-3">A MESSAGE FROM DIRECTOR</p>
-             <article className="text-gray-300 leading-relaxed font-serif text-sm md:text-lg whitespace-pre-line">
-                {letterContent}
+             <article className="text-gray-300 leading-relaxed text-sm md:text-lg" style={{ fontFamily: 'Microsoft YaHei, 微软雅黑, sans-serif' }}>
+                {letterContent.split('\n').map((paragraph, index) => {
+                  const trimmed = paragraph.trim();
+                  return trimmed ? (
+                    <p key={index} style={{ textIndent: '2em', marginBottom: '0.5em' }}>
+                      {trimmed}
+                    </p>
+                  ) : null;
+                })}
              </article>
           </div>
 
