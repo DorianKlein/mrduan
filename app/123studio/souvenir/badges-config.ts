@@ -42,7 +42,10 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/wangzai-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      作为工作室的元老，你的稳重和踏实一直是闪闪发光的。\
+      但工作和大学生活可能不太一样，有时候需要多一些主动和积极，\
+      也需要一些灵活变化的处理。
+      希望你能继续保持你的优点，同时也能在新的环境中不断成长和突破自己。加油！\
     `,
   },
   {
@@ -156,7 +159,9 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/Kevin-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To Kevin：
+      再次欢迎你加入123工作室，今年看到了你的成长，\
+      也感受到了你无限的可能，下学期也要继续加油哦！
     `,
   },
   {
@@ -170,7 +175,12 @@ export const badgesConfig: BadgeConfig[] = [
     themeColor: '#241229',
     letterContent: `
       To 狗宝：
-      
+      你是我们能量非常非常非常高的小课代表！\
+      积极认真负责是你对工作的完美态度。\
+      即使有一些小拖延但也能理解，因为我大学的时候比你还严重哈哈哈。\
+      但这学期相信你的进步是大家可见的，\
+      大家见不到我看见了，我说你进步了你就是进步了，别怀疑！
+      接下来的生活、学习、工作都有我在你后面，安心往前走吧。
     `,
   },
   {
@@ -184,7 +194,7 @@ export const badgesConfig: BadgeConfig[] = [
     themeColor: '#241229',
     letterContent: `
       To 面包：
-      再次欢迎你加入123工作室，明年也要继续加油哦！
+      再次欢迎你加入123工作室，下学期也要继续加油哦！
     `,
   },
   {
@@ -198,7 +208,7 @@ export const badgesConfig: BadgeConfig[] = [
     themeColor: '#241229',
     letterContent: `
       To 锅包肉：
-      再次欢迎你加入123工作室，明年也要继续加油哦！
+      再次欢迎你加入123工作室，下学期也要继续加油哦！
     `,
   },
   {
@@ -212,7 +222,7 @@ export const badgesConfig: BadgeConfig[] = [
     themeColor: '#241229',
     letterContent: `
       To 石榴：
-      再次欢迎你加入123工作室，明年也要继续加油哦！
+      再次欢迎你加入123工作室，下学期也要继续加油哦！
     `,
   },
   {
@@ -226,7 +236,7 @@ export const badgesConfig: BadgeConfig[] = [
     themeColor: '#241229',
     letterContent: `
       To 小咩：
-      再次欢迎你加入123工作室，明年也要继续加油哦！
+      再次欢迎你加入123工作室，下学期也要继续加油哦！
     `,
   },
   
