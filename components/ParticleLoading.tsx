@@ -134,7 +134,7 @@ export default function ParticleLoading() {
           </div>
         </div>
         <div className="text-purple-300 text-lg font-medium mb-2">
-          加载中
+          师兄正在努力连通网线...
         </div>
         <div className="flex gap-1 justify-center">
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
