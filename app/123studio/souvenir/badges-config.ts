@@ -42,10 +42,11 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/wangzai-shape.svg',
     themeColor: '#241229',
     letterContent: `
+      To 旺仔：
       作为工作室的元老，你的稳重和踏实一直是闪闪发光的。\
       但工作和大学生活可能不太一样，有时候需要多一些主动和积极，\
       也需要一些灵活变化的处理。
-      希望你能继续保持你的优点，同时也能在新的环境中不断成长和突破自己。加油！\
+      希望你能继续保持你的优点，同时也能在新的环境中不断成长和突破自己。加油！
     `,
   },
   {
@@ -58,7 +59,11 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/xiongbao-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 熊宝：
+      给你写点儿啥呢？恭喜你圆满完成了本学期负责人的工作？\
+      还是感谢你这段时间对工作室的付出和努力？\
+      算了，祝你天天开心吧！
+      喝酒不吊水，熬夜不生病。
     `,
   },
   {
@@ -71,7 +76,11 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/shanze-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 山泽：
+      山泽同学，作为工作室第一批成员，\
+      你有着明确的目标和对AI的探索热情，\
+      这让我对你的未来充满期待。\
+      期待你能成为心目中的自己，加油！
     `,
   },
   {
@@ -84,7 +93,13 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/yaozi-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 瑶子：
+      一个非常具有创造力的同学，\
+      脑袋里总有一些新奇的想法和点子。\
+      希望你能继续保持这种创新精神，\
+      在工作室里发挥你的特长，\
+      带来更多有趣的作品。
+      期待看到你不断成长和进步！
     `,
   },
   {
@@ -97,7 +112,12 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/dabing-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 大饼：
+      作为工作室的特效担当，\
+      本学期看到了你在特效制作方面的成长和进步。\
+      希望你能继续保持这种热情和动力，\
+      在特效的学习路上不断前进。\
+      加油！
     `,
   },
   {
@@ -119,8 +139,8 @@ export const badgesConfig: BadgeConfig[] = [
       也很感谢邵老师能把这个工作交给你，让我能早些熟悉你。
       本学期接近尾声，但我没有对你明年更多的要求，\
       早在一次组会的时候我就说过，你是一个目标明确的人，\
-      前进的路上保持这种状态就好。我会尽我所能帮助你成为更好的自己。
-      每天都要开心是我对你今年最大的祝愿！
+      前进的路上保持这种状态就好，我会站在你身后。
+      每天都要开心是我对你最大的祝愿！
     `,
   },
   {
@@ -133,7 +153,12 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/erchen-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 二晨：
+      刚来工作室的那会儿，\
+      你跟我说会一点儿建模，\
+      实习之前突飞猛进，现在更是在实习单位参与了完整的项目制作。\
+      你真的已经很厉害了，不要低估自己的能力，\
+      我会尽我所能给你提供帮助。
     `,
   },
   {
@@ -146,7 +171,9 @@ export const badgesConfig: BadgeConfig[] = [
     svgPath: '/badges/xiaojiu-shape.svg',
     themeColor: '#241229',
     letterContent: `
-      
+      To 小玖：
+      师姐！我们很快就有机会一起工作了，本学期辛苦了！
+      期待我们在未来的合作能碰撞出更多花火！
     `,
   },
   {
