@@ -301,18 +301,36 @@ const tracks: Track[] = [
 
 export default function Mix2025() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
   const containerRef = useRef(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  // 自动播放音乐
+  // 进入页面并开始播放
+  const handleEnter = () => {
+    setShowWelcome(false);
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.log("播放失败:", err);
+        setIsPlaying(false);
+      });
+    }
+  };
+  
+  // 控制音乐播放/暂停
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.play().catch(err => {
-        console.log("自动播放失败，需要用户交互:", err);
-      });
-      setIsPlaying(true);
+      if (isPlaying) {
+        audioRef.current.play().catch(err => {
+          console.log("播放失败:", err);
+          setIsPlaying(false);
+        });
+      } else {
+        audioRef.current.pause();
+      }
     }
-  }, []);
+  }, [isPlaying]);
   
   // 滚动动效钩子
   const { scrollYProgress } = useScroll({
@@ -325,6 +343,43 @@ export default function Mix2025() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-black text-white font-sans selection:bg-pink-500 selection:text-white pb-32">
+      
+      {/* 欢迎屏幕 */}
+      {showWelcome && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center cursor-pointer"
+          onClick={handleEnter}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-center space-y-8"
+          >
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-500 to-violet-600 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(236,72,153,0.5)] animate-pulse">
+              <Play size={40} fill="white" className="text-white ml-1" />
+            </div>
+            <div>
+              <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-600">
+                2025
+              </h1>
+              <p className="text-neutral-400 text-lg md:text-xl font-light tracking-wider">
+                点击任意位置开始播放
+              </p>
+            </div>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-neutral-600 text-sm"
+            >
+              ↓ 点击进入 ↓
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
       
       {/* 背景音乐 */}
       <audio ref={audioRef} src="/2025pictures/music.mp3" loop />
@@ -501,14 +556,22 @@ export default function Mix2025() {
           </div>
           
           <div className="flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
-              <Rewind size={24} className="text-neutral-500 hover:text-white cursor-pointer transition-colors" />
+              <Rewind size={24} className="text-neutral-500 hover:text-white cursor-pointer transition-colors" onClick={() => {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
+                }
+              }} />
               <button 
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="w-14 h-14 bg-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
               >
                   {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
               </button>
-              <FastForward size={24} className="text-neutral-500 hover:text-white cursor-pointer transition-colors" />
+              <FastForward size={24} className="text-neutral-500 hover:text-white cursor-pointer transition-colors" onClick={() => {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = Math.min(audioRef.current.duration, audioRef.current.currentTime + 10);
+                }
+              }} />
           </div>
           
           <div className="hidden md:flex items-center space-x-3">
