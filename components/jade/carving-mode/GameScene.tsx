@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, Float, Text, Center} from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Environment, Float, Text, Center, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useHandTracking } from '@/components/jade/shared/useHandTracking';
 import CameraPreview from '@/components/jade/shared/CameraPreview';
@@ -184,14 +184,77 @@ function Level4_Final({
   return <primitive object={clone} ref={groupRef} />;
 }
 
+// ==========================================================
+// 组件 5: 手持工具 - 跟随手势位置移动
+// ==========================================================
+function HandTool({ 
+  stage, 
+  fingertip 
+}: { 
+  stage: GameStage, 
+  fingertip: { x: number, y: number } 
+}) {
+  const { viewport, camera } = useThree();
+  const spriteRef = useRef<THREE.Sprite>(null);
+  
+  // 根据阶段加载对应的工具纹理
+  const getToolTexturePath = () => {
+    switch(stage) {
+      case 'STAGE_1_PEELING': return '/models/jade/tools/bursh.png';
+      case 'STAGE_2_CUTTING': return '/models/jade/tools/hammer.png';
+      case 'STAGE_3_CARVING': return '/models/jade/tools/carving_knife.png';
+      default: return null;
+    }
+  };
+
+  const texturePath = getToolTexturePath();
+  const texture = texturePath ? useTexture(texturePath) : null;
+
+  useFrame(() => {
+    if (!spriteRef.current || !texture) return;
+    
+    // 将归一化坐标 (0-1) 转换为 3D 场景坐标
+    // fingertip.x: 0~1 (左到右), fingertip.y: 0~1 (上到下)
+    // 需要映射到屏幕空间，然后投影到 3D 空间
+    
+    // 标准化设备坐标 (NDC): -1 到 1
+    const ndcX = -((fingertip.x * 2) - 1);    // 0~1 -> 1~-1 (镜像翻转X轴)
+    const ndcY = -(fingertip.y * 2) + 1;      // 0~1 -> 1~-1 (Y轴反转)
+    
+    // 转换为世界坐标 (在相机前方固定距离)
+    const distance = 1.5; // 工具距离相机的距离
+    const vector = new THREE.Vector3(ndcX, ndcY, 0.5);
+    vector.unproject(camera);
+    
+    const dir = vector.sub(camera.position).normalize();
+    const targetPos = camera.position.clone().add(dir.multiplyScalar(distance));
+    
+    // 平滑跟随
+    spriteRef.current.position.lerp(targetPos, 0.3);
+  });
+
+  if (!texture) return null;
+
+  return (
+    <sprite ref={spriteRef} scale={[0.2, 0.2, 1]}>
+      <spriteMaterial map={texture} transparent depthTest={false} />
+    </sprite>
+  );
+}
 
 // ==========================================================
 // 主场景逻辑 (🔥 核心修改区域)
 // ==========================================================
 export default function GameScene() {
-  const { cameraStream, gesture, velocity, rotation, explosion } = useHandTracking();
+  const { cameraStream, gesture, velocity, rotation, explosion, fingertip } = useHandTracking();
   const [stage, setStage] = useState<GameStage>('STAGE_1_PEELING');
   const [progress, setProgress] = useState(0);
+
+  // 重置游戏到初始状态
+  const handleReset = () => {
+    setStage('STAGE_1_PEELING');
+    setProgress(0);
+  };
 
   // 1. 创建 Refs 来存储最新数据，防止闭包陷阱
   const gestureRef = useRef(gesture);
@@ -260,6 +323,14 @@ export default function GameScene() {
 
   return (
     <div className="h-full w-full bg-neutral-900 relative">
+      {/* 重置按钮 */}
+      <button
+        onClick={handleReset}
+        className="absolute top-6 right-6 z-20 px-5 py-2.5 bg-neutral-800/80 backdrop-blur-sm border-2 border-emerald-500/50 hover:border-emerald-400 hover:bg-neutral-800 text-emerald-400 hover:text-emerald-300 rounded-lg font-mono font-semibold shadow-lg shadow-emerald-500/20 transition-all duration-200 active:scale-95 pointer-events-auto"
+      >
+        🔄 重制
+      </button>
+
       {/* UI 面板 */}
       <div className="absolute top-20 left-10 text-white z-10 font-mono text-sm pointer-events-none">
          <h1 className="text-2xl font-bold mb-2 text-emerald-400">当前工艺: {getStageName(stage)}</h1>
@@ -314,6 +385,11 @@ export default function GameScene() {
           </group>
         </Float>
 
+        {/* 手持工具 - 跟随手势 */}
+        {stage !== 'STAGE_4_VIEWING' && (
+          <HandTool stage={stage} fingertip={fingertip} />
+        )}
+
         <OrbitControls 
           makeDefault 
           target={[0, 0.2, 0]} 
@@ -341,3 +417,8 @@ useGLTF.preload('/models/jade/carving/level1_skin.glb');
 useGLTF.preload('/models/jade/carving/level2_rock.glb');
 useGLTF.preload('/models/jade/carving/level3_rough.glb');
 useGLTF.preload('/models/jade/carving/level4_jade.glb');
+
+// 预加载工具纹理
+useTexture.preload('/models/jade/tools/bursh.png');
+useTexture.preload('/models/jade/tools/hammer.png');
+useTexture.preload('/models/jade/tools/carving_knife.png');
