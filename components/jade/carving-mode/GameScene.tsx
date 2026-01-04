@@ -352,7 +352,7 @@ export default function GameScene() {
       <Canvas camera={{ position: [0, 0, 2], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-        <Environment preset="warehouse" />
+        <Environment files="/empty_warehouse_01_1k.hdr" />
 
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
           <group rotation={[0, Math.PI / 4, 0]}>
