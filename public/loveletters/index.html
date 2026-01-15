@@ -151,8 +151,8 @@
 
         // === 2. URL 参数获取 ===
         const params = new URLSearchParams(window.location.search);
-        const toName = urlParams.get('to') || 'My Fav Person';
-        const mainMsg = urlParams.get('msg') || 'Just a reminder: You are amazing! 👋';
+        const toName = params.get('to') || 'My Fav Person';
+        const mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
 
         // === 3. 疯狂弹窗逻辑 ===
         let count = 0;
