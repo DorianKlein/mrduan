@@ -155,87 +155,86 @@
         // 如果没有任何 URL 参数，跳转到 duan_lab
         if (!params.toString()) {
             window.location.href = 'https://www.mrduan.me/duan_lab';
-            return;
-        }
-        
-        const toName = params.get('to') || 'My Fav Person';
-        const mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
-        
-        // 读取参数后，清除地址栏中的 URL 参数
-        history.replaceState(null, '', window.location.pathname);
+        } else {
+            const toName = params.get('to') || 'My Fav Person';
+            const mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
+            
+            // 读取参数后，清除地址栏中的 URL 参数
+            history.replaceState(null, '', window.location.pathname);
 
-        // === 3. 疯狂弹窗逻辑 ===
-        let count = 0;
-        const totalPopups = 50; // 数量加到 50 个！
-        const screenW = window.innerWidth;
-        const screenH = window.innerHeight;
+            // === 3. 疯狂弹窗逻辑 ===
+            let count = 0;
+            const totalPopups = 50; // 数量加到 50 个！
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
 
-        function createPopup() {
-            if (count >= totalPopups) {
-                setTimeout(showFinalCard, 500);
-                return;
+            function createPopup() {
+                if (count >= totalPopups) {
+                    setTimeout(showFinalCard, 500);
+                    return;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'window';
+                
+                // 随机配色
+                const palette = palettes[Math.floor(Math.random() * palettes.length)];
+                div.style.backgroundColor = palette.bg;
+                div.style.color = palette.text;
+                
+                // 随机旋转角度 (-10度 到 10度)，增加活泼感
+                const rotate = (Math.random() * 20 - 10).toFixed(2);
+                div.style.setProperty('--rotation', rotate + 'deg');
+
+                // 随机位置 (允许稍微重叠，制造堆积感)
+                const x = Math.random() * (screenW - 220); // 减去宽度防止超出去
+                const y = Math.random() * (screenH - 150);
+                div.style.left = x + "px";
+                div.style.top = y + "px";
+                div.style.zIndex = 100 + count;
+
+                // 随机内容
+                const txt = wishes[Math.floor(Math.random() * wishes.length)];
+                const emj = emojis[Math.floor(Math.random() * emojis.length)];
+
+                div.innerHTML = `
+                    <div class="window-header">
+                        <div class="close-dot"></div>
+                    </div>
+                    <div class="window-body">
+                        <div class="emoji">${emj}</div>
+                        <div class="text">${txt}</div>
+                    </div>
+                `;
+
+                document.body.appendChild(div);
+
+                // 触发动画
+                requestAnimationFrame(() => {
+                    div.classList.add('show');
+                });
+
+                count++;
+                
+                // === 极速模式 ===
+                // 初始很快，中间极快，最后稍微慢一点点收尾
+                // 随机间隔 50ms 到 150ms，像机关枪一样弹
+                let nextTime = Math.random() * 100 + 50; 
+                setTimeout(createPopup, nextTime);
             }
 
-            const div = document.createElement('div');
-            div.className = 'window';
-            
-            // 随机配色
-            const palette = palettes[Math.floor(Math.random() * palettes.length)];
-            div.style.backgroundColor = palette.bg;
-            div.style.color = palette.text;
-            
-            // 随机旋转角度 (-10度 到 10度)，增加活泼感
-            const rotate = (Math.random() * 20 - 10).toFixed(2);
-            div.style.setProperty('--rotation', rotate + 'deg');
+            function showFinalCard() {
+                const card = document.getElementById('final-card');
+                document.getElementById('card-to').innerText = `To: ${toName}`;
+                document.getElementById('card-msg').innerText = mainMsg;
+                card.style.display = 'block';
+            }
 
-            // 随机位置 (允许稍微重叠，制造堆积感)
-            const x = Math.random() * (screenW - 220); // 减去宽度防止超出去
-            const y = Math.random() * (screenH - 150);
-            div.style.left = x + "px";
-            div.style.top = y + "px";
-            div.style.zIndex = 100 + count;
-
-            // 随机内容
-            const txt = wishes[Math.floor(Math.random() * wishes.length)];
-            const emj = emojis[Math.floor(Math.random() * emojis.length)];
-
-            div.innerHTML = `
-                <div class="window-header">
-                    <div class="close-dot"></div>
-                </div>
-                <div class="window-body">
-                    <div class="emoji">${emj}</div>
-                    <div class="text">${txt}</div>
-                </div>
-            `;
-
-            document.body.appendChild(div);
-
-            // 触发动画
-            requestAnimationFrame(() => {
-                div.classList.add('show');
-            });
-
-            count++;
-            
-            // === 极速模式 ===
-            // 初始很快，中间极快，最后稍微慢一点点收尾
-            // 随机间隔 50ms 到 150ms，像机关枪一样弹
-            let nextTime = Math.random() * 100 + 50; 
-            setTimeout(createPopup, nextTime);
+            // === 启动 ===
+            window.onload = function() {
+                setTimeout(createPopup, 300); // 打开网页 0.3秒后直接开始
+            };
         }
-
-        function showFinalCard() {
-            const card = document.getElementById('final-card');
-            document.getElementById('card-to').innerText = `To: ${toName}`;
-            document.getElementById('card-msg').innerText = mainMsg;
-            card.style.display = 'block';
-        }
-
-        // === 启动 ===
-        window.onload = function() {
-            setTimeout(createPopup, 300); // 打开网页 0.3秒后直接开始
-        };
 
     </script>
 </body>
