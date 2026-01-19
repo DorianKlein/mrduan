@@ -151,8 +151,18 @@
 
         // === 2. URL 参数获取 ===
         const params = new URLSearchParams(window.location.search);
+        
+        // 如果没有任何 URL 参数，跳转到 duan_lab
+        if (!params.toString()) {
+            window.location.href = '/duan_lab/index.html';
+            return;
+        }
+        
         const toName = params.get('to') || 'My Fav Person';
         const mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
+        
+        // 读取参数后，清除地址栏中的 URL 参数
+        history.replaceState(null, '', window.location.pathname);
 
         // === 3. 疯狂弹窗逻辑 ===
         let count = 0;
