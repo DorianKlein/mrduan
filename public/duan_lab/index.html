@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duan_Lab</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #33ff00; /* 经典的黑客绿 */
+            --accent-color: #ff0055; /* 你的爱心粉色，作为点缀 */
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace; /* 等宽字体 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        /* 头像区域 */
+        .avatar {
+            width: 100px;
+            height: 100px;
+            image-rendering: pixelated; /* 强制像素风不模糊 */
+            border: 2px solid var(--text-color);
+            margin-bottom: 20px;
+            background-color: #111;
+        }
+
+        /* 打字机文字 */
+        .bio {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 链接按钮容器 */
+        .links {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 复古按钮 */
+        .link-btn {
+            display: block;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--text-color);
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 4px 4px 0px var(--text-color); /* 像素阴影 */
+        }
+
+        .link-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        .link-btn:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            cursor: pointer;
+        }
+
+        /* 底部版权 */
+        footer {
+            margin-top: 50px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="profile_picture.jpg" alt="Duan_Lab" class="avatar">
+
+    <div class="bio">
+        > SYSTEM_READY<br>
+        > 0% Romantic, <span class="highlight">100% Logic.</span><br>
+        > I code digital gifts for you.
+    </div>
+
+    <div class="links">
+        <a href="https://你的用户名.gumroad.com/l/xxxxx" class="link-btn">
+            [1] 💌 Order Custom Website ($4.99)
+        </a>
+
+        <a href="https://www.tiktok.com/@duan_lab" class="link-btn">
+            [2] Follow on TikTok
+        </a>
+    </div>
+
+    <footer>
+        © 2026 Duan_Lab. All Systems Normal.
+    </footer>
+
+</body>
+</html>
