@@ -149,15 +149,34 @@
         
         const emojis = ["💖", "🌈", "✨", "🍓", "🧸", "🎈", "🍭", "🍬", "🎀", "🦄"];
 
-        // === 2. URL 参数获取 ===
+        // === 2. URL 参数获取（支持加密） ===
         const params = new URLSearchParams(window.location.search);
         
         // 如果没有任何 URL 参数，跳转到 duan_lab
         if (!params.toString()) {
             window.location.href = 'https://www.mrduan.me/duan_lab';
         } else {
-            const toName = params.get('to') || 'My Fav Person';
-            const mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
+            let toName, mainMsg;
+            
+            // 检查是否使用加密参数
+            const encryptedData = params.get('data');
+            if (encryptedData) {
+                try {
+                    // Base64 解码
+                    const decoded = atob(decodeURIComponent(encryptedData));
+                    const data = JSON.parse(decoded);
+                    toName = data.to || 'My Fav Person';
+                    mainMsg = data.msg || 'Just a reminder: You are amazing! 👋';
+                } catch (e) {
+                    // 解密失败，使用默认值
+                    toName = 'My Fav Person';
+                    mainMsg = 'Just a reminder: You are amazing! 👋';
+                }
+            } else {
+                // 兼容旧的明文参数方式
+                toName = params.get('to') || 'My Fav Person';
+                mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
+            }
             
             // 读取参数后，清除地址栏中的 URL 参数
             history.replaceState(null, '', window.location.pathname);

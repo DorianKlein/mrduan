@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Letter URL 生成器 💌</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            margin: 0;
+            padding: 20px;
+            font-family: 'Fredoka', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #ff6b6b;
+            text-align: center;
+            margin: 0 0 10px 0;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+            transition: transform 0.2s;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 25px rgba(255, 107, 107, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-label {
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .url-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .copy-btn.copied {
+            background: #2196F3;
+        }
+
+        .example {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .example strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💌 Love Letter URL 生成器</h1>
+        <p class="subtitle">生成加密的祝福链接</p>
+
+        <div class="form-group">
+            <label for="to">收件人 (To:)</label>
+            <input type="text" id="to" placeholder="例如：Joanne" value="Joanne">
+        </div>
+
+        <div class="form-group">
+            <label for="msg">祝福语 (Message:)</label>
+            <textarea id="msg" placeholder="例如：I love you 3000">I love you 3000</textarea>
+        </div>
+
+        <button class="btn" onclick="generateURL()">🎀 生成加密链接</button>
+
+        <div id="result" class="result">
+            <div class="result-label">✨ 你的加密链接：</div>
+            <div class="url-box" id="generatedURL"></div>
+            <button class="copy-btn" onclick="copyURL()">📋 复制链接</button>
+        </div>
+
+        <div class="example">
+            <strong>💡 使用说明：</strong>
+            1. 填写收件人和祝福语<br>
+            2. 点击生成按钮<br>
+            3. 复制链接发送给对方<br>
+            4. 对方打开链接会看到爱心弹窗轰炸！
+        </div>
+    </div>
+
+    <script>
+        let generatedURLText = '';
+
+        function generateURL() {
+            const to = document.getElementById('to').value.trim() || 'My Fav Person';
+            const msg = document.getElementById('msg').value.trim() || 'Just a reminder: You are amazing! 👋';
+
+            // 创建数据对象
+            const data = { to, msg };
+            
+            // JSON -> Base64 -> URL编码
+            const json = JSON.stringify(data);
+            const base64 = btoa(unescape(encodeURIComponent(json))); // 支持中文
+            const encoded = encodeURIComponent(base64);
+
+            // 生成完整URL
+            const baseURL = window.location.origin + window.location.pathname.replace('generator.html', 'index.html');
+            generatedURLText = `${baseURL}?data=${encoded}`;
+
+            // 显示结果
+            document.getElementById('generatedURL').textContent = generatedURLText;
+            document.getElementById('result').classList.add('show');
+        }
+
+        function copyURL() {
+            navigator.clipboard.writeText(generatedURLText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 已复制！';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败，请手动复制链接');
+            });
+        }
+
+        // 页面加载时自动生成一次
+        window.onload = function() {
+            generateURL();
+        };
+    </script>
+</body>
+</html>
