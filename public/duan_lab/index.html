@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,17 @@
     <style>
         :root {
             --bg-color: #000000;
-            --text-color: #33ff00; /* 经典的黑客绿 */
-            --accent-color: #ff0055; /* 你的爱心粉色，作为点缀 */
+            --text-color: #33ff00;
+            /* 经典的黑客绿 */
+            --accent-color: #ff0055;
+            /* 你的爱心粉色，作为点缀 */
         }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Courier New', Courier, monospace; /* 等宽字体 */
+            font-family: 'Courier New', Courier, monospace;
+            /* 等宽字体 */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,12 +26,13 @@
             margin: 0;
             min-height: 100vh;
         }
-        
+
         /* 头像区域 */
         .avatar {
             width: 100px;
             height: 100px;
-            image-rendering: pixelated; /* 强制像素风不模糊 */
+            image-rendering: pixelated;
+            /* 强制像素风不模糊 */
             border: 2px solid var(--text-color);
             margin-bottom: 20px;
             background-color: #111;
@@ -39,6 +45,7 @@
             max-width: 400px;
             line-height: 1.5;
         }
+
         .highlight {
             color: var(--accent-color);
             font-weight: bold;
@@ -64,7 +71,8 @@
             font-weight: bold;
             transition: all 0.2s;
             position: relative;
-            box-shadow: 4px 4px 0px var(--text-color); /* 像素阴影 */
+            box-shadow: 4px 4px 0px var(--text-color);
+            /* 像素阴影 */
         }
 
         .link-btn:active {
@@ -86,6 +94,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <img src="/duan_lab/profile_picture.jpg" alt="Duan_Lab" class="avatar">
@@ -97,8 +106,8 @@
     </div>
 
     <div class="links">
-        <a href="https://nnowarning.gumroad.com/l/xkqpe" class="link-btn">
-            [1] 💌 Order Custom Website ($4.99)
+        <a href="https://nnowarning.gumroad.com/l/cyber-rose" class="link-btn">
+            [1] 💌 Order The "Programmer's Romance" Kit ($9.99)
         </a>
 
         <a href="https://www.tiktok.com/@duan_lab" class="link-btn">
@@ -111,4 +120,5 @@
     </footer>
 
 </body>
+
 </html>
