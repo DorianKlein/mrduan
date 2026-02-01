@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,39 +8,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        /* === 全局样式：奶乎乎的背景 === */
+        /* === Global Styles: Creamy Background === */
         body {
-            background-color: #fdf6e3; /* 默认米白色，很温柔 */
+            background-color: #fdf6e3;
+            /* Default creamy white, very gentle */
             margin: 0;
-            overflow: hidden; 
+            overflow: hidden;
             font-family: 'Fredoka', 'Varela Round', sans-serif;
             touch-action: none;
         }
 
-        /* === 马卡龙窗口样式 === */
+        /* === Macaron Window Styles === */
         .window {
             position: absolute;
-            /* 颜色会在JS里随机赋予，这里只写基础结构 */
-            background: #fff; 
+            /* Colors will be assigned randomly in JS, here just the basic structure */
+            background: #fff;
             border: 3px solid #fff;
-            border-radius: 20px; /* 圆角大一点 */
-            box-shadow: 5px 5px 0px rgba(0,0,0,0.1); /* 这种扁平投影很像贴纸 */
-            width: 220px; /* 稍微做小一点，方便密集堆叠 */
+            border-radius: 20px;
+            /* Larger border radius */
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+            /* Flat shadow looks like a sticker */
+            width: 220px;
+            /* Slightly smaller to allow dense stacking */
             display: flex;
             flex-direction: column;
             user-select: none;
-            opacity: 0; 
+            opacity: 0;
             transform: scale(0.5);
-            /* Q弹的动画效果 */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            /* Bouncy animation effect */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .window.show {
             opacity: 1;
-            transform: scale(1) rotate(var(--rotation)); /* 增加随机旋转 */
+            transform: scale(1) rotate(var(--rotation));
+            /* Add random rotation */
         }
 
-        /* 顶部小条 */
+        /* Top bar */
         .window-header {
             padding: 8px 15px 0 15px;
             display: flex;
@@ -50,17 +56,18 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: rgba(255,255,255, 0.8);
+            background: rgba(255, 255, 255, 0.8);
             cursor: pointer;
         }
 
-        /* 内容区域 */
+        /* Content area */
         .window-body {
             padding: 5px 15px 15px 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #555; /* 字体颜色深灰，不刺眼 */
+            color: #555;
+            /* Dark gray font color, easy on the eyes */
         }
 
         .emoji {
@@ -73,117 +80,216 @@
             line-height: 1.4;
         }
 
-        /* === 最终大卡片 === */
+        /* === Final Big Card & Overlay === */
+        #final-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(253, 246, 227, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
         #final-card {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 85%;
+            max-width: 420px;
             background: #fff;
-            border-radius: 30px;
-            padding: 30px;
+            border-radius: 40px;
+            padding: 50px 20px;
             text-align: center;
             z-index: 9999;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            animation: popUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 30px 100px rgba(255, 107, 107, 0.15);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 8px solid #FFE4E1;
+            box-sizing: border-box;
         }
 
-        @keyframes popUp {
-            from { transform: translate(-50%, -50%) scale(0); }
-            to { transform: translate(-50%, -50%) scale(1); }
+        #final-card.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        .btn {
-            background: #ff6b6b;
+        .card-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 10px 15px rgba(255, 107, 107, 0.2));
+            animation: heartBeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartBeat {
+            0% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.15);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.15);
+            }
+
+            70% {
+                transform: scale(1);
+            }
+        }
+
+        #card-to {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 32px;
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+        }
+
+        #card-msg {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 35px;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        .btn-replay {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
             color: white;
             border: none;
-            padding: 10px 30px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 15px;
+            padding: 16px 45px;
+            border-radius: 100px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .btn-replay:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
         }
     </style>
 </head>
+
 <body>
 
+    <div id="final-overlay"></div>
     <div id="final-card">
-        <h2 id="card-to" style="color: #ff8888; margin:0 0 10px 0;">To: 小可爱</h2>
-        <p id="card-msg" style="font-size: 18px; color: #666; margin-bottom: 20px;">这里是主祝福语</p>
-        
+        <div class="card-icon">💝</div>
+        <h2 id="card-to">To: Jenny</h2>
+        <p id="card-msg">love you 3000 times</p>
+        <button class="btn-replay" onclick="location.reload()">Send More Love ✨</button>
     </div>
 
     <script>
-        // === 1. 马卡龙色盘 (背景色, 边框色会稍深一点) ===
+        // === 1. Macaron Palette (Background color, border color will be slightly darker) ===
         const palettes = [
-            { bg: "#FFB7B2", text: "#FFFFFF" }, // 桃粉
-            { bg: "#FFDAC1", text: "#555555" }, // 杏黄
-            { bg: "#E2F0CB", text: "#555555" }, // 抹茶
-            { bg: "#B5EAD7", text: "#555555" }, // 薄荷
-            { bg: "#C7CEEA", text: "#FFFFFF" }, // 蓝紫
-            { bg: "#fff0f5", text: "#555555" }, // 淡粉
-            { bg: "#e0ffff", text: "#555555" }  // 淡蓝
+            { bg: "#FFB7B2", text: "#FFFFFF" }, // Peach Pink
+            { bg: "#FFDAC1", text: "#555555" }, // Apricot Yellow
+            { bg: "#E2F0CB", text: "#555555" }, // Matcha Green
+            { bg: "#B5EAD7", text: "#555555" }, // Mint Green
+            { bg: "#C7CEEA", text: "#FFFFFF" }, // Blue Violet
+            { bg: "#fff0f5", text: "#555555" }, // Pale Pink
+            { bg: "#e0ffff", text: "#555555" }  // Pale Blue
         ];
 
         const wishes = [
-            "Main Character Energy ✨",       // 主角光环
-            "Manifesting this for u 🕯️",     // 为你显化（许愿）
-            "100% Slay 💅",                  // 绝杀/太美了
-            "Good vibes only 🪐",             // 只有好心情
-            "You glow different today ✨",    // 你今天发光了
-            "Incoming Hugs 🧸",               // 抱抱正在派送
-            "Pov: You are loved ❤️",          // 视角：你被爱着
-            "Proud of you 🌟",                // 为你骄傲
-            "Protect your peace 🛡️",         // 守护平静
-            "Hot & Rich 💰",                  // 有钱又辣
-            "Bad vibes blocked 🚫",           // 坏心情屏蔽
-            "You deserve the world 🌍",       // 你值得全世界
-            "Pure Magic ✨",                  // 纯粹魔法
-            "Unstoppable 🚀",                 // 势不可挡
-            "Ur sign to be happy 🦋"          // 这是让你快乐的信号
+            "Main Character Energy ✨",
+            "Manifesting this for u 🕯️",
+            "100% Slay 💅",
+            "Good vibes only 🪐",
+            "You glow different today ✨",
+            "Incoming Hugs 🧸",
+            "Pov: You are loved ❤️",
+            "Proud of you 🌟",
+            "Protect your peace 🛡️",
+            "Hot & Rich 💰",
+            "Bad vibes blocked 🚫",
+            "You deserve the world 🌍",
+            "Pure Magic ✨",
+            "Unstoppable 🚀",
+            "Ur sign to be happy 🦋",
+            "You are the moment 💅",
+            "Endless possibilities 🌌",
+            "Living your best life 🥂",
+            "Stunning as always 💎",
+            "Keep that energy ⚡",
+            "Surrounded by love ☁️",
+            "A literal icon 👑",
+            "Dream big, babe ☁️",
+            "Positive vibes loading... 🔄",
+            "You're doing amazing 🌈",
+            "Simply the best 🏆",
+            "Radiating happiness ☀️",
+            "The world is yours 🕊️",
+            "Magic in your eyes ✨",
+            "Soul full of sunshine 🌻",
+            "A whole vibe 🌊",
+            "Stay golden 🍯",
+            "Fearless & Free 🦅",
+            "Wrapped in joy 🎁",
+            "Your smile > everything 💖",
+            "Born to shine 🌟",
+            "Limitless potential 🚀",
+            "Queen behavior 👑",
+            "Love yourself first 🌸",
+            "Golden hour glow ☀️"
         ];
-        
+
         const emojis = ["💖", "🌈", "✨", "🍓", "🧸", "🎈", "🍭", "🍬", "🎀", "🦄"];
 
-        // === 2. URL 参数获取（支持加密） ===
+        // === 2. URL Parameter Retrieval (Supports Encryption) ===
         const params = new URLSearchParams(window.location.search);
-        
-        // 如果没有任何 URL 参数，跳转到 duan_lab
-        if (!params.toString()) {
+
+        // If no URL parameters, redirect to duan_lab
+        if (params.toString()) {
             window.location.href = 'https://www.mrduan.me/duan_lab';
         } else {
             let toName, mainMsg;
-            
-            // 检查是否使用加密参数
+
+            // Check if encrypted parameters are used
             const encryptedData = params.get('data');
             if (encryptedData) {
                 try {
-                    // Base64 解码
+                    // Base64 Decode
                     const decoded = atob(decodeURIComponent(encryptedData));
                     const data = JSON.parse(decoded);
-                    toName = data.to || 'My Fav Person';
-                    mainMsg = data.msg || 'Just a reminder: You are amazing! 👋';
+                    toName = data.to || 'Jenny';
+                    mainMsg = data.msg || 'Just a reminder: I love you! 👋';
                 } catch (e) {
-                    // 解密失败，使用默认值
-                    toName = 'My Fav Person';
-                    mainMsg = 'Just a reminder: You are amazing! 👋';
+                    // Decryption failed, use default values
+                    toName = 'Jenny';
+                    mainMsg = 'Just a reminder: I love you! 👋';
                 }
             } else {
-                // 兼容旧的明文参数方式
-                toName = params.get('to') || 'My Fav Person';
-                mainMsg = params.get('msg') || 'Just a reminder: You are amazing! 👋';
+                // Compatible with old plain text parameter method
+                toName = params.get('to') || 'Jenny';
+                mainMsg = params.get('msg') || 'Just a reminder: I love you! 👋';
             }
-            
-            // 读取参数后，清除地址栏中的 URL 参数
+
+            // After reading parameters, clear URL parameters from address bar
             history.replaceState(null, '', window.location.pathname);
 
-            // === 3. 疯狂弹窗逻辑 ===
+            // === 3. Crazy Popup Logic ===
             let count = 0;
-            const totalPopups = 50; // 数量加到 50 个！
+            const totalPopups = 200; // Increased count to 200!
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
 
@@ -195,24 +301,24 @@
 
                 const div = document.createElement('div');
                 div.className = 'window';
-                
-                // 随机配色
+
+                // Random Color Scheme
                 const palette = palettes[Math.floor(Math.random() * palettes.length)];
                 div.style.backgroundColor = palette.bg;
                 div.style.color = palette.text;
-                
-                // 随机旋转角度 (-10度 到 10度)，增加活泼感
-                const rotate = (Math.random() * 20 - 10).toFixed(2);
+
+                // Random rotation angle (-10 to 10 degrees), to add liveliness
+                const rotate = (Math.random() * 20 - 20).toFixed(2);
                 div.style.setProperty('--rotation', rotate + 'deg');
 
-                // 随机位置 (允许稍微重叠，制造堆积感)
-                const x = Math.random() * (screenW - 220); // 减去宽度防止超出去
+                // Random position (allows slight overlap to create stacking effect)
+                const x = Math.random() * (screenW - 220); // Subtract width to prevent overflow
                 const y = Math.random() * (screenH - 150);
                 div.style.left = x + "px";
                 div.style.top = y + "px";
                 div.style.zIndex = 100 + count;
 
-                // 随机内容
+                // Random content
                 const txt = wishes[Math.floor(Math.random() * wishes.length)];
                 const emj = emojis[Math.floor(Math.random() * emojis.length)];
 
@@ -228,33 +334,43 @@
 
                 document.body.appendChild(div);
 
-                // 触发动画
+                // Trigger animation
                 requestAnimationFrame(() => {
                     div.classList.add('show');
                 });
 
                 count++;
-                
-                // === 极速模式 ===
-                // 初始很快，中间极快，最后稍微慢一点点收尾
-                // 随机间隔 50ms 到 150ms，像机关枪一样弹
-                let nextTime = Math.random() * 100 + 50; 
+
+                // === Speed Mode ===
+                // Starts fast, becomes very fast in the middle, slows down slightly at the end
+                // Random interval 50ms to 150ms, pops like a machine gun
+                let nextTime = Math.random() * 20 + 30;
                 setTimeout(createPopup, nextTime);
             }
 
             function showFinalCard() {
+                const overlay = document.getElementById('final-overlay');
                 const card = document.getElementById('final-card');
+
                 document.getElementById('card-to').innerText = `To: ${toName}`;
                 document.getElementById('card-msg').innerText = mainMsg;
+
+                overlay.style.display = 'block';
                 card.style.display = 'block';
+
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    card.classList.add('show');
+                }, 100);
             }
 
-            // === 启动 ===
-            window.onload = function() {
-                setTimeout(createPopup, 300); // 打开网页 0.3秒后直接开始
+            // === Start ===
+            window.onload = function () {
+                setTimeout(createPopup, 300); // Start directly 0.3 seconds after page load
             };
         }
 
     </script>
 </body>
+
 </html>
