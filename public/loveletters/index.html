@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Incoming Love... 💌</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         /* === Global Styles: Creamy Background === */
@@ -41,8 +42,8 @@
 
         .window.show {
             opacity: 1;
-            transform: scale(1) rotate(var(--rotation));
-            /* Add random rotation */
+            transform: scale(var(--scale, 1)) rotate(var(--rotation));
+            /* Add random rotation and scale */
         }
 
         /* Top bar */
@@ -195,10 +196,67 @@
         <div class="card-icon">💝</div>
         <h2 id="card-to">To: Jenny</h2>
         <p id="card-msg">love you 3000 times</p>
-        <button class="btn-replay" onclick="location.reload()">Send More Love ✨</button>
+        <button class="btn-replay" onclick="celebrate()">Send More Love ✨</button>
     </div>
 
     <script>
+        // Define celebrate globally
+        window.celebrate = function () {
+            // 1. Play button sound effect (reusing popSound)
+            if (popSound) {
+                popSound.currentTime = 0; // Reset audio progress
+                popSound.volume = 0.6;    // A bit louder
+                popSound.play().catch(() => { });
+            }
+
+            // 2. Button interaction feedback (Turn green + change text)
+            const btn = document.querySelector('.btn-replay');
+            if (btn) {
+                btn.innerHTML = "Love Accepted! 💖";
+
+                // === Modification started: Using premium honey peach gradient ===
+                // btn.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"; // Removed this ugly green color
+                // ⬇️ Replaced with this gentle premium gradient (Honey Peach)
+                btn.style.background = "linear-gradient(to right, #FBD786, #f7797d)";
+                // ⬇️ Glow effect also replaced with matching warm gold
+                btn.style.boxShadow = "0 10px 25px rgba(247, 121, 125, 0.5)";
+                // === Modification finished ===
+
+                btn.disabled = true; // Prevent duplicate clicks
+            }
+
+            // 3. Launch fireworks (Fix Z-Index issue)
+            if (typeof confetti === 'undefined') return;
+
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // Fireworks on the left
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 100,
+                    origin: { x: 0 },
+                    zIndex: 10000,
+                    colors: ['#ff6b6b', '#ffb7b2', '#fdf6e3']
+                });
+                // Fireworks on the right
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 100,
+                    origin: { x: 1 },
+                    zIndex: 10000,
+                    colors: ['#ff6b6b', '#ffb7b2', '#fdf6e3']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        };
+
         // === 1. Macaron Palette (Background color, border color will be slightly darker) ===
         const palettes = [
             { bg: "#FFB7B2", text: "#FFFFFF" }, // Peach Pink
@@ -254,75 +312,56 @@
         ];
 
         const emojis = ["💖", "🌈", "✨", "🍓", "🧸", "🎈", "🍭", "🍬", "🎀", "🦄"];
+        const popSound = new Audio('pop.mp3');
 
         // === 2. URL Parameter Retrieval (Supports Encryption) ===
         const params = new URLSearchParams(window.location.search);
 
-        // If no URL parameters, redirect to duan_lab
-        if (params.toString()) {
-            window.location.href = 'https://www.mrduan.me/duan_lab';
-        } else {
-            let toName, mainMsg;
+        // Read parameters (supports ?to=xxx&msg=yyy)
+        const toName = params.get('to') || 'Jenny';
+        const mainMsg = params.get('msg') || 'Just a reminder: I love you! 💕';
 
-            // Check if encrypted parameters are used
-            const encryptedData = params.get('data');
-            if (encryptedData) {
-                try {
-                    // Base64 Decode
-                    const decoded = atob(decodeURIComponent(encryptedData));
-                    const data = JSON.parse(decoded);
-                    toName = data.to || 'Jenny';
-                    mainMsg = data.msg || 'Just a reminder: I love you! 👋';
-                } catch (e) {
-                    // Decryption failed, use default values
-                    toName = 'Jenny';
-                    mainMsg = 'Just a reminder: I love you! 👋';
-                }
-            } else {
-                // Compatible with old plain text parameter method
-                toName = params.get('to') || 'Jenny';
-                mainMsg = params.get('msg') || 'Just a reminder: I love you! 👋';
+        // After reading parameters, clear URL parameters from address bar
+        history.replaceState(null, '', window.location.pathname);
+
+        // === 3. Crazy Popup Logic ===
+        let count = 0;
+        const totalPopups = 150; // Adjusted count to 150
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        function createPopup() {
+            if (count >= totalPopups) {
+                setTimeout(showFinalCard, 500);
+                return;
             }
 
-            // After reading parameters, clear URL parameters from address bar
-            history.replaceState(null, '', window.location.pathname);
+            const div = document.createElement('div');
+            div.className = 'window';
 
-            // === 3. Crazy Popup Logic ===
-            let count = 0;
-            const totalPopups = 200; // Increased count to 200!
-            const screenW = window.innerWidth;
-            const screenH = window.innerHeight;
+            // Random Color Scheme
+            const palette = palettes[Math.floor(Math.random() * palettes.length)];
+            div.style.backgroundColor = palette.bg;
+            div.style.color = palette.text;
 
-            function createPopup() {
-                if (count >= totalPopups) {
-                    setTimeout(showFinalCard, 500);
-                    return;
-                }
+            // Random rotation angle and scale
+            const rotate = (Math.random() * 60 - 30).toFixed(2);
+            const scale = (Math.random() * 0.4 + 0.8).toFixed(2); // Random scale between 0.8 and 1.2
+            div.style.setProperty('--rotation', rotate + 'deg');
+            div.style.setProperty('--scale', scale);
 
-                const div = document.createElement('div');
-                div.className = 'window';
+            // Random position (allows slight overlap to create stacking effect)
+            const x = Math.random() * (screenW - 220); // Subtract width to prevent overflow
+            const y = Math.random() * (screenH - 150);
+            div.style.left = x + "px";
+            div.style.top = y + "px";
+            div.style.zIndex = 100 + count;
 
-                // Random Color Scheme
-                const palette = palettes[Math.floor(Math.random() * palettes.length)];
-                div.style.backgroundColor = palette.bg;
-                div.style.color = palette.text;
+            // Random content
+            const txt = wishes[Math.floor(Math.random() * wishes.length)];
+            const emj = emojis[Math.floor(Math.random() * emojis.length)];
 
-                // Random rotation angle (-10 to 10 degrees), to add liveliness
-                const rotate = (Math.random() * 20 - 20).toFixed(2);
-                div.style.setProperty('--rotation', rotate + 'deg');
-
-                // Random position (allows slight overlap to create stacking effect)
-                const x = Math.random() * (screenW - 220); // Subtract width to prevent overflow
-                const y = Math.random() * (screenH - 150);
-                div.style.left = x + "px";
-                div.style.top = y + "px";
-                div.style.zIndex = 100 + count;
-
-                // Random content
-                const txt = wishes[Math.floor(Math.random() * wishes.length)];
-                const emj = emojis[Math.floor(Math.random() * emojis.length)];
-
-                div.innerHTML = `
+            div.innerHTML = `
                     <div class="window-header">
                         <div class="close-dot"></div>
                     </div>
@@ -332,43 +371,50 @@
                     </div>
                 `;
 
-                document.body.appendChild(div);
+            document.body.appendChild(div);
 
-                // Trigger animation
-                requestAnimationFrame(() => {
-                    div.classList.add('show');
-                });
-
-                count++;
-
-                // === Speed Mode ===
-                // Starts fast, becomes very fast in the middle, slows down slightly at the end
-                // Random interval 50ms to 150ms, pops like a machine gun
-                let nextTime = Math.random() * 20 + 30;
-                setTimeout(createPopup, nextTime);
+            // Play pop sound every 3 popups
+            if (count % 3 === 0) {
+                popSound.currentTime = 0;
+                popSound.play().catch(() => { });
             }
 
-            function showFinalCard() {
-                const overlay = document.getElementById('final-overlay');
-                const card = document.getElementById('final-card');
+            // Trigger animation
+            requestAnimationFrame(() => {
+                div.classList.add('show');
+            });
 
-                document.getElementById('card-to').innerText = `To: ${toName}`;
-                document.getElementById('card-msg').innerText = mainMsg;
+            count++;
 
-                overlay.style.display = 'block';
-                card.style.display = 'block';
-
-                setTimeout(() => {
-                    overlay.style.opacity = '1';
-                    card.classList.add('show');
-                }, 100);
-            }
-
-            // === Start ===
-            window.onload = function () {
-                setTimeout(createPopup, 300); // Start directly 0.3 seconds after page load
-            };
+            // === Speed Mode ===
+            // Starts fast, becomes very fast in the middle, slows down slightly at the end
+            // Random interval 50ms to 150ms, pops like a machine gun
+            let nextTime = Math.random() * 50 + 30;
+            setTimeout(createPopup, nextTime);
         }
+
+        function showFinalCard() {
+            const overlay = document.getElementById('final-overlay');
+            const card = document.getElementById('final-card');
+
+            document.getElementById('card-to').innerText = `To: ${toName}`;
+            document.getElementById('card-msg').innerText = mainMsg;
+
+            overlay.style.display = 'block';
+            card.style.display = 'block';
+
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                card.classList.add('show');
+            }, 100);
+        }
+
+
+
+        // === Start ===
+        window.onload = function () {
+            setTimeout(createPopup, 300); // Start directly 0.3 seconds after page load
+        };
 
     </script>
 </body>
