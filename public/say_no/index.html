@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Project: Valentine</title>
+    <style>
+        /* --- 全局赛博氛围 --- */
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #000;
+            /* 深邃的黑紫渐变背景，配合你的素材 */
+            background-image: radial-gradient(circle at 50% 50%, #1a0520 0%, #000000 80%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* --- 1. 核心容器 --- */
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 2. 信封层 (The Asset Layer) --- */
+        .envelope-wrapper {
+            position: relative;
+            width: 350px; /* 根据 iPad 屏幕适配的大小 */
+            height: auto;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 极客魔法：让黑底变透明 */
+        .blend-mode {
+            mix-blend-mode: screen; 
+            display: block;
+            width: 100%;
+        }
+
+        .envelope-img {
+            width: 100%;
+            /* 稍微加一点浮动动画 */
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .lock-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px; /* 锁的大小 */
+            transform: translate(-50%, -50%);
+            z-index: 11;
+            /* 锁的独立动画 */
+            animation: float 3s ease-in-out infinite reverse; 
+        }
+
+        /* --- 3. 解锁动画 (Unlocking) --- */
+        .envelope-wrapper.unlock {
+            transform: scale(1.5); /* 放大 */
+            opacity: 0; /* 消失 */
+            filter: blur(20px); /* 动态模糊 */
+            pointer-events: none;
+        }
+
+        /* --- 4. 隐藏的内容 (The Surprise) --- */
+        .content {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.6s ease 0.4s; /* 延迟显示 */
+            z-index: 5;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .content.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            letter-spacing: 2px;
+        }
+
+        /* 霓虹按钮 */
+        button {
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        #yes { 
+            background: #ff0055; 
+            color: white; 
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.4); 
+        }
+        
+        #yes:active { transform: scale(0.95); }
+
+        #no { 
+            border: 2px solid #444; 
+            background: transparent; 
+            color: #888; 
+            position: absolute; /* 绝对定位方便逃跑 */
+        }
+
+        /* 浮动动画关键帧 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="envelope-wrapper" id="envelope">
+            <img src="lock_alpha.png" class="lock-img blend-mode" alt="Lock">
+            <img src="envelope_alpha.png" class="envelope-img blend-mode" alt="Envelope">
+        </div>
+
+        <div class="content" id="mainContent">
+            <h1>WARNING:<br>Will you be my Player 2?</h1>
+            <button id="yes">ACCEPT</button>
+            <button id="no">DECLINE</button>
+        </div>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const content = document.getElementById('mainContent');
+        const noBtn = document.getElementById('no');
+        const yesBtn = document.getElementById('yes');
+
+        // 1. 解锁特效 (Unboxing)
+        envelope.addEventListener('click', () => {
+            // 添加消失动画类
+            envelope.classList.add('unlock');
+            // 显示内容
+            content.classList.add('visible');
+        });
+
+        // 2. 逃跑逻辑 (The Chase) - 适配 iPad/Mobile
+        const runAway = (e) => {
+            e.preventDefault(); // 防止误触
+            
+            // 获取可视区域
+            const maxWidth = window.innerWidth - 150; 
+            const maxHeight = window.innerHeight - 100;
+
+            const randomX = Math.random() * maxWidth;
+            const randomY = Math.random() * maxHeight;
+
+            noBtn.style.position = 'fixed'; // 变成全屏定位
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+            
+            // 变红警告
+            noBtn.style.borderColor = '#ff0000';
+            noBtn.style.color = '#ff0000';
+            noBtn.innerText = "ERROR";
+        };
+
+        noBtn.addEventListener('touchstart', runAway, {passive: false});
+        noBtn.addEventListener('mouseover', runAway); // 电脑端兼容
+        noBtn.addEventListener('click', runAway); // 顽固点击兼容
+
+        // 3. 成功逻辑 (Success)
+        yesBtn.addEventListener('click', () => {
+            document.querySelector('h1').innerHTML = "SYSTEM UPDATE:<br>Relationship Connected. ❤️";
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none';
+            // 这里可以加跳转链接或烟花特效
+        });
+    </script>
+</body>
+</html>
