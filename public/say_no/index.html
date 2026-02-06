@@ -1,9 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Project: Valentine</title>
+</head>
+
+<body>
+    <canvas id="fireworks"></canvas>
+
+    <div class="container">
+        <div class="envelope-wrapper" id="envelope">
+            <img src="lock_alpha.png" class="lock-img" alt="Lock">
+            <img src="envelope_alpha.png" class="envelope-img" alt="Envelope">
+        </div>
+
+        <div class="content" id="mainContent" style="display: none;">
+            <h1>Jenny:<br>Will you be my girlfriend?</h1>
+            <div class="btn-group">
+                <button id="yes">ACCEPT</button>
+                <button id="no">DECLINE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const content = document.getElementById('mainContent');
+        const noBtn = document.getElementById('no');
+        const yesBtn = document.getElementById('yes');
+
+        // 1. 解锁特效 (Unboxing)
+        envelope.addEventListener('click', () => {
+            // 添加消失动画类
+            envelope.classList.add('unlock');
+            // 显示内容
+            content.style.display = 'block';
+            setTimeout(() => {
+                content.classList.add('visible');
+            }, 10);
+        });
+
+        // 2. 逃跑逻辑 (The Chase) + Yes 按钮生长
+        let yesScale = 1;
+        const runAway = (e) => {
+            if (e) e.preventDefault();
+
+            // NO 逃跑 - 确保不跑出屏幕
+            const btnWidth = noBtn.offsetWidth || 150;
+            const btnHeight = noBtn.offsetHeight || 50;
+
+            // 设定安全边距，确保按钮完全在可视区内
+            const padding = 20;
+            const maxWidth = window.innerWidth - btnWidth - padding;
+            const maxHeight = window.innerHeight - btnHeight - padding;
+
+            const randomX = Math.max(padding, Math.random() * maxWidth);
+            const randomY = Math.max(padding, Math.random() * maxHeight);
+
+            // 关键修复：将按钮移动到 body 下，避免受父容器 transform 影响导致坐标错乱
+            if (noBtn.parentNode !== document.body) {
+                document.body.appendChild(noBtn);
+            }
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+            noBtn.style.margin = '0';
+            noBtn.style.zIndex = '200'; // 确保 z-index 极高，不会被生长中的 YES 覆盖
+            noBtn.style.opacity = '1';
+            noBtn.style.visibility = 'visible';
+
+            // YES 生长
+            yesScale += 0.3;
+            if (yesScale > 15) { // 限制最大倍数
+                yesBtn.style.width = '100vw';
+                yesBtn.style.height = '100vh';
+                yesBtn.style.position = 'fixed';
+                yesBtn.style.top = '0';
+                yesBtn.style.left = '0';
+                yesBtn.style.margin = '0';
+                yesBtn.style.borderRadius = '0';
+                yesBtn.style.zIndex = '99';
+            } else {
+                yesBtn.style.transform = `scale(${yesScale})`;
+            }
+        };
+
+        noBtn.addEventListener('touchstart', runAway, { passive: false });
+        noBtn.addEventListener('mouseover', runAway);
+        noBtn.addEventListener('click', runAway);
+
+        // 3. 赛博烟花逻辑
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+                this.gravity = 0.03; // 稍微调高重力，让下落更自然
+                this.opacity = 1;
+                this.decay = Math.random() * 0.008 + 0.005; // 提高衰减率，让粒子消失得快一些，不再拖沓
+            }
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.opacity -= this.decay;
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                // 赛博辉光 - 设置在绘制之前
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 重置阴影，避免影响后续绘制
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#ff77ff', '#7000ff', '#a020f0', '#ff00ff', '#e0b0ff']; // 纯粉色、紫色系，移除红色调
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animate() {
+            // 确保清除背景时不受阴影影响
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // 恢复留痕/拖尾效果：不使用 clearRect，而是覆盖一层半透明背景
+            ctx.fillStyle = 'rgba(12, 2, 13, 0.2)'; // 稍微增加不透明度，使背景更稳固
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles = particles.filter(p => p.opacity > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // 4. 成功逻辑 (Success)
+        yesBtn.addEventListener('click', () => {
+            // UI 清理
+            content.style.zIndex = '101';
+            document.querySelector('h1').innerHTML = "I love you forever. ❤️";
+            document.querySelector('h1').style.position = 'relative';
+            document.querySelector('h1').style.zIndex = '102';
+
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none';
+
+            // 背景开始柔和闪烁
+            document.body.classList.add('success-bg');
+
+            // 启动烟花
+            animate();
+            const fireInterval = setInterval(() => {
+                createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
+            }, 400); // 稍微放慢连发速度，让观感更从容
+
+            // 延长连发总时长到 60 秒
+            setTimeout(() => clearInterval(fireInterval), 60000);
+        });
+    </script>
     <style>
         /* --- 全局赛博氛围 --- */
         body {
@@ -32,42 +215,37 @@
         /* --- 2. 信封层 (The Asset Layer) --- */
         .envelope-wrapper {
             position: relative;
-            width: 350px; /* 根据 iPad 屏幕适配的大小 */
+            width: 60%;
+            /* 增大信封尺寸 */
             height: auto;
             cursor: pointer;
             z-index: 10;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* 极客魔法：让黑底变透明 */
-        .blend-mode {
-            mix-blend-mode: screen; 
-            display: block;
-            width: 100%;
+            animation: float 3s ease-in-out infinite;
         }
 
         .envelope-img {
             width: 100%;
-            /* 稍微加一点浮动动画 */
-            animation: float 3s ease-in-out infinite;
         }
 
         .lock-img {
             position: absolute;
-            top: 50%;
+            top: 58%;
+            /* 精准定位：处于盖口中心 */
             left: 50%;
-            width: 80px; /* 锁的大小 */
+            width: 30%;
             transform: translate(-50%, -50%);
             z-index: 11;
-            /* 锁的独立动画 */
-            animation: float 3s ease-in-out infinite reverse; 
         }
 
         /* --- 3. 解锁动画 (Unlocking) --- */
         .envelope-wrapper.unlock {
-            transform: scale(1.5); /* 放大 */
-            opacity: 0; /* 消失 */
-            filter: blur(20px); /* 动态模糊 */
+            transform: scale(1.5);
+            /* 放大 */
+            opacity: 0;
+            /* 消失 */
+            filter: blur(20px);
+            /* 动态模糊 */
             pointer-events: none;
         }
 
@@ -77,10 +255,10 @@
             text-align: center;
             opacity: 0;
             transform: scale(0.8);
-            transition: all 0.6s ease 0.4s; /* 延迟显示 */
+            transition: all 0.6s ease 0.4s;
+            /* 延迟显示 */
             z-index: 5;
             width: 90%;
-            max-width: 400px;
         }
 
         .content.visible {
@@ -110,89 +288,68 @@
             transition: 0.2s;
         }
 
-        #yes { 
-            background: #ff0055; 
-            color: white; 
-            box-shadow: 0 0 30px rgba(255, 0, 85, 0.4); 
+        #yes {
+            background: #ff0055;
+            color: white;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
         }
-        
-        #yes:active { transform: scale(0.95); }
 
-        #no { 
-            border: 2px solid #444; 
-            background: transparent; 
-            color: #888; 
-            position: absolute; /* 绝对定位方便逃跑 */
+        #yes:active {
+            transform: scale(0.95);
+        }
+
+        /* 按钮容器样式 */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #no {
+            border: 2px solid #444;
+            background: transparent;
+            color: #888;
+            transition: 0.1s ease;
         }
 
         /* 浮动动画关键帧 */
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 赛博烟花画布 */
+        #fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .success-bg {
+            background-color: #0c020d !important;
+            /* 固定的深紫色背景，不闪烁 */
+            background-image: none !important;
+        }
+
+        /* 按钮过渡效果 */
+        #yes {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                width 0.3s ease, height 0.3s ease, font-size 0.3s ease;
         }
     </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="envelope-wrapper" id="envelope">
-            <img src="lock_alpha.png" class="lock-img blend-mode" alt="Lock">
-            <img src="envelope_alpha.png" class="envelope-img blend-mode" alt="Envelope">
-        </div>
-
-        <div class="content" id="mainContent">
-            <h1>WARNING:<br>Will you be my Player 2?</h1>
-            <button id="yes">ACCEPT</button>
-            <button id="no">DECLINE</button>
-        </div>
-    </div>
-
-    <script>
-        const envelope = document.getElementById('envelope');
-        const content = document.getElementById('mainContent');
-        const noBtn = document.getElementById('no');
-        const yesBtn = document.getElementById('yes');
-
-        // 1. 解锁特效 (Unboxing)
-        envelope.addEventListener('click', () => {
-            // 添加消失动画类
-            envelope.classList.add('unlock');
-            // 显示内容
-            content.classList.add('visible');
-        });
-
-        // 2. 逃跑逻辑 (The Chase) - 适配 iPad/Mobile
-        const runAway = (e) => {
-            e.preventDefault(); // 防止误触
-            
-            // 获取可视区域
-            const maxWidth = window.innerWidth - 150; 
-            const maxHeight = window.innerHeight - 100;
-
-            const randomX = Math.random() * maxWidth;
-            const randomY = Math.random() * maxHeight;
-
-            noBtn.style.position = 'fixed'; // 变成全屏定位
-            noBtn.style.left = randomX + 'px';
-            noBtn.style.top = randomY + 'px';
-            
-            // 变红警告
-            noBtn.style.borderColor = '#ff0000';
-            noBtn.style.color = '#ff0000';
-            noBtn.innerText = "ERROR";
-        };
-
-        noBtn.addEventListener('touchstart', runAway, {passive: false});
-        noBtn.addEventListener('mouseover', runAway); // 电脑端兼容
-        noBtn.addEventListener('click', runAway); // 顽固点击兼容
-
-        // 3. 成功逻辑 (Success)
-        yesBtn.addEventListener('click', () => {
-            document.querySelector('h1').innerHTML = "SYSTEM UPDATE:<br>Relationship Connected. ❤️";
-            noBtn.style.display = 'none';
-            yesBtn.style.display = 'none';
-            // 这里可以加跳转链接或烟花特效
-        });
-    </script>
 </body>
+
 </html>
