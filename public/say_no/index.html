@@ -12,12 +12,16 @@
 
     <div class="container">
         <div class="envelope-wrapper" id="envelope">
-            <img src="lock_alpha.png" class="lock-img" alt="Lock">
-            <img src="envelope_alpha.png" class="envelope-img" alt="Envelope">
+            <img src="seal.png" class="lock-img" alt="Lock">
+            <img src="envelope.png" class="envelope-img" alt="Envelope">
         </div>
 
         <div class="content" id="mainContent" style="display: none;">
+
+            <!-- ---------First Modification--------- -->
             <h1>Jenny:<br>Will you be my girlfriend?</h1>
+            <!-- ----------------------------- -->
+
             <div class="btn-group">
                 <button id="yes">ACCEPT</button>
                 <button id="no">DECLINE</button>
@@ -31,27 +35,27 @@
         const noBtn = document.getElementById('no');
         const yesBtn = document.getElementById('yes');
 
-        // 1. 解锁特效 (Unboxing)
+        // 1. Unboxing Effect
         envelope.addEventListener('click', () => {
-            // 添加消失动画类
+            // Add disappearance animation class
             envelope.classList.add('unlock');
-            // 显示内容
+            // Show content
             content.style.display = 'block';
             setTimeout(() => {
                 content.classList.add('visible');
             }, 10);
         });
 
-        // 2. 逃跑逻辑 (The Chase) + Yes 按钮生长
+        // 2. Escape Logic (The Chase) + Yes Button Growth
         let yesScale = 1;
         const runAway = (e) => {
             if (e) e.preventDefault();
 
-            // NO 逃跑 - 确保不跑出屏幕
+            // NO Escape - Ensure it doesn't run off-screen
             const btnWidth = noBtn.offsetWidth || 150;
             const btnHeight = noBtn.offsetHeight || 50;
 
-            // 设定安全边距，确保按钮完全在可视区内
+            // Set safe margins to ensure the button is fully within the viewport
             const padding = 20;
             const maxWidth = window.innerWidth - btnWidth - padding;
             const maxHeight = window.innerHeight - btnHeight - padding;
@@ -59,7 +63,7 @@
             const randomX = Math.max(padding, Math.random() * maxWidth);
             const randomY = Math.max(padding, Math.random() * maxHeight);
 
-            // 关键修复：将按钮移动到 body 下，避免受父容器 transform 影响导致坐标错乱
+            // Key Fix: Move the button under body to avoid coordinate issues caused by parent container transforms
             if (noBtn.parentNode !== document.body) {
                 document.body.appendChild(noBtn);
             }
@@ -68,13 +72,13 @@
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
             noBtn.style.margin = '0';
-            noBtn.style.zIndex = '200'; // 确保 z-index 极高，不会被生长中的 YES 覆盖
+            noBtn.style.zIndex = '200'; // Ensure z-index is extremely high so it won't be covered by the growing YES button
             noBtn.style.opacity = '1';
             noBtn.style.visibility = 'visible';
 
-            // YES 生长
+            // YES Growth
             yesScale += 0.3;
-            if (yesScale > 15) { // 限制最大倍数
+            if (yesScale > 15) { // Limit maximum scale
                 yesBtn.style.width = '100vw';
                 yesBtn.style.height = '100vh';
                 yesBtn.style.position = 'fixed';
@@ -92,7 +96,7 @@
         noBtn.addEventListener('mouseover', runAway);
         noBtn.addEventListener('click', runAway);
 
-        // 3. 赛博烟花逻辑
+        // 3. Cyber Fireworks Logic
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -112,9 +116,9 @@
                 this.size = Math.random() * 3 + 1;
                 this.speedX = Math.random() * 6 - 3;
                 this.speedY = Math.random() * 6 - 3;
-                this.gravity = 0.03; // 稍微调高重力，让下落更自然
+                this.gravity = 0.03; // Slightly increase gravity for more natural falling
                 this.opacity = 1;
-                this.decay = Math.random() * 0.008 + 0.005; // 提高衰减率，让粒子消失得快一些，不再拖沓
+                this.decay = Math.random() * 0.008 + 0.005; // Increase decay rate to make particles disappear faster
             }
             update() {
                 this.speedY += this.gravity;
@@ -125,7 +129,7 @@
             draw() {
                 ctx.globalAlpha = this.opacity;
                 ctx.fillStyle = this.color;
-                // 赛博辉光 - 设置在绘制之前
+                // Cyber Glow - Set before drawing
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = this.color;
 
@@ -133,13 +137,13 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 重置阴影，避免影响后续绘制
+                // Reset shadows to avoid affecting subsequent drawing
                 ctx.shadowBlur = 0;
             }
         }
 
         function createFirework(x, y) {
-            const colors = ['#ff77ff', '#7000ff', '#a020f0', '#ff00ff', '#e0b0ff']; // 纯粉色、紫色系，移除红色调
+            const colors = ['#ff77ff', '#7000ff', '#a020f0', '#ff00ff', '#e0b0ff']; // Pure pink and purple tones, removed red tones
             const color = colors[Math.floor(Math.random() * colors.length)];
             for (let i = 0; i < 50; i++) {
                 particles.push(new Particle(x, y, color));
@@ -147,12 +151,12 @@
         }
 
         function animate() {
-            // 确保清除背景时不受阴影影响
+            // Ensure background clearing is not affected by shadows
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
 
-            // 恢复留痕/拖尾效果：不使用 clearRect，而是覆盖一层半透明背景
-            ctx.fillStyle = 'rgba(12, 2, 13, 0.2)'; // 稍微增加不透明度，使背景更稳固
+            // Restore trail effect: Use a semi-transparent background overlay instead of clearRect
+            ctx.fillStyle = 'rgba(12, 2, 13, 0.2)'; // Slightly increase opacity for a more stable background
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             particles = particles.filter(p => p.opacity > 0);
@@ -163,37 +167,41 @@
             requestAnimationFrame(animate);
         }
 
-        // 4. 成功逻辑 (Success)
+        // 4. Success Logic (Success)
         yesBtn.addEventListener('click', () => {
-            // UI 清理
+            // UI Cleanup
             content.style.zIndex = '101';
+
+            // ------- Second Modification -------
             document.querySelector('h1').innerHTML = "I love you forever. ❤️";
+            // -----------------------------------
+
             document.querySelector('h1').style.position = 'relative';
             document.querySelector('h1').style.zIndex = '102';
 
             noBtn.style.display = 'none';
             yesBtn.style.display = 'none';
 
-            // 背景开始柔和闪烁
+            // Background starts a gentle pulse
             document.body.classList.add('success-bg');
 
-            // 启动烟花
+            // Launch fireworks
             animate();
             const fireInterval = setInterval(() => {
                 createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
-            }, 400); // 稍微放慢连发速度，让观感更从容
+            }, 400); // Slightly slow down fire rate for a more relaxed visual
 
-            // 延长连发总时长到 60 秒
+            // Extend total firing duration to 60 seconds
             setTimeout(() => clearInterval(fireInterval), 60000);
         });
     </script>
     <style>
-        /* --- 全局赛博氛围 --- */
+        /* --- Global Cyber Atmosphere --- */
         body {
             margin: 0;
             height: 100vh;
             background-color: #000;
-            /* 深邃的黑紫渐变背景，配合你的素材 */
+            /* Deep dark purple gradient background to match your assets */
             background-image: radial-gradient(circle at 50% 50%, #1a0520 0%, #000000 80%);
             display: flex;
             justify-content: center;
@@ -202,7 +210,7 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* --- 1. 核心容器 --- */
+        /* --- 1. Core Container --- */
         .container {
             position: relative;
             width: 100vw;
@@ -212,11 +220,11 @@
             align-items: center;
         }
 
-        /* --- 2. 信封层 (The Asset Layer) --- */
+        /* --- 2. Envelope Layer (The Asset Layer) --- */
         .envelope-wrapper {
             position: relative;
             width: 60%;
-            /* 增大信封尺寸 */
+            /* Increased envelope size */
             height: auto;
             cursor: pointer;
             z-index: 10;
@@ -231,32 +239,32 @@
         .lock-img {
             position: absolute;
             top: 58%;
-            /* 精准定位：处于盖口中心 */
+            /* Precise positioning: Centered on the flap */
             left: 50%;
             width: 30%;
             transform: translate(-50%, -50%);
             z-index: 11;
         }
 
-        /* --- 3. 解锁动画 (Unlocking) --- */
+        /* --- 3. Unlocking Animation --- */
         .envelope-wrapper.unlock {
             transform: scale(1.5);
-            /* 放大 */
+            /* Zoom in */
             opacity: 0;
-            /* 消失 */
+            /* Disappear */
             filter: blur(20px);
-            /* 动态模糊 */
+            /* Dynamic blur */
             pointer-events: none;
         }
 
-        /* --- 4. 隐藏的内容 (The Surprise) --- */
+        /* --- 4. Hidden Content (The Surprise) --- */
         .content {
             position: absolute;
             text-align: center;
             opacity: 0;
             transform: scale(0.8);
             transition: all 0.6s ease 0.4s;
-            /* 延迟显示 */
+            /* Delayed appearance */
             z-index: 5;
             width: 90%;
         }
@@ -275,7 +283,7 @@
             letter-spacing: 2px;
         }
 
-        /* 霓虹按钮 */
+        /* Neon buttons */
         button {
             padding: 15px 40px;
             border-radius: 50px;
@@ -298,7 +306,7 @@
             transform: scale(0.95);
         }
 
-        /* 按钮容器样式 */
+        /* Button group container style */
         .btn-group {
             display: flex;
             justify-content: center;
@@ -314,7 +322,7 @@
             transition: 0.1s ease;
         }
 
-        /* 浮动动画关键帧 */
+        /* Floating animation keyframes */
         @keyframes float {
 
             0%,
@@ -327,7 +335,7 @@
             }
         }
 
-        /* 赛博烟花画布 */
+        /* Cyber fireworks canvas */
         #fireworks {
             position: fixed;
             top: 0;
@@ -340,11 +348,11 @@
 
         .success-bg {
             background-color: #0c020d !important;
-            /* 固定的深紫色背景，不闪烁 */
+            /* Static deep purple background, no flickering */
             background-image: none !important;
         }
 
-        /* 按钮过渡效果 */
+        /* Button transition effects */
         #yes {
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 width 0.3s ease, height 0.3s ease, font-size 0.3s ease;
