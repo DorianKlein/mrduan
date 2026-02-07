@@ -18,6 +18,10 @@
 
         <div class="content" id="mainContent" style="display: none;">
 
+            <div class="gif-container">
+                <img id="mainGif" src="Te Amo Love GIF.gif" alt="Love GIF">
+            </div>
+
             <!-- ---------First Modification--------- -->
             <h1>Jenny:<br>Will you be my girlfriend?</h1>
             <!-- ----------------------------- -->
@@ -171,6 +175,9 @@
         yesBtn.addEventListener('click', () => {
             // UI Cleanup
             content.style.zIndex = '101';
+            const mainGif = document.getElementById('mainGif');
+            mainGif.src = "Heart Love GIF.gif";
+            mainGif.style.transform = "scaleX(1)"; // Reset flip for the second GIF
 
             // ------- Second Modification -------
             document.querySelector('h1').innerHTML = "I love you forever. ❤️";
@@ -281,6 +288,19 @@
             margin-bottom: 40px;
             line-height: 1.5;
             letter-spacing: 2px;
+        }
+
+        .gif-container {
+            margin-bottom: 20px;
+        }
+
+        #mainGif {
+            width: 200px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+            transform: scaleX(-1);
+            /* Flip the first GIF horizontally */
         }
 
         /* Neon buttons */
