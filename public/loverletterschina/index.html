@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>温暖来信... 💚</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* === 全局样式: 温暖背景 === */
+        * {
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #fdf6e3;
+            /* 温暖的奶油色 */
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Fredoka', 'Varela Round', sans-serif;
+            touch-action: none;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* === 马卡龙窗口样式 === */
+        .window {
+            position: absolute;
+            background: #fff;
+            border: 3px solid #fff;
+            border-radius: 20px;
+            /* 圆润的边界 */
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+            /* 贴纸风格阴影 */
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-user-select: none;
+            opacity: 0;
+            transform: scale(0.5);
+            /* 反弹动画效果 */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @media (max-width: 640px) {
+            .window {
+                width: 160px;
+            }
+        }
+
+        .window.show {
+            opacity: 1;
+            transform: scale(var(--scale, 1)) rotate(var(--rotation));
+            /* 添加随机旋转和缩放 */
+        }
+
+        /* 顶部栏 */
+        .window-header {
+            padding: 8px 15px 0 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .close-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+        }
+
+        /* 内容区域 */
+        .window-body {
+            padding: 5px 15px 15px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+            /* 深灰色文本，舒适柔和 */
+        }
+
+        .emoji {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .text {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        @media (max-width: 640px) {
+            .text {
+                font-size: 13px;
+            }
+
+            .emoji {
+                font-size: 22px;
+            }
+        }
+
+        /* === 最终大卡片和覆盖层 === */
+        #final-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(253, 246, 227, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #final-card {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 40px;
+            padding: 50px 20px;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 30px 100px rgba(255, 107, 107, 0.15);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 8px solid #FFE4E1;
+            box-sizing: border-box;
+        }
+
+        #final-card.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .card-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 10px 15px rgba(255, 107, 107, 0.2));
+            animation: heartBeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartBeat {
+            0% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.15);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.15);
+            }
+
+            70% {
+                transform: scale(1);
+            }
+        }
+
+        #card-to {
+            font-family: 'Segoe UI', 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 32px;
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+        }
+
+        #card-msg {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 35px;
+            padding: 0 20px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .btn-replay {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            border-radius: 100px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', 'Fredoka', sans-serif;
+        }
+
+        .btn-replay:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-replay:active {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 640px) {
+            #final-card {
+                padding: 40px 15px;
+                border-radius: 30px;
+            }
+
+            .card-icon {
+                font-size: 60px;
+            }
+
+            #card-to {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+
+            #card-msg {
+                font-size: 16px;
+                padding: 0 15px;
+                margin-bottom: 25px;
+            }
+
+            .btn-replay {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="final-overlay"></div>
+    <div id="final-card">
+        <!-- <div class="card-icon"></div> -->
+        <h2 id="card-to">给: 亲爱的自己</h2>
+        <p id="card-msg">你已经尽力了，好好休息 🌙</p>
+        <button class="btn-replay" onclick="celebrate()">再获一些温暖 ✨</button>
+    </div>
+
+    <script>
+        // 全局定义celebrate函数
+        window.celebrate = function () {
+            // 1. 播放按钮音效
+            if (popSound) {
+                popSound.currentTime = 0;
+                popSound.volume = 0.6;
+                popSound.play().catch(() => { });
+            }
+
+            // 2. 按钮交互反馈（变绿 + 改变文本）
+            const btn = document.querySelector('.btn-replay');
+            if (btn) {
+                btn.innerHTML = "温暖已接收 💚";
+                btn.style.background = "linear-gradient(to right, #86efac, #6ee7b7)";
+                btn.style.boxShadow = "0 10px 25px rgba(110, 231, 183, 0.5)";
+                btn.disabled = true;
+            }
+
+            // 3. 启动烟火效果
+            if (typeof confetti === 'undefined') return;
+
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // 左边的烟火
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 100,
+                    origin: { x: 0 },
+                    zIndex: 10000,
+                    colors: ['#ff6b6b', '#ffb7b2', '#fdf6e3']
+                });
+                // 右边的烟火
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 100,
+                    origin: { x: 1 },
+                    zIndex: 10000,
+                    colors: ['#ff6b6b', '#ffb7b2', '#fdf6e3']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        };
+
+        // === 1. 马卡龙色板 === 
+        const palettes = [
+            { bg: "#FFB7B2", text: "#FFFFFF" }, // 蜜桃粉
+            { bg: "#FFDAC1", text: "#555555" }, // 杏色
+            { bg: "#E2F0CB", text: "#555555" }, // 抹茶绿
+            { bg: "#B5EAD7", text: "#555555" }, // 薄荷绿
+            { bg: "#C7CEEA", text: "#FFFFFF" }, // 紫蓝
+            { bg: "#fff0f5", text: "#555555" }, // 浅粉
+            { bg: "#e0ffff", text: "#555555" }  // 浅蓝
+        ];
+
+        // === 2. 中文祝福语 ===
+        const wishes = [
+            "你的感受很有效 💚",
+            "学会接纳自己 🌱",
+            "允许自己放松 🧘",
+            "今天已经尽力了 ✓",
+            "休息是为了前进 🌙",
+            "你不需要完美 🎯",
+            "坚持会有收获 📈",
+            "相信自己的直觉 🧭",
+            "慢下来也没关系 🐢",
+            "喝点水休息一下 💧",
+            "你的想法值得听 👂",
+            "焦虑会过去的 ☀️",
+            "允许自己犯错 ❌",
+            "改变需要时间 ⏳",
+            "你已经在进步 🌱",
+            "情绪是正常的 🌊",
+            "给自己个拥抱 🤗",
+            "你做出了选择 💪",
+            "深呼吸 会好的 🫁",
+            "承认压力是第一步 🎈",
+            "小事也值得庆祝 🎉",
+            "你不是在浪费时间 ⏱️",
+            "改变从现在开始 🔔",
+            "放下不属于你的 🪶",
+            "你的痛苦被看见了 👁️",
+            "有时候就是累了 😴",
+            "需要时刻的宽容 🤲",
+            "你很勇敢 🦁",
+            "允许有低潮期 📉",
+            "好好照顾自己 🛁",
+            "诚实面对感受 💭",
+            "改变不会一蹴而就 🌤️",
+            "你在慢慢变好 🌸",
+            "保留一些能量给自己 ⚡",
+            "今天对你足够了 ✨",
+            "甚至放弃也是选择 🪧",
+            "你配得上温柔对待 🤍",
+            "倾听你的内心 🔊",
+            "失败不定义你 🎲",
+            "明天再开始可以 🌅"
+        ];
+
+        const emojis = ["💖", "🌈", "✨", "🍓", "🧸", "🎈", "🍭", "🍬", "🎀", "🦄"];
+        const popSound = new Audio('pop.mp3');
+
+        // === 3. URL参数读取 ===
+        const params = new URLSearchParams(window.location.search);
+
+        const toName = params.get('to') || '亲爱的自己';
+        const mainMsg = params.get('msg') || '只是想提醒你:好好照顾自己 💚';
+
+        // 清除地址栏URL参数
+        history.replaceState(null, '', window.location.pathname);
+
+        // === 4. 疯狂弹窗逻辑 ===
+        let count = 0;
+        const totalPopups = 150;
+        const screenW = window.innerWidth;
+        const screenH = window.innerHeight;
+
+        function createPopup() {
+            if (count >= totalPopups) {
+                setTimeout(showFinalCard, 500);
+                return;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'window';
+
+            // 随机颜色方案
+            const palette = palettes[Math.floor(Math.random() * palettes.length)];
+            div.style.backgroundColor = palette.bg;
+            div.style.color = palette.text;
+
+            // 随机旋转角度和缩放
+            const rotate = (Math.random() * 60 - 30).toFixed(2);
+            const scale = (Math.random() * 0.4 + 0.8).toFixed(2);
+            div.style.setProperty('--rotation', rotate + 'deg');
+            div.style.setProperty('--scale', scale);
+
+            // 随机位置
+            const windowWidth = window.innerWidth <= 640 ? 160 : 220;
+            const x = Math.random() * (screenW - windowWidth);
+            const y = Math.random() * (screenH - 150);
+            div.style.left = x + "px";
+            div.style.top = y + "px";
+            div.style.zIndex = 100 + count;
+
+            // 随机内容
+            const txt = wishes[Math.floor(Math.random() * wishes.length)];
+            const emj = emojis[Math.floor(Math.random() * emojis.length)];
+
+            div.innerHTML = `
+                    <div class="window-header">
+                        <div class="close-dot"></div>
+                    </div>
+                    <div class="window-body">
+                        <div class="emoji">${emj}</div>
+                        <div class="text">${txt}</div>
+                    </div>
+                `;
+
+            document.body.appendChild(div);
+
+            // 每3个弹窗播放音效
+            if (count % 3 === 0) {
+                popSound.currentTime = 0;
+                popSound.play().catch(() => { });
+            }
+
+            // 触发动画
+            requestAnimationFrame(() => {
+                div.classList.add('show');
+            });
+
+            count++;
+
+            // === 速度模式 ===
+            let nextTime = Math.random() * 50 + 30;
+            setTimeout(createPopup, nextTime);
+        }
+
+        function showFinalCard() {
+            const overlay = document.getElementById('final-overlay');
+            const card = document.getElementById('final-card');
+
+            document.getElementById('card-to').innerText = `给: ${toName}`;
+            document.getElementById('card-msg').innerText = mainMsg;
+
+            overlay.style.display = 'block';
+            card.style.display = 'block';
+
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                card.classList.add('show');
+            }, 100);
+        }
+
+        // === 启动 ===
+        window.onload = function () {
+            setTimeout(createPopup, 300);
+        };
+
+        // 处理窗口变化（响应式）
+        window.addEventListener('resize', () => {
+            // 重新计算屏幕尺寸
+            screenW = window.innerWidth;
+            screenH = window.innerHeight;
+        });
+    </script>
+</body>
+
+</html>
