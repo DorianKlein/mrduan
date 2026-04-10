@@ -398,7 +398,8 @@
         // === 3. URL参数读取 ===
         const params = new URLSearchParams(window.location.search);
 
-        const toName = params.get('to') || '只是想提醒你:';
+        
+        const toName = params.get('to') || '送给大连市委宣传部的小伙伴';
         const mainMsg = params.get('msg') || '好好照顾自己 💚';
 
         // 清除地址栏URL参数
