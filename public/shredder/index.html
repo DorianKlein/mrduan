@@ -519,7 +519,18 @@
       var FEED_DISTANCE = 98;
       var FALLBACK_AUDIO_SECONDS = 8;
 
-      var shredAudio = new Audio("suizhi.mp3");
+      function resolveAudioSrc() {
+        var pathname = window.location.pathname;
+        if (pathname.endsWith("/index.html")) {
+          pathname = pathname.slice(0, -"index.html".length);
+        }
+        if (!pathname.endsWith("/")) {
+          pathname += "/";
+        }
+        return window.location.origin + pathname + "suizhi.mp3";
+      }
+
+      var shredAudio = new Audio(resolveAudioSrc());
       shredAudio.preload = "auto";
       shredAudio.volume = 0.9;
       shredAudio.setAttribute("playsinline", "");
