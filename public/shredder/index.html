@@ -167,6 +167,7 @@
 
     .actions {
       display: flex;
+      justify-content: center;
       align-items: center;
       gap: 12px;
       margin-top: 20px;
@@ -365,6 +366,7 @@
       background: #fff1f7;
       color: #a04573;
       font-weight: 600;
+      text-align: center;
     }
 
     .hint {
@@ -448,11 +450,11 @@
 
       <section class="section actions">
         <button class="btn btn-primary" id="shredBtn">开始粉碎</button>
-        <button class="btn btn-secondary" id="resetBtn" style="display:none;">重新来过</button>
+        <button class="btn btn-secondary" id="resetBtn" style="display:none;">还要粉碎</button>
         <div class="status" id="statusText"></div>
       </section>
 
-      <div class="result" id="resultText">团市委宣传部小伙伴坏情绪清空！祝你每天都是好心情！</div>
+      <div class="result" id="resultText">已清空<br />祝你每天都是好心情！</div>
       <!-- <div class="result" id="resultText">祝你每天都是好心情！</div> -->
 
     </div>
@@ -470,6 +472,10 @@
       var shredAudio = new Audio("suizhi.mp3");
       shredAudio.preload = "auto";
       shredAudio.volume = 0.9;
+      shredAudio.setAttribute("playsinline", "");
+
+      var audioUnlocked = false;
+      var audioUnlocking = false;
 
       var selectedWords = [];
 
@@ -499,6 +505,49 @@
           return FALLBACK_AUDIO_SECONDS;
         }
         return clamp(d, 4, 20);
+      }
+
+      function unlockAudioFromGesture() {
+        if (audioUnlocked || audioUnlocking) {
+          return;
+        }
+
+        audioUnlocking = true;
+        var originalVolume = shredAudio.volume;
+        shredAudio.volume = 0;
+
+        var playPromise = shredAudio.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise.then(function () {
+            shredAudio.pause();
+            shredAudio.currentTime = 0;
+            audioUnlocked = true;
+          }).catch(function () {
+            // Keep graceful fallback for browsers that still block this attempt.
+          }).then(function () {
+            shredAudio.volume = originalVolume;
+            audioUnlocking = false;
+          });
+          return;
+        }
+
+        shredAudio.pause();
+        shredAudio.currentTime = 0;
+        shredAudio.volume = originalVolume;
+        audioUnlocked = true;
+        audioUnlocking = false;
+      }
+
+      function playShredAudio() {
+        shredAudio.pause();
+        shredAudio.currentTime = 0;
+
+        var playPromise = shredAudio.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(function () {
+            statusText.textContent = "碾碎完成，碎纸下落中...（浏览器阻止了自动播放音效）";
+          });
+        }
       }
 
       function configurePaperTransition(paperEl, totalSec) {
@@ -703,6 +752,8 @@
       }
 
       function runShred() {
+        unlockAudioFromGesture();
+
         var content = inputEl.value.trim();
         if (!content && selectedWords.length > 0) {
           content = selectedWords.join("、");
@@ -717,6 +768,7 @@
         statusText.textContent = "碎纸机启动中...";
         resultText.style.display = "none";
         shredBtn.disabled = true;
+        shredBtn.style.display = "none";
 
         inputSection.style.display = "none";
         composeSection.style.display = "none";
@@ -744,12 +796,7 @@
             }
             ui.paper.removeEventListener("transitionend", onFeedEnd);
             statusText.textContent = "碾碎完成，碎纸下落中...";
-
-            shredAudio.pause();
-            shredAudio.currentTime = 0;
-            shredAudio.play().catch(function () {
-              statusText.textContent = "碾碎完成，碎纸下落中...（浏览器阻止了自动播放音效）";
-            });
+            playShredAudio();
 
             ui.paper.classList.add("fade");
             requestAnimationFrame(function () {
@@ -781,6 +828,7 @@
         resultText.style.display = "none";
         resetBtn.style.display = "none";
         shredBtn.disabled = false;
+        shredBtn.style.display = "inline-flex";
 
         var tagButtons = tagsEl.querySelectorAll(".tag");
         tagButtons.forEach(function (btn) {
@@ -792,6 +840,7 @@
       }
 
       addWordBtn.addEventListener("click", addCustomWord);
+      document.addEventListener("pointerdown", unlockAudioFromGesture, { passive: true });
       customWordInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
           event.preventDefault();
