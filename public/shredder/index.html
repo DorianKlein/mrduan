@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>情绪粉碎机</title>
+  <style>
+    :root {
+      --bg: #fff4f8;
+      --card: #fffdfd;
+      --text: #5d3f4f;
+      --muted: #9b7a8b;
+      --line: #f2d8e2;
+      --primary: #e779a9;
+      --tag-bg: #fff1f7;
+      --tag-border: #f5cee0;
+      --tag-active-bg: #ea8cb4;
+      --tag-active-text: #ffffff;
+      --shadow-lg: 0 24px 60px rgba(212, 133, 171, 0.18), 0 2px 8px rgba(212, 133, 171, 0.1);
+      --shadow-sm: 0 8px 22px rgba(220, 140, 179, 0.2);
+      --radius-xl: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: "PingFang SC", "SF Pro Text", "Helvetica Neue", "Noto Sans SC", sans-serif;
+      background: radial-gradient(circle at 18% 8%, #fffdfd 0%, #fff2f8 42%, #ffe9f2 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(760px, 100%);
+      background: var(--card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .content {
+      padding: 32px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.6rem, 2vw + 1rem, 2.2rem);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      font-weight: 650;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .section {
+      margin-top: 26px;
+    }
+
+    .label {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      appearance: none;
+      border: 1px solid var(--tag-border);
+      background: var(--tag-bg);
+      color: #855f72;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+    }
+
+    .tag:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(229, 146, 186, 0.22);
+    }
+
+    .tag.active {
+      background: var(--tag-active-bg);
+      color: var(--tag-active-text);
+      border-color: #e37ca8;
+    }
+
+    .tag-tools {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .word-input {
+      flex: 1;
+      min-width: 210px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      font: 400 0.95rem/1.4 "PingFang SC", "SF Pro Text", "Helvetica Neue", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      outline: none;
+    }
+
+    .word-input:focus {
+      border-color: #eea2c4;
+      box-shadow: 0 0 0 3px rgba(238, 162, 196, 0.24);
+    }
+
+    .textarea-shell {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fffafc;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 1px 2px rgba(226, 144, 182, 0.08);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 0;
+      outline: 0;
+      resize: vertical;
+      padding: 18px;
+      font: 400 1rem/1.7 "PingFang SC", "SF Pro Text", "Helvetica Neue", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background: transparent;
+    }
+
+    textarea::placeholder {
+      color: #c6a6b6;
+    }
+
+    .selected-preview {
+      margin-top: 10px;
+      color: #b5899d;
+      font-size: 0.88rem;
+      min-height: 20px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      font-size: 0.96rem;
+      font-weight: 600;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.995);
+    }
+
+    .btn-primary {
+      color: #ffffff;
+      background: linear-gradient(180deg, #f39ac0 0%, #e678a8 100%);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #ef8eb9 0%, #dd649a 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      color: #7e5468;
+      background: #fff1f7;
+      border: 1px solid #f2cede;
+    }
+
+    .status {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .shredder-stage {
+      display: none;
+      position: relative;
+      min-height: 400px;
+      border-radius: 20px;
+      border: 1px solid #f1d3e1;
+      background: linear-gradient(180deg, #fffafb 0%, #fff0f7 100%);
+      overflow: hidden;
+    }
+
+    .machine {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      width: min(480px, calc(100% - 34px));
+      height: 180px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #fff0f6 0%, #f8dceb 100%);
+      border: 1px solid #efc8dc;
+      box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.72), 0 10px 24px rgba(223, 141, 181, 0.25);
+    }
+
+    .machine-top {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 16px;
+      height: 22px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f5cede 0%, #ebaec8 100%);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+
+    .slot {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 52px;
+      width: 68%;
+      height: 10px;
+      border-radius: 999px;
+      background: #9a6780;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.24);
+      z-index: 8;
+    }
+
+    .rollers {
+      position: absolute;
+      left: 50%;
+      top: 72px;
+      transform: translateX(-50%);
+      width: 68%;
+      display: flex;
+      justify-content: space-between;
+      z-index: 7;
+      pointer-events: none;
+    }
+
+    .roller {
+      position: relative;
+      width: 52px;
+      height: 48px;
+      background: linear-gradient(180deg, #ffd9e8 0%, #ef9dc2 55%, #d874a3 100%);
+      clip-path: polygon(50% 92%, 18% 62%, 8% 38%, 18% 19%, 35% 11%, 50% 22%, 65% 11%, 82% 19%, 92% 38%, 82% 62%);
+      filter: drop-shadow(0 1px 0 #c56d97) drop-shadow(0 4px 6px rgba(156, 72, 113, 0.25));
+      transform-origin: center;
+    }
+
+    .roller::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.16) 45%, rgba(255, 255, 255, 0) 68%);
+      clip-path: inherit;
+    }
+
+    .machine.is-running .roller {
+      animation: spin 0.26s linear infinite;
+    }
+
+    .paper-sheet {
+      position: absolute;
+      left: 50%;
+      top: 26px;
+      transform: translateX(-50%);
+      width: min(430px, calc(100% - 60px));
+      height: 350px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fffefe 0%, #fff2f8 100%);
+      border: 1px solid #f0d2e1;
+      box-shadow: 0 16px 22px rgba(220, 140, 179, 0.2);
+      z-index: 6;
+      overflow: hidden;
+      transition: transform 2.2s cubic-bezier(0.24, 0.8, 0.2, 1), opacity 0.75s ease;
+      will-change: transform, opacity;
+    }
+
+    .paper-sheet.feed {
+      transform: translateX(-50%) translateY(98px);
+    }
+
+    .paper-sheet.fade {
+      opacity: 0;
+    }
+
+    .paper-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.9;
+      padding: 16px;
+      color: #1f2937;
+      font-size: 2.12rem;
+      text-align: left;
+    }
+
+    .paper-strip {
+      position: absolute;
+      top: 146px;
+      height: 170px;
+      overflow: hidden;
+      border-left: 1px solid rgba(240, 208, 223, 0.84);
+      border-right: 1px solid rgba(240, 208, 223, 0.84);
+      background: linear-gradient(180deg, #fffefe 0%, #fff0f7 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+      opacity: 0;
+      animation-name: none;
+      animation-duration: 2.6s;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+      animation-fill-mode: forwards;
+      z-index: 5;
+      will-change: transform, opacity;
+    }
+
+    .strip-content {
+      position: absolute;
+      top: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      pointer-events: none;
+      color: #1f2937;
+      font: 400 2.12rem/1.9 "PingFang SC", "SF Pro Text", "Helvetica Neue", "Noto Sans SC", sans-serif;
+      padding: 16px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 22px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid #f5c8db;
+      background: #fff1f7;
+      color: #a04573;
+      font-weight: 600;
+    }
+
+    .hint {
+      font-size: 0.84rem;
+      color: #bc8fa3;
+      margin-top: 8px;
+    }
+
+    @keyframes strip-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(300px) rotate(var(--tilt, 6deg));
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .content {
+        padding: 22px;
+      }
+
+      .paper-text,
+      .strip-content,
+      textarea {
+        font-size: 2.02rem;
+      }
+
+      .shredder-stage {
+        min-height: 400px;
+      }
+
+      .machine {
+        height: 170px;
+      }
+
+      .paper-strip {
+        height: 152px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="content">
+      <h1 class="title">情绪粉碎机</h1>
+      <p class="subtitle">选中你的情绪词或补充你的情绪，再把它交给碎纸机碾碎。</p>
+
+      <section class="section" id="inputSection">
+        <span class="label">快捷 Tag（可多选）</span>
+        <div class="tags" id="tags"></div>
+        <div class="tag-tools">
+          <input class="word-input" id="customWordInput" type="text" maxlength="20" placeholder="添加自定义词语，例如：内耗" />
+          <button class="btn btn-secondary" id="addWordBtn" type="button">添加词语</button>
+        </div>
+        <div class="selected-preview" id="selectedPreview"></div>
+      </section>
+
+      <section class="section" id="composeSection">
+        <span class="label">纸上的内容（可编辑）</span>
+        <div class="textarea-shell" id="textareaShell">
+          <textarea id="emotionInput" placeholder="你可以继续补充一句话，也可以只使用上面的词语。"></textarea>
+        </div>
+      </section>
+
+      <section class="section" id="stageSection">
+        <div class="shredder-stage" id="shredderStage" aria-hidden="true"></div>
+        <!-- <p class="hint">提示：点击“开始粉碎”后，纸张会先进入滚轮，再变成碎纸条下落。</p> -->
+      </section>
+
+      <section class="section actions">
+        <button class="btn btn-primary" id="shredBtn">开始粉碎</button>
+        <button class="btn btn-secondary" id="resetBtn" style="display:none;">重新来过</button>
+        <div class="status" id="statusText"></div>
+      </section>
+
+      <div class="result" id="resultText">团市委宣传部小伙伴坏情绪清空！祝你每天都是好心情！</div>
+      <!-- <div class="result" id="resultText">祝你每天都是好心情！</div> -->
+
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var QUICK_TAGS = [
+        "焦虑", "委屈", "烦躁", "不甘", "心累", "失望", "被误解", "社交耗竭", "拖延自责", "害怕失败"
+      ];
+      var STRIP_COUNT = 18;
+      var FEED_DISTANCE = 98;
+      var FALLBACK_AUDIO_SECONDS = 8;
+
+      var shredAudio = new Audio("suizhi.mp3");
+      shredAudio.preload = "auto";
+      shredAudio.volume = 0.9;
+
+      var selectedWords = [];
+
+      var tagsEl = document.getElementById("tags");
+      var selectedPreviewEl = document.getElementById("selectedPreview");
+      var customWordInput = document.getElementById("customWordInput");
+      var addWordBtn = document.getElementById("addWordBtn");
+
+      var inputSection = document.getElementById("inputSection");
+      var composeSection = document.getElementById("composeSection");
+      var inputEl = document.getElementById("emotionInput");
+      var shellEl = document.getElementById("textareaShell");
+      var stageEl = document.getElementById("shredderStage");
+
+      var shredBtn = document.getElementById("shredBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var statusText = document.getElementById("statusText");
+      var resultText = document.getElementById("resultText");
+
+      function clamp(num, min, max) {
+        return Math.max(min, Math.min(max, num));
+      }
+
+      function getAudioDurationSeconds() {
+        var d = shredAudio.duration;
+        if (!Number.isFinite(d) || d <= 0) {
+          return FALLBACK_AUDIO_SECONDS;
+        }
+        return clamp(d, 4, 20);
+      }
+
+      function configurePaperTransition(paperEl, totalSec) {
+        var feedSec = clamp(totalSec * 0.34, 1.3, 6.2);
+        var fadeSec = clamp(totalSec * 0.1, 0.45, 1.4);
+        paperEl.style.transition = "transform " + feedSec.toFixed(3) + "s cubic-bezier(0.24, 0.8, 0.2, 1), opacity " + fadeSec.toFixed(3) + "s ease";
+        return feedSec;
+      }
+
+      function randomBetween(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function normalizeWord(word) {
+        return word.replace(/\s+/g, "").trim();
+      }
+
+      function renderSelectedPreview() {
+        if (selectedWords.length === 0) {
+          selectedPreviewEl.textContent = "当前未选择词语";
+          return;
+        }
+        selectedPreviewEl.textContent = "已选择：" + selectedWords.join("、");
+      }
+
+      function syncTextareaFromTags() {
+        if (selectedWords.length === 0) {
+          return;
+        }
+        if (!inputEl.value.trim()) {
+          inputEl.value = selectedWords.join("、");
+          return;
+        }
+
+        var base = inputEl.value;
+        selectedWords.forEach(function (word) {
+          if (base.indexOf(word) === -1) {
+            base += (base.endsWith("，") || base.endsWith("。") || base.endsWith("、") ? "" : "，") + word;
+          }
+        });
+        inputEl.value = base;
+      }
+
+      function toggleWord(word, btnEl) {
+        var index = selectedWords.indexOf(word);
+        if (index >= 0) {
+          selectedWords.splice(index, 1);
+          btnEl.classList.remove("active");
+        } else {
+          selectedWords.push(word);
+          btnEl.classList.add("active");
+        }
+        renderSelectedPreview();
+        syncTextareaFromTags();
+      }
+
+      function createTagButton(word) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tag";
+        btn.textContent = word;
+        btn.dataset.word = word;
+        btn.addEventListener("click", function () {
+          toggleWord(word, btn);
+        });
+        return btn;
+      }
+
+      function createTags() {
+        QUICK_TAGS.forEach(function (word) {
+          tagsEl.appendChild(createTagButton(word));
+        });
+      }
+
+      function addCustomWord() {
+        var rawWord = customWordInput.value;
+        var word = normalizeWord(rawWord);
+        if (!word) {
+          customWordInput.focus();
+          return;
+        }
+
+        var existed = !!tagsEl.querySelector('[data-word="' + word + '"]');
+        if (!existed) {
+          tagsEl.appendChild(createTagButton(word));
+        }
+
+        var btn = tagsEl.querySelector('[data-word="' + word + '"]');
+        if (btn && !btn.classList.contains("active")) {
+          toggleWord(word, btn);
+        }
+
+        customWordInput.value = "";
+        customWordInput.focus();
+      }
+
+      function renderMachine(content) {
+        stageEl.innerHTML = "";
+        stageEl.style.display = "block";
+
+        var machine = document.createElement("div");
+        machine.className = "machine";
+
+        var machineTop = document.createElement("div");
+        machineTop.className = "machine-top";
+
+        var slot = document.createElement("div");
+        slot.className = "slot";
+
+        var rollers = document.createElement("div");
+        rollers.className = "rollers";
+        for (var i = 0; i < 6; i += 1) {
+          var roller = document.createElement("div");
+          roller.className = "roller";
+          rollers.appendChild(roller);
+        }
+
+        var paper = document.createElement("div");
+        paper.className = "paper-sheet";
+        var paperText = document.createElement("div");
+        paperText.className = "paper-text";
+        paperText.textContent = content;
+        paper.appendChild(paperText);
+
+        machine.appendChild(machineTop);
+        machine.appendChild(slot);
+        machine.appendChild(rollers);
+
+        stageEl.appendChild(paper);
+        stageEl.appendChild(machine);
+
+        return {
+          machine: machine,
+          paper: paper,
+          paperText: paperText
+        };
+      }
+
+      function createStrips(content, paperEl, timing) {
+        var paperRect = paperEl.getBoundingClientRect();
+        var stageRect = stageEl.getBoundingClientRect();
+
+        var paperWidth = paperRect.width;
+        var paperHeight = paperRect.height;
+        var leftInStage = paperRect.left - stageRect.left;
+        var topInStage = paperRect.top - stageRect.top;
+        var stripWidth = paperWidth / STRIP_COUNT;
+        var fragment = document.createDocumentFragment();
+        var strips = [];
+
+        for (var i = 0; i < STRIP_COUNT; i += 1) {
+          var strip = document.createElement("div");
+          strip.className = "paper-strip";
+          strip.style.width = stripWidth + "px";
+          strip.style.left = leftInStage + i * stripWidth + "px";
+          strip.style.top = topInStage + FEED_DISTANCE + 112 + "px";
+          strip.style.height = Math.max(72, paperHeight - 48) + "px";
+          var delaySec = i === 0 ? 0 : randomBetween(0.03, timing.maxDelaySec);
+          var targetEndSec = randomBetween(timing.endMinSec, timing.endMaxSec);
+          var durationSec = Math.max(0.6, targetEndSec - delaySec);
+
+          strip.style.animationDelay = delaySec.toFixed(3) + "s";
+          strip.style.animationDuration = durationSec.toFixed(3) + "s";
+          strip.style.setProperty("--tilt", randomBetween(-9, 9).toFixed(2) + "deg");
+
+          var textLayer = document.createElement("div");
+          textLayer.className = "strip-content";
+          textLayer.textContent = content;
+          textLayer.style.width = paperWidth + "px";
+          textLayer.style.height = paperHeight + "px";
+          textLayer.style.left = -i * stripWidth + "px";
+
+          strip.appendChild(textLayer);
+          fragment.appendChild(strip);
+          strips.push(strip);
+        }
+
+        stageEl.appendChild(fragment);
+        return strips;
+      }
+
+      function startStrips(strips) {
+        strips.forEach(function (strip) {
+          strip.style.animationName = "strip-fall";
+        });
+      }
+
+      function finalizeByAnimationEnd(strips) {
+        var finished = 0;
+
+        strips.forEach(function (strip) {
+          strip.addEventListener("animationend", function onEnd() {
+            strip.removeEventListener("animationend", onEnd);
+            finished += 1;
+            if (finished === strips.length) {
+              statusText.textContent = "";
+              resultText.style.display = "block";
+              resetBtn.style.display = "inline-flex";
+            }
+          });
+        });
+      }
+
+      function runShred() {
+        var content = inputEl.value.trim();
+        if (!content && selectedWords.length > 0) {
+          content = selectedWords.join("、");
+        }
+
+        if (!content) {
+          statusText.textContent = "请先选择或添加词语。";
+          customWordInput.focus();
+          return;
+        }
+
+        statusText.textContent = "碎纸机启动中...";
+        resultText.style.display = "none";
+        shredBtn.disabled = true;
+
+        inputSection.style.display = "none";
+        composeSection.style.display = "none";
+
+        var totalSec = getAudioDurationSeconds();
+        var introDelayMs = clamp(totalSec * 0.05 * 1000, 100, 700);
+
+        var ui = renderMachine(content);
+        var feedSec = configurePaperTransition(ui.paper, totalSec);
+        var remainingSec = Math.max(1.2, totalSec - introDelayMs / 1000 - feedSec);
+        var stripTiming = {
+          endMinSec: remainingSec * 0.74,
+          endMaxSec: remainingSec * 0.98,
+          maxDelaySec: clamp(remainingSec * 0.24, 0.22, 1.8)
+        };
+        var strips = createStrips(content, ui.paper, stripTiming);
+
+        setTimeout(function () {
+          statusText.textContent = "纸张进入滚轮中...";
+          ui.machine.classList.add("is-running");
+
+          ui.paper.addEventListener("transitionend", function onFeedEnd(event) {
+            if (event.propertyName !== "transform") {
+              return;
+            }
+            ui.paper.removeEventListener("transitionend", onFeedEnd);
+            statusText.textContent = "碾碎完成，碎纸下落中...";
+
+            shredAudio.pause();
+            shredAudio.currentTime = 0;
+            shredAudio.play().catch(function () {
+              statusText.textContent = "碾碎完成，碎纸下落中...（浏览器阻止了自动播放音效）";
+            });
+
+            ui.paper.classList.add("fade");
+            requestAnimationFrame(function () {
+              startStrips(strips);
+              finalizeByAnimationEnd(strips);
+            });
+          });
+
+          requestAnimationFrame(function () {
+            ui.paper.classList.add("feed");
+          });
+        }, introDelayMs);
+      }
+
+      function resetAll() {
+        shredAudio.pause();
+        shredAudio.currentTime = 0;
+
+        stageEl.innerHTML = "";
+        stageEl.style.display = "none";
+
+        inputSection.style.display = "block";
+        composeSection.style.display = "block";
+
+        selectedWords = [];
+        inputEl.value = "";
+        customWordInput.value = "";
+        statusText.textContent = "";
+        resultText.style.display = "none";
+        resetBtn.style.display = "none";
+        shredBtn.disabled = false;
+
+        var tagButtons = tagsEl.querySelectorAll(".tag");
+        tagButtons.forEach(function (btn) {
+          btn.classList.remove("active");
+        });
+
+        renderSelectedPreview();
+        customWordInput.focus();
+      }
+
+      addWordBtn.addEventListener("click", addCustomWord);
+      customWordInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          addCustomWord();
+        }
+      });
+
+      shredBtn.addEventListener("click", runShred);
+      resetBtn.addEventListener("click", resetAll);
+
+      createTags();
+      renderSelectedPreview();
+    })();
+  </script>
+</body>
+</html>
