@@ -222,6 +222,47 @@
       overflow: hidden;
     }
 
+    .swipe-prompt {
+      height: 100%;
+      min-height: 400px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .swipe-card {
+      width: min(420px, 100%);
+      border-radius: 20px;
+      border: 1px solid #f3ccde;
+      background: linear-gradient(180deg, #fff7fb 0%, #fff0f7 100%);
+      box-shadow: 0 10px 24px rgba(223, 141, 181, 0.18);
+      padding: 26px 20px;
+      text-align: center;
+    }
+
+    .swipe-arrow {
+      font-size: 2rem;
+      line-height: 1;
+      color: #d46f9f;
+      animation: swipe-bob 1.05s ease-in-out infinite alternate;
+      margin-bottom: 10px;
+    }
+
+    .swipe-title {
+      margin: 0;
+      font-size: 1.06rem;
+      color: #9a5877;
+      font-weight: 620;
+    }
+
+    .swipe-subtitle {
+      margin: 10px 0 0;
+      font-size: 0.92rem;
+      color: #b3839a;
+    }
+
     .machine {
       position: absolute;
       left: 50%;
@@ -395,6 +436,15 @@
       }
     }
 
+    @keyframes swipe-bob {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(10px);
+      }
+    }
+
     @media (max-width: 640px) {
       .content {
         padding: 22px;
@@ -476,6 +526,9 @@
 
       var audioUnlocked = false;
       var audioUnlocking = false;
+      var pendingContent = "";
+      var awaitingSwipe = false;
+      var swipeStartY = null;
 
       var selectedWords = [];
 
@@ -545,9 +598,87 @@
         var playPromise = shredAudio.play();
         if (playPromise && typeof playPromise.catch === "function") {
           playPromise.catch(function () {
-            statusText.textContent = "碾碎完成，碎纸下落中...（浏览器阻止了自动播放音效）";
+            statusText.textContent = "碾碎中...";
           });
         }
+      }
+
+      function renderSwipePrompt() {
+        stageEl.innerHTML = "";
+        stageEl.style.display = "block";
+
+        var prompt = document.createElement("div");
+        prompt.className = "swipe-prompt";
+
+        var card = document.createElement("div");
+        card.className = "swipe-card";
+
+        var arrow = document.createElement("div");
+        arrow.className = "swipe-arrow";
+        arrow.textContent = "↓";
+
+        var title = document.createElement("p");
+        title.className = "swipe-title";
+        title.textContent = "向下滑动，开始粉碎";
+
+        var subtitle = document.createElement("p");
+        subtitle.className = "swipe-subtitle";
+        subtitle.textContent = "松手后，碎纸机会立即启动";
+
+        card.appendChild(arrow);
+        card.appendChild(title);
+        card.appendChild(subtitle);
+        prompt.appendChild(card);
+        stageEl.appendChild(prompt);
+
+        return prompt;
+      }
+
+      function startShredWithContent(content) {
+        inputSection.style.display = "none";
+        composeSection.style.display = "none";
+
+        statusText.textContent = "碎纸机启动中...";
+        resultText.style.display = "none";
+        shredBtn.disabled = true;
+        shredBtn.style.display = "none";
+
+        var totalSec = getAudioDurationSeconds();
+        var introDelayMs = clamp(totalSec * 0.05 * 1000, 100, 700);
+
+        var ui = renderMachine(content);
+        var feedSec = configurePaperTransition(ui.paper, totalSec);
+        var remainingSec = Math.max(1.2, totalSec - introDelayMs / 1000 - feedSec);
+        var stripTiming = {
+          endMinSec: remainingSec * 0.74,
+          endMaxSec: remainingSec * 0.98,
+          maxDelaySec: clamp(remainingSec * 0.24, 0.22, 1.8)
+        };
+        var strips = createStrips(content, ui.paper, stripTiming);
+
+        setTimeout(function () {
+          statusText.textContent = "纸张进入滚轮中...";
+          ui.machine.classList.add("is-running");
+
+          ui.paper.addEventListener("transitionend", function onFeedEnd(event) {
+            if (event.propertyName !== "transform") {
+              return;
+            }
+            ui.paper.removeEventListener("transitionend", onFeedEnd);
+            statusText.textContent = "碾碎完成，碎纸下落中...";
+            playShredAudio();
+
+            ui.paper.classList.add("fade");
+            requestAnimationFrame(function () {
+              startStrips(strips);
+              finalizeByAnimationEnd(strips);
+            });
+          });
+
+          requestAnimationFrame(function () {
+            ui.paper.classList.add("feed");
+          });
+        }, introDelayMs);
       }
 
       function configurePaperTransition(paperEl, totalSec) {
@@ -752,8 +883,6 @@
       }
 
       function runShred() {
-        unlockAudioFromGesture();
-
         var content = inputEl.value.trim();
         if (!content && selectedWords.length > 0) {
           content = selectedWords.join("、");
@@ -765,50 +894,65 @@
           return;
         }
 
-        statusText.textContent = "碎纸机启动中...";
-        resultText.style.display = "none";
-        shredBtn.disabled = true;
-        shredBtn.style.display = "none";
+        pendingContent = content;
+        awaitingSwipe = true;
+        swipeStartY = null;
 
         inputSection.style.display = "none";
         composeSection.style.display = "none";
+        shredBtn.style.display = "none";
+        resetBtn.style.display = "none";
+        resultText.style.display = "none";
+        statusText.textContent = "向下滑动，开始粉碎";
 
-        var totalSec = getAudioDurationSeconds();
-        var introDelayMs = clamp(totalSec * 0.05 * 1000, 100, 700);
+        var promptEl = renderSwipePrompt();
 
-        var ui = renderMachine(content);
-        var feedSec = configurePaperTransition(ui.paper, totalSec);
-        var remainingSec = Math.max(1.2, totalSec - introDelayMs / 1000 - feedSec);
-        var stripTiming = {
-          endMinSec: remainingSec * 0.74,
-          endMaxSec: remainingSec * 0.98,
-          maxDelaySec: clamp(remainingSec * 0.24, 0.22, 1.8)
-        };
-        var strips = createStrips(content, ui.paper, stripTiming);
+        function readClientY(event) {
+          if (event.changedTouches && event.changedTouches[0]) {
+            return event.changedTouches[0].clientY;
+          }
+          if (event.touches && event.touches[0]) {
+            return event.touches[0].clientY;
+          }
+          return event.clientY;
+        }
 
-        setTimeout(function () {
-          statusText.textContent = "纸张进入滚轮中...";
-          ui.machine.classList.add("is-running");
+        function onSwipeStart(event) {
+          if (!awaitingSwipe) {
+            return;
+          }
+          swipeStartY = readClientY(event);
+        }
 
-          ui.paper.addEventListener("transitionend", function onFeedEnd(event) {
-            if (event.propertyName !== "transform") {
-              return;
-            }
-            ui.paper.removeEventListener("transitionend", onFeedEnd);
-            statusText.textContent = "碾碎完成，碎纸下落中...";
-            playShredAudio();
+        function onSwipeEnd(event) {
+          if (!awaitingSwipe || swipeStartY === null) {
+            return;
+          }
 
-            ui.paper.classList.add("fade");
-            requestAnimationFrame(function () {
-              startStrips(strips);
-              finalizeByAnimationEnd(strips);
-            });
-          });
+          var endY = readClientY(event);
+          var deltaY = endY - swipeStartY;
+          swipeStartY = null;
 
-          requestAnimationFrame(function () {
-            ui.paper.classList.add("feed");
-          });
-        }, introDelayMs);
+          if (deltaY < 56) {
+            statusText.textContent = "再向下滑动一点，开始粉碎";
+            return;
+          }
+
+          awaitingSwipe = false;
+          promptEl.removeEventListener("touchstart", onSwipeStart);
+          promptEl.removeEventListener("touchend", onSwipeEnd);
+          promptEl.removeEventListener("pointerdown", onSwipeStart);
+          promptEl.removeEventListener("pointerup", onSwipeEnd);
+
+          unlockAudioFromGesture();
+          startShredWithContent(pendingContent);
+          pendingContent = "";
+        }
+
+        promptEl.addEventListener("touchstart", onSwipeStart, { passive: true });
+        promptEl.addEventListener("touchend", onSwipeEnd, { passive: true });
+        promptEl.addEventListener("pointerdown", onSwipeStart);
+        promptEl.addEventListener("pointerup", onSwipeEnd);
       }
 
       function resetAll() {
@@ -829,6 +973,9 @@
         resetBtn.style.display = "none";
         shredBtn.disabled = false;
         shredBtn.style.display = "inline-flex";
+        pendingContent = "";
+        awaitingSwipe = false;
+        swipeStartY = null;
 
         var tagButtons = tagsEl.querySelectorAll(".tag");
         tagButtons.forEach(function (btn) {
@@ -840,7 +987,6 @@
       }
 
       addWordBtn.addEventListener("click", addCustomWord);
-      document.addEventListener("pointerdown", unlockAudioFromGesture, { passive: true });
       customWordInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
           event.preventDefault();
