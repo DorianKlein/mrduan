@@ -88,6 +88,8 @@
   place-items: center;
   gap: 12px;
   padding: 20px 14px 10px;
+  perspective: 960px;
+  perspective-origin: 50% 42%;
   border-radius: 20px;
   background:
     linear-gradient(160deg, rgba(255, 248, 224, 0.4), rgba(168, 91, 19, 0.14)),
@@ -104,25 +106,64 @@
   display: grid;
   place-items: center;
   transform-style: preserve-3d;
-  filter: drop-shadow(0 16px 18px rgba(76, 32, 0, 0.32));
+  filter: drop-shadow(0 22px 16px rgba(70, 28, 0, 0.34));
 }
 
-.coin::before {
-  content: "";
-  position: absolute;
-  inset: -5px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #fff2bf, #f4af39 50%, #8f4f04 100%);
-  z-index: -2;
+.coinBody3d {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  will-change: transform;
 }
 
-.coin::after {
-  content: "";
+.coinFaceFront3d,
+.coinFaceBack3d {
   position: absolute;
-  inset: -2px;
+  inset: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px rgba(255, 241, 186, 0.7), inset 0 10px 12px rgba(255, 255, 255, 0.24);
-  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.coinFaceFront3d {
+  transform: translateZ(10px);
+}
+
+.coinFaceBack3d {
+  transform: rotateY(180deg) translateZ(10px);
+  background:
+    radial-gradient(circle at 70% 72%, #f4c45f 0%, #cf8320 48%, #854707 100%);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 222, 126, 0.46),
+    inset 0 0 20px rgba(255, 255, 255, 0.14);
+}
+
+.coinRim3d {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.coinRimSegment {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 20px;
+  margin-left: -9px;
+  margin-top: -10px;
+  transform-style: preserve-3d;
+}
+
+.coinRimSlice {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f0bd5a 0%, #9f5b12 48%, #6c3905 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 230, 162, 0.38);
+  transform: rotateY(90deg);
+  backface-visibility: hidden;
 }
 
 .coinInner {
@@ -139,6 +180,8 @@
   line-height: 1;
   color: #d2792a;
   text-shadow: 0 1px 0 rgba(255, 236, 178, 0.35);
+  transform: translateZ(0.01px);
+  backface-visibility: hidden;
   z-index: 2;
   background:
     radial-gradient(circle at 30% 28%, #fff8cc 0%, #f9cb63 33%, #d88a22 66%, #8a4a05 100%);
@@ -201,6 +244,18 @@
   .coin {
     width: 130px;
     height: 130px;
+  }
+
+  .coinBody3d {
+    width: 130px;
+    height: 130px;
+  }
+
+  .coinRimSegment {
+    width: 16px;
+    height: 18px;
+    margin-left: -8px;
+    margin-top: -9px;
   }
 
   .coinInner {

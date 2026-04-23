@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Coin3D } from "./Coin3D";
 import styles from "./wishCoin.module.css";
 
 type WishToken = {
@@ -49,18 +50,14 @@ export function CoinFace({ tossing, tossSeed, result }: CoinFaceProps) {
           tossing
             ? {
                 y: [0, -180, -300, -180, 0],
-                rotateX: [0, 1080, 1800, 2520],
-                rotateY: [0, 120, 60, 0],
               }
             : {
                 y: 0,
-                rotateX: 0,
-                rotateY: 0,
               }
         }
         transition={{ duration: tossing ? 1.2 : 0.45, ease: "easeOut" }}
       >
-        <div className={styles.coinInner}>{tossing ? "?" : landedToken.word}</div>
+        <Coin3D tossing={tossing} tossSeed={tossSeed} word={tossing ? "?" : landedToken.word} />
       </motion.div>
 
       <div className={styles.coinResult}>
