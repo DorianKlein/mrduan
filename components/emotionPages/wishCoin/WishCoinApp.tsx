@@ -6,6 +6,7 @@ import { InstructionCard } from "./InstructionCard";
 import { useShakeAndSwipe } from "./useShakeAndSwipe";
 import styles from "./wishCoin.module.css";
 
+// Random pool after first toss; the initial "等待" token is only defined in CoinFace defaultToken.
 const wishTokens: WishToken[] = [
   { word: "如愿", blessing: "愿你今天抬头,就能看见好消息" },
   { word: "安心", blessing: "慢一点也没关系,你正在变得更稳" },

@@ -13,7 +13,7 @@ type InstructionCardProps = {
 export function InstructionCard({ shakeSupported, motionPermission, onEnableShake }: InstructionCardProps) {
   return (
     <section className={styles.panel}>
-      <h2>许愿抛币</h2>
+      <h2>抛出团市委幸运币</h2>
       <p>向上滑动或摇一摇手机，把硬币抛出去。</p>
 
       <ul className={styles.hints}>

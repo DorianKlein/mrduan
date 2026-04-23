@@ -15,8 +15,8 @@ type CoinFaceProps = {
 };
 
 const defaultToken: WishToken = {
-  word: "如愿",
-  blessing: "愿你被温柔接住,心想慢慢成真",
+  word: "等待",
+  blessing: "等你摇出幸运,好运正在赶来的路上",
 };
 
 function splitBlessingByComma(blessing: string): [string, string] {
