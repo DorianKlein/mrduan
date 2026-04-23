@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:https": "next dev --experimental-https --hostname 0.0.0.0 --port 3000",
+    "dev:https:3443": "next dev --experimental-https --hostname 0.0.0.0 --port 3443",
+    "dev:https:cert": "next dev --experimental-https --experimental-https-key ./certs/dev-key.pem --experimental-https-cert ./certs/dev-cert.pem --hostname 0.0.0.0 --port 3000",
+    "dev:https:cert:3443": "next dev --experimental-https --experimental-https-key ./certs/dev-key.pem --experimental-https-cert ./certs/dev-cert.pem --hostname 0.0.0.0 --port 3443",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
