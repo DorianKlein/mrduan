@@ -40,7 +40,9 @@
 
 .panel h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
   letter-spacing: 0.02em;
 }
 
@@ -212,25 +214,25 @@
 }
 
 .coinResult {
-  min-height: 94px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   color: #5c2f06;
   text-align: center;
 }
 
 .coinResultTitle {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: 0.06em;
   line-height: 1.35;
 }
 
 .coinResultLine {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -262,7 +264,7 @@
     font-size: 33px;
   }
 
-  .coinResultTitle {
+  /* .coinResultTitle {
     font-size: 20px;
   }
 
@@ -272,5 +274,5 @@
 
   .panel h2 {
     font-size: 21px;
-  }
+  } */
 }

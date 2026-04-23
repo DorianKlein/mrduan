@@ -14,12 +14,12 @@ export function InstructionCard({ shakeSupported, motionPermission, onEnableShak
   return (
     <section className={styles.panel}>
       <h2>抛出幸运币</h2>
-      <p>向上滑动或摇一摇手机，把硬币抛出去。</p>
+      {/* <p>向上滑动或摇一摇手机，把硬币抛出去。</p>
 
       <ul className={styles.hints}>
         <li>上滑触发：任意位置向上滑动屏幕</li>
         <li>摇一摇触发：快速晃动手机</li>
-      </ul>
+      </ul> */}
 
       {shakeSupported && motionPermission !== "granted" && (
         <button className={styles.enableBtn} onClick={onEnableShake} type="button">
