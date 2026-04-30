@@ -25,7 +25,7 @@ export function Modal({ open, fruit, onReset }: ModalProps) {
 				<div className="mx-auto mb-4 flex h-18 w-18 items-center justify-center rounded-full bg-linear-to-br from-emerald-50 to-amber-50">
 					<FruitIcon className="h-12 w-12" />
 				</div>
-				<p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-600">五一情绪结算</p>
+				<p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-600">劳动节快乐</p>
 				<h2 className="mt-3 text-2xl font-semibold tracking-tight">{fruit.name}</h2>
 				<p className="mt-3 text-sm leading-7 text-slate-600">{fruit.blessing}</p>
 				<button
