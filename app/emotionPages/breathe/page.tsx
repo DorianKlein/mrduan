@@ -217,7 +217,7 @@ export default function BreathePage() {
     >
       {/* Top Texts */}
       <div className={`${styles.textTop} ${introState === 'showing' ? styles.textVisible : ''}`}>
-        漫长的六天终于要结束了。<br />
+        本周的工作终于要结束了。<br />
         现在的你，是不是感觉一身疲惫？
       </div>
 
