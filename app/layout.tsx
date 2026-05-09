@@ -14,8 +14,8 @@ import "./globals.css";
 // });
 
 export const metadata: Metadata = {
-  title: "123 Studio Souvenir",
-  description: "Interactive 3D Badge",
+  
+  
 };
 
 export default function RootLayout({
