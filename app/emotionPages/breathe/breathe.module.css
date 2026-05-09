@@ -1,0 +1,111 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #1c191a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  touch-action: none; /* Prevent default touch actions like scroll */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.textTop {
+  position: absolute;
+  top: 25vh;
+  width: 80%;
+  text-align: center;
+  color: rgba(232, 180, 184, 0.8);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+  font-weight: 300;
+  z-index: 10;
+}
+
+.textVisible {
+  opacity: 1;
+}
+
+.numberText {
+  font-size: 4rem;
+  font-weight: 200;
+  margin-top: -10px;
+}
+
+.auraContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.aura {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--aura-color-center, rgba(160, 140, 145, 0.6)) 0%, var(--aura-color-edge, rgba(160, 140, 145, 0.1)) 60%, var(--aura-color-transparent, rgba(160, 140, 145, 0)) 80%);
+  filter: blur(20px);
+  transform: scale(1) translateZ(0);
+  transform-style: preserve-3d;
+  will-change: transform, filter, background;
+  transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1), filter 6s cubic-bezier(0.25, 1, 0.5, 1), background 6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.inhale .aura {
+  transform: scale(2.5) translateZ(0);
+  filter: blur(30px);
+  background: radial-gradient(circle, var(--aura-color-inhale-center, rgba(200, 160, 165, 0.9)) 0%, var(--aura-color-inhale-edge, rgba(180, 150, 155, 0.4)) 70%, var(--aura-color-inhale-transparent, rgba(180, 150, 155, 0)) 90%);
+  transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), filter 4s cubic-bezier(0.4, 0, 0.2, 1), background 4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes finalAuraPulse {
+  0% { transform: scale(1.3) translateZ(0); filter: blur(25px); }
+  50% { transform: scale(1.5) translateZ(0); filter: blur(35px); }
+  100% { transform: scale(1.3) translateZ(0); filter: blur(25px); }
+}
+
+.finalAura .aura {
+  animation: finalAuraPulse 5s ease-in-out infinite;
+  transform: scale(1.3) translateZ(0);
+  filter: blur(25px);
+  transition: transform 4s ease, filter 4s ease, background 4s ease;
+}
+
+.resetBtn {
+  position: absolute;
+  bottom: 20vh;
+  padding: 12px 32px;
+  background: transparent;
+  border: 1px solid rgba(232, 180, 184, 0.4);
+  color: rgba(232, 180, 184, 0.8);
+  border-radius: 30px;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 1.5s ease, background-color 0.3s ease;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.resetBtn.btnVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.resetBtn:active {
+  background: rgba(232, 180, 184, 0.1);
+}
+
+.hidden {
+  opacity: 0;
+}
