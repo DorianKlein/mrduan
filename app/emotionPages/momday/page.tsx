@@ -17,6 +17,7 @@ const backgrounds = [
   pic5.src,
 ];
 
+
 const TodoItem = ({ text, index, isVisible }: { text: string; index: number; isVisible: boolean }) => {
   const [checked, setChecked] = useState(false);
 
@@ -89,6 +90,10 @@ const Section = ({ bgIndex, children }: { bgIndex: number; children: React.React
 export default function MomDayPage() {
   const section4Ref = useRef(null);
   const isSection4InView = useInView(section4Ref, { amount: 0.5 });
+
+  useEffect(() => {
+    document.title = "母亲节快乐！";
+  }, []);
 
   const todos = [
     "听她聊聊过去的八卦",
