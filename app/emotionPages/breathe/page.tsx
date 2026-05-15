@@ -11,8 +11,11 @@ export default function BreathePage() {
   const [breathCount, setBreathCount] = useState(0);
   const [displayCount, setDisplayCount] = useState(5);
   const [isFinished, setIsFinished] = useState(false);
+  const [showTapWarning, setShowTapWarning] = useState(false);
   
   const introTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pressStartTime = useRef<number>(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -119,6 +122,10 @@ export default function BreathePage() {
 
     if (breathCount >= 5) return;
 
+    if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+    setShowTapWarning(false);
+    pressStartTime.current = Date.now();
+
     setDisplayCount(5 - breathCount);
     setIsInhaling(true);
     setHasInteracted(true);
@@ -132,6 +139,19 @@ export default function BreathePage() {
     e.preventDefault();
     if (!isInhaling) return;
     setIsInhaling(false);
+
+    const pressDuration = Date.now() - pressStartTime.current;
+    
+    if (pressDuration < 500) {
+      // Considered a tap/misclick, don't increment count or play long exhale
+      stopAudio();
+      setShowTapWarning(true);
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+      warningTimeoutRef.current = setTimeout(() => {
+        setShowTapWarning(false);
+      }, 2000);
+      return;
+    }
 
     const newCount = breathCount + 1;
     setBreathCount(newCount);
@@ -191,6 +211,7 @@ export default function BreathePage() {
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
       if (oscillatorRef.current) {
         try {
           oscillatorRef.current.stop();
@@ -221,11 +242,15 @@ export default function BreathePage() {
         现在的你，是不是感觉一身疲惫？
       </div>
 
-      <div className={`${styles.textTop} ${(showGuide && !hasInteracted && !isFinished) ? styles.textVisible : ''}`}>
+      <div className={`${styles.textTop} ${(showGuide && !hasInteracted && !isFinished && !showTapWarning) ? styles.textVisible : ''}`}>
         按住屏幕中心进行吸气<br />松开进行呼气
       </div>
 
-      <div className={`${styles.textTop} ${(isInhaling && !isFinished) ? styles.textVisible : ''}`}>
+      <div className={`${styles.textTop} ${showTapWarning && !isFinished ? styles.textVisible : ''}`}>
+        请长按屏幕
+      </div>
+
+      <div className={`${styles.textTop} ${(isInhaling && !isFinished && !showTapWarning) ? styles.textVisible : ''}`}>
         <div className={styles.numberText}>{displayCount}</div>
       </div>
 
