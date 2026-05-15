@@ -157,11 +157,11 @@ export default function BreathePage() {
     setBreathCount(newCount);
 
     if (newCount >= 5) {
-      // Wait for the full 6 seconds of the exhale animation to complete before showing finished state
+      // Show finished state shortly after exhale begins
       setTimeout(() => {
         setIsFinished(true);
         setShowGuide(false);
-      }, 6000);
+      }, 3000);
     }
 
     // Stop Audio
