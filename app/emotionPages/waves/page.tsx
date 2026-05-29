@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 
 export default function WavesPage() {
   const [inputText, setInputText] = useState("");
-  const [centerText, setCenterText] = useState("输入你的情绪");
+  // 第一次看到的文字
+  const [centerText, setCenterText] = useState("点击底部输入你的负面情绪，让他们随波消散");
   
   const [isFloatingUp, setIsFloatingUp] = useState(false);
   const [isDissipating, setIsDissipating] = useState(false);
@@ -63,8 +64,18 @@ export default function WavesPage() {
     });
 
     setTimeout(() => {
+      // 在这里恢复到占位文字时，为了防止带入之前的 blur 动画，我们使其瞬间变成隐身状态
+      setIsFloatingUp(true);
       setIsDissipating(false);
-      setCenterText("输入你的情绪");
+      // 第二次及以后看到的文字
+      setCenterText("我们可以继续负面情绪的消散哦");
+      
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          // 然后再次平滑上升，干干净净
+          setIsFloatingUp(false);
+        }, 50);
+      });
     }, 4000);
   };
 
@@ -148,11 +159,11 @@ export default function WavesPage() {
         {/* 顶部/居中动画文字区 */}
         <div className="relative flex flex-1 items-center justify-center px-8 z-20">
           <h1
-            className={`text-center text-3xl font-light tracking-[0.2em] text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all will-change-transform ${
+            className={`text-center text-xl md:text-2xl font-light tracking-[0.1em] leading-relaxed text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all ${
               isFloatingUp 
-                ? "translate-y-16 opacity-0 duration-0" 
+                ? "translate-y-16 scale-100 blur-0 opacity-0 duration-0" 
                 : isDissipating
-                ? "scale-[2.5] blur-[16px] opacity-0 duration-[1200ms] ease-out"
+                ? "translate-y-0 scale-[2.5] blur-[16px] opacity-0 duration-[1200ms] ease-out"
                 : "translate-y-0 scale-100 blur-0 opacity-100 duration-700 ease-out"
             }`}
           >
@@ -168,7 +179,7 @@ export default function WavesPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={isDissipating || isFloatingUp}
-              placeholder="输入文字后按发送键"
+              placeholder="输入负面情绪后按发送键"
               className="w-full bg-transparent text-center text-xl tracking-widest text-white/50 caret-white outline-none transition-colors focus:text-white placeholder:text-white/30"
               autoComplete="off"
               spellCheck="false"
