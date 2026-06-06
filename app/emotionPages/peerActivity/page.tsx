@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"; //[cite: 1]
 import Image from "next/image"; //[cite: 1]
-import bgPic from "./components/pic/BG.webp"; //[cite: 1]
+import bgPic from "./components/pic/BG (1).webp"; //[cite: 1]
 // 1. 引入你的标题图片，请根据实际存放位置调整路径
 import titlePic from "./components/pic/title-1.png"; 
 import { OutlineButton } from "./components/OutlineButton"; //[cite: 1]
