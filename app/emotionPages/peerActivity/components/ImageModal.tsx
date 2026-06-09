@@ -14,10 +14,21 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
 
   // 🔥 核心修复 1：每次弹窗打开，或者切换不同的图组(images)时，必须把索引重置为 0
   useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(0);
+  if (!isOpen || images.length <= 1) return;
+
+  // 计算下一张和上一张的索引
+  const nextIdx = (currentIndex + 1) % images.length;
+  const prevIdx = (currentIndex - 1 + images.length) % images.length;
+
+  // 提前把下一张和上一张图片丢给浏览器后台下载
+  [nextIdx, prevIdx].forEach((idx) => {
+    const src = images[idx];
+    if (src) {
+      const img = new window.Image();
+      img.src = typeof src === 'string' ? src : (src as any).src || '';
     }
-  }, [isOpen, images]);
+  });
+}, [currentIndex, isOpen, images]); // 只要当前页码一变，立刻悄悄下载它的前后两张
 
   if (!isOpen) return null;
 
@@ -75,6 +86,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
               alt={`Gallery Image ${currentIndex + 1}`}
               className="w-auto h-auto max-w-full max-h-full object-contain animate-fadeIn"
               quality={100}
+              priority
               // 由于可能是 string 或 StaticImport，安全地转换类型
               {...(typeof currentImage === 'string' ? { fill: true } : {})}
             />
