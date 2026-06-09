@@ -14,21 +14,22 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
 
   // 🔥 核心修复 1：每次弹窗打开，或者切换不同的图组(images)时，必须把索引重置为 0
   useEffect(() => {
-  if (!isOpen || images.length <= 1) return;
+    // 增加 typeof window === "undefined" 判断，确保这行代码在 Vercel 打包阶段直接跳过，不报未定义错误
+    if (!isOpen || !images || images.length <= 1 || typeof window === "undefined") return;
 
-  // 计算下一张和上一张的索引
-  const nextIdx = (currentIndex + 1) % images.length;
-  const prevIdx = (currentIndex - 1 + images.length) % images.length;
+    const nextIdx = (currentIndex + 1) % images.length;
+    const prevIdx = (currentIndex - 1 + images.length) % images.length;
 
-  // 提前把下一张和上一张图片丢给浏览器后台下载
-  [nextIdx, prevIdx].forEach((idx) => {
-    const src = images[idx];
-    if (src) {
-      const img = new window.Image();
-      img.src = typeof src === 'string' ? src : (src as any).src || '';
-    }
-  });
-}, [currentIndex, isOpen, images]); // 只要当前页码一变，立刻悄悄下载它的前后两张
+    [nextIdx, prevIdx].forEach((idx) => {
+      const srcObj = images[idx];
+      if (srcObj) {
+        // 安全创建 Image 对象
+        // 引入原生 Image 对象，避开 Next.js 的 Image 组件命名冲突
+        const img = new window.Image();
+        img.src = typeof srcObj === "string" ? srcObj : (srcObj as any).src || (srcObj as any).default?.src || "";
+      }
+    });
+  }, [currentIndex, isOpen, images]);
 
   if (!isOpen) return null;
 

@@ -33,7 +33,8 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
 
   // 🔥 核心修复 2：只要翻页，就提前静默预载它的“下一张”和“上一张”，防止滑屏卡顿
   useEffect(() => {
-    if (!isOpen || !images || images.length <= 1) return;
+    // 【修改点 1】增加 typeof window 严格检查，让 Vercel 在编译打包阶段直接安全跳过这段代码
+    if (!isOpen || !images || images.length <= 1 || typeof window === "undefined") return;
 
     const nextIdx = (currentIndex + 1) % images.length;
     const prevIdx = (currentIndex - 1 + images.length) % images.length;
@@ -42,7 +43,10 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
       const srcObj = images[idx];
       if (srcObj) {
         const img = new window.Image();
-        img.src = typeof srcObj === "string" ? srcObj : (srcObj as any).src || (srcObj as any).default?.src || "";
+        // 【修改点 2】补充 (srcObj as any).default?.src 路径解析，保证打包后在手机端也能 100% 认出哈希路径
+        img.src = typeof srcObj === "string" 
+          ? srcObj 
+          : (srcObj as any).src || (srcObj as any).default?.src || "";
       }
     });
   }, [currentIndex, isOpen, images]);
