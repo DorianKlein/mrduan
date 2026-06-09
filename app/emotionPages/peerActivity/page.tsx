@@ -1,157 +1,234 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image, { StaticImageData } from "next/image";
+import { OutlineButton } from "./components/OutlineButton";
+import { ImageModal } from "./components/ImageModal";
+import { galleryConfig } from "./components/galleryConfig";
 
-interface ImageModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  images: (StaticImageData | string)[];
-}
+// 引入首屏核心大图（保持资产随代码打包）
+import bgPic from "./components/pic/BG (1).webp";
+import titlePic from "./components/pic/title-1.png"; 
 
-export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  // 🔥 核心修复 1：新增一个局部加载状态，给手机端图片对象解析提供缓冲时间
-  const [isReady, setIsReady] = useState(false);
+// 🔥 核心修正：Next.js 路由文件必须 export default 页面组件
+export default function PeerActivityPage() {
+  const [activeGalleryId, setActiveGalleryId] = useState<number | null>(null);
+
+  // 加载状态
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [isFadeOut, setIsFadeOut] = useState(false);
+
+  const hasStartedLoading = useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(0);
-      setIsReady(false);
-      
-      // 给浏览器一个 50ms 的极短宏任务宏延迟，确保 Next.js 的 Chunks 和静态对象完全反序列化
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 50);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setIsReady(false);
+    if (typeof window === "undefined") return;
+
+    if (hasStartedLoading.current) return;
+    hasStartedLoading.current = true;
+
+    // 扁平化拉取所有静态图片对象，阻止 Turbopack 懒分包
+    const galleryImages = Object.values(galleryConfig).flat() as StaticImageData[];
+    const allStaticImages = [bgPic, titlePic, ...galleryImages].filter(Boolean);
+    const totalImages = allStaticImages.length;
+
+    if (totalImages === 0) {
+      setIsLoading(false);
+      return;
     }
-  }, [isOpen, images]);
 
-  // 🔥 核心修复 2：只要翻页，就提前静默预载它的“下一张”和“上一张”，防止滑屏卡顿
-  useEffect(() => {
-    // 【修改点 1】增加 typeof window 严格检查，让 Vercel 在编译打包阶段直接安全跳过这段代码
-    if (!isOpen || !images || images.length <= 1 || typeof window === "undefined") return;
+    let loadedCount = 0;
 
-    const nextIdx = (currentIndex + 1) % images.length;
-    const prevIdx = (currentIndex - 1 + images.length) % images.length;
+    // 强行兜底定时器（6秒），手机端防死锁
+    const safetyTimeout = setTimeout(() => {
+      handleLoadComplete();
+    }, 6000);
 
-    [nextIdx, prevIdx].forEach((idx) => {
-      const srcObj = images[idx];
-      if (srcObj) {
-        const img = new window.Image();
-        // 【修改点 2】补充 (srcObj as any).default?.src 路径解析，保证打包后在手机端也能 100% 认出哈希路径
-        img.src = typeof srcObj === "string" 
-          ? srcObj 
-          : (srcObj as any).src || (srcObj as any).default?.src || "";
+    const handleLoadComplete = () => {
+      setIsFadeOut(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+      clearTimeout(safetyTimeout);
+    };
+
+    // 串行单轨跑道机制，强制调用底层 .decode() 像素级解码，彻底搞定安卓与首次空白
+    const CONCURRENCY_LIMIT = 1; 
+    let currentIndex = 0;
+
+    const launchNextImage = () => {
+      if (currentIndex >= totalImages) return;
+
+      const staticObj = allStaticImages[currentIndex];
+      currentIndex++;
+
+      const realUrl = staticObj?.src || (staticObj as any).src || (staticObj as any).default?.src || "";
+
+      if (!realUrl) {
+        handleImageEvent();
+        return;
       }
-    });
-  }, [currentIndex, isOpen, images]);
 
-  if (!isOpen) return null;
+      const img = new window.Image();
+      
+      function handleImageEvent() {
+        loadedCount++;
+        const percent = Math.round((loadedCount / totalImages) * 100);
+        setLoadProgress(percent);
 
-  // 🔥 核心修复 3：放宽判断界限。只要 images 数组有长度，说明这不是一个“空文件夹”
-  // 绝对不能因为一瞬间没拿到 currentImage 就判死刑显示“敬请期待”
-  const isFolderEmpty = !images || images.length === 0;
-  
-  // 安全地提取当前图片源
-  const currentImage = images && images[currentIndex] ? images[currentIndex] : null;
+        if (loadedCount >= totalImages) {
+          handleLoadComplete();
+        } else {
+          launchNextImage();
+        }
+      }
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isFolderEmpty) return;
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+      img.onload = () => {
+        if (typeof img.decode === "function") {
+          img.decode()
+            .then(handleImageEvent)
+            .catch(handleImageEvent);
+        } else {
+          handleImageEvent();
+        }
+      };
+
+      img.onerror = handleImageEvent;
+      img.src = realUrl;
+    };
+
+    for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalImages); i++) {
+      launchNextImage();
+    }
+
+    return () => clearTimeout(safetyTimeout);
+  }, []);
+
+  const openGallery = (id: number) => {
+    setActiveGalleryId(id);
   };
 
-  const handlePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isFolderEmpty) return;
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  const closeGallery = () => {
+    setActiveGalleryId(null);
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity"
-      onClick={onClose}
-    >
-      {/* 关闭按钮 */}
-      <button 
-        className="absolute top-4 right-4 text-white text-3xl font-bold z-50 p-4 hover:text-gray-300"
-        onClick={onClose}
-      >
-        ×
-      </button>
-
-      {/* 如果文件夹不为空，则进入图片展示逻辑 */}
-      {!isFolderEmpty ? (
-        <div className="relative w-full max-w-[800px] h-[80vh] flex items-center justify-center p-4">
-          {/* 左侧切换按钮 */}
-          {images.length > 1 && (
-            <button 
-              className="absolute left-2 md:left-4 text-white text-4xl p-4 bg-black/30 rounded-full hover:bg-black/50 z-20"
-              onClick={handlePrev}
-            >
-              ‹
-            </button>
-          )}
-
-          {/* 当前照片容器 */}
-          <div 
-            className="relative w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()} // 点击图片时不会触发关闭
-          >
-            {/* 🔥 核心修复 4：只有就绪且拿到了有效的 currentImage 才会渲染 Next.js Image，否则显示局部骨架屏，绝不跳到提示字样分支 */}
-            {isReady && currentImage ? (
-              <Image
-                src={currentImage}
-                alt={`Gallery Image ${currentIndex + 1}`}
-                className="w-auto h-auto max-w-full max-h-full object-contain animate-fadeIn"
-                quality={100}
-                priority // 提升当前展示图片的优先级
-                {...(typeof currentImage === 'string' ? { fill: true } : {})}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <div className="w-8 h-8 border-4 border-t-transparent border-white/80 rounded-full animate-spin" />
-                <span className="text-white/60 text-xs tracking-wider">图片加载中...</span>
-              </div>
-            )}
+    <main className="w-full min-h-[100dvh] bg-[#fdfaf4] flex flex-col items-center relative overflow-x-hidden">
+      
+      {/* 1. 开屏预加载进度条遮罩 */}
+      {isLoading && (
+        <div 
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fdfaf4] transition-opacity duration-500 ease-out ${
+            isFadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <div className="mb-6 text-base font-bold text-[#8B5A2B] tracking-wide animate-pulse">
+            精彩内容正在加载中...
           </div>
-
-          {/* 右侧切换按钮 */}
-          {images.length > 1 && (
-            <button 
-              className="absolute right-2 md:right-4 text-white text-4xl p-4 bg-black/30 rounded-full hover:bg-black/50 z-20"
-              onClick={handleNext}
-            >
-              ›
-            </button>
-          )}
-
-          {/* 底部分页点 */}
-          {images.length > 1 && (
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
-              {images.map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                    idx === currentIndex ? 'bg-white' : 'bg-white/40'
-                  }`} 
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
-        /* 只有当配置里这个数组彻底为空 0 时，才显示敬请期待 */
-        <div className="text-white text-xl font-bold tracking-widest p-4 text-center">
-          <p>更多精彩，敬请期待</p>
-          <p className="text-sm font-normal mt-2 text-white/60">（该文件夹尚未添加图片）</p>
+          <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden border border-gray-100 shadow-inner">
+            <div 
+              className="h-full bg-[#8B5A2B] rounded-full transition-all duration-300 ease-out" 
+              style={{ width: `${loadProgress}%` }}
+            />
+          </div>
+          <div className="mt-3 text-xs font-semibold text-gray-500 tabular-nums">
+            {loadProgress}%
+          </div>
         </div>
       )}
-    </div>
+
+      {/* 2. 交互弹窗组件 */}
+      <ImageModal 
+        isOpen={activeGalleryId !== null}
+        onClose={closeGallery}
+        images={activeGalleryId ? galleryConfig[activeGalleryId] : []}
+      />
+
+      {/* 3. 主页面内容 */}
+      <div className="relative w-full max-w-[768px]">
+        <Image
+          src={bgPic}
+          alt="Activity Background"
+          className="w-full h-auto block pointer-events-none"
+          priority
+          quality={100}
+        />
+
+        <div className="absolute top-[3%] left-1/2 -translate-x-1/2 w-[80%] z-30 pointer-events-none">
+          <Image
+            src={titlePic}
+            alt="第3季 青春同行 花YOUNG大连"
+            className="w-full h-auto drop-shadow-lg"
+            priority
+          />
+        </div>
+
+        {/* 4. 绝对定位交互点按钮 */}
+        <div className="absolute top-[20%] left-[22%] z-20 w-[30%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(1)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              团市委“连青空间”
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[28%] left-[52%] z-20 w-[30%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(2)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              大连市西岗文化馆<br/>（核雕）
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[36%] left-[24%] z-20 w-[28%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(3)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              金阿山艺术馆
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[43.5%] left-[60%] z-20 w-[30%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(4)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              钟氏面塑工艺品馆
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[52%] left-[22%] z-20 w-[30%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(5)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              金家街非遗文化体验馆
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[65%] left-[60%] z-20 w-[30%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(6)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              东关街<br/>（泽惠园槐花饼）
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[76%] left-[29%] z-20 w-[28%] aspect-[4/3]">
+          <OutlineButton onClick={() => openGallery(7)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              东关街<br/>（甲骨刻辞）
+            </span>
+          </OutlineButton>
+        </div>
+
+        <div className="absolute top-[84%] left-[60%] z-20 w-[36%] aspect-[5/4]">
+          <OutlineButton onClick={() => openGallery(8)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
+            <span className="text-[10px] sm:text-xs md:text-sm font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
+              东关街<br/>（时光印记活字印刷体验馆）
+            </span>
+          </OutlineButton>
+        </div>
+
+      </div>
+    </main>
   );
-};
+}
