@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import bgPic from "./components/pic/BG (1).webp";
 import titlePic from "./components/pic/title-1.png"; 
@@ -14,15 +14,19 @@ export default function PeerActivityPage() {
   // 加载状态管理
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
-  const [isFadeOut, setIsFadeOut] = useState(false); // 用于控制遮罩层淡出动画
+  const [isFadeOut, setIsFadeOut] = useState(false);
+
+  // 使用 ref 来防止在 React 严格模式下 Effect 重复触发导致的网络混乱
+  const hasStartedLoading = useRef(false);
 
   useEffect(() => {
-    // 1. 收集所有需要预加载的图片（包括背景、标题以及弹窗组图）
-    // 扁平化 galleryConfig 里的所有图片数组
+    if (hasStartedLoading.current) return;
+    hasStartedLoading.current = true;
+
+    // 1. 收集所有需要加载的图片源
     const galleryImages = Object.values(galleryConfig).flat();
-    
-    // 把首屏的核心大图也加入预加载队列中
-    const allImages = [bgPic, titlePic, ...galleryImages];
+    // 确保首屏最核心的背景和标题最先加载
+    const allImages = [bgPic, titlePic, ...galleryImages].filter(Boolean);
     const totalImages = allImages.length;
 
     if (totalImages === 0) {
@@ -32,40 +36,67 @@ export default function PeerActivityPage() {
 
     let loadedCount = 0;
 
-    // 2. 设置安全兜底定时器：6秒后如果还没加载完，也强制进入首页，避免用户死等
+    // 安全兜底定时器：手机端网络复杂，6秒后不管加载多少，绝对放行，防止死屏
     const safetyTimeout = setTimeout(() => {
       handleLoadComplete();
     }, 6000);
 
-    // 处理加载完成的收尾动画
     const handleLoadComplete = () => {
-      setIsFadeOut(true); // 触发淡出
+      setIsFadeOut(true);
       setTimeout(() => {
-        setIsLoading(false); // 彻底销毁加载组件
-      }, 500); // 这里的延迟时间对应 transition-opacity 的 duration
+        setIsLoading(false);
+      }, 500);
       clearTimeout(safetyTimeout);
     };
 
-    // 3. 遍历并执行预加载
-    allImages.forEach((src) => {
+    // 2. 手机端优化核心：队列串行/并发控制加载（一次只加载 3 张，防止塞死手机网络信道）
+    const CONCURRENCY_LIMIT = 3; 
+    let currentIndex = 0;
+
+    const launchNextImage = () => {
+      if (currentIndex >= totalImages) return;
+
+      const src = allImages[currentIndex];
+      currentIndex++;
+
       const img = new window.Image();
       
-      // 兼容 Next.js 的静态导入对象（Object { src: ... }）和普通的字符串路径
-      img.src = typeof src === "string" ? src : (src as any).src || "";
+      // 极其严格的路径解析，确保 Next.js 的静态导入在手机端百分之百能识别
+      let imageUrl = "";
+      if (typeof src === "string") {
+        imageUrl = src;
+      } else if (src && typeof src === "object") {
+        imageUrl = (src as any).src || (src as any).default?.src || "";
+      }
 
-      const handleImageEvent = () => {
+      if (!imageUrl) {
+        // 如果路径为空，直接跳过并算作加载完成
+        handleImageEvent();
+        return;
+      }
+
+      function handleImageEvent() {
         loadedCount++;
         const percent = Math.round((loadedCount / totalImages) * 100);
         setLoadProgress(percent);
 
         if (loadedCount >= totalImages) {
           handleLoadComplete();
+        } else {
+          // 当前这张好了，立刻补上下一张，保持通道占满但不过载
+          launchNextImage();
         }
-      };
+      }
 
       img.onload = handleImageEvent;
-      img.onerror = handleImageEvent; // 某张图片报错也继续计数，不卡死流程
-    });
+      img.onerror = handleImageEvent; // 失败也放行，防止单张图挂掉导致手机端卡死
+      img.src = imageUrl;
+    };
+
+    // 启动首批并发队列
+    for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalImages); i++) {
+      launchNextImage();
+    }
 
     return () => clearTimeout(safetyTimeout);
   }, []);
@@ -81,7 +112,7 @@ export default function PeerActivityPage() {
   return (
     <main className="w-full min-h-[100dvh] bg-[#fdfaf4] flex flex-col items-center relative overflow-x-hidden">
       
-      {/* ==================== 1. 开屏预加载进度条遮罩 ==================== */}
+      {/* 1. 开屏预加载进度条遮罩 */}
       {isLoading && (
         <div 
           className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fdfaf4] transition-opacity duration-500 ease-out ${
@@ -89,36 +120,29 @@ export default function PeerActivityPage() {
           }`}
         >
           <div className="mb-6 text-base font-bold text-[#8B5A2B] tracking-wide animate-pulse">
-            精彩内容正在加载中...
+            内容正在加载中...
           </div>
-          
-          {/* 进度条轨道 */}
           <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden border border-gray-100 shadow-inner">
-            {/* 进度条填充 */}
             <div 
               className="h-full bg-[#8B5A2B] rounded-full transition-all duration-300 ease-out" 
               style={{ width: `${loadProgress}%` }}
             />
           </div>
-          
-          {/* 数字百分比 */}
           <div className="mt-3 text-xs font-semibold text-gray-500 tabular-nums">
             {loadProgress}%
           </div>
         </div>
       )}
 
-      {/* ==================== 2. 交互弹窗组件 ==================== */}
+      {/* 2. 交互弹窗组件 */}
       <ImageModal 
         isOpen={activeGalleryId !== null}
         onClose={closeGallery}
         images={activeGalleryId ? galleryConfig[activeGalleryId] : []}
       />
 
-      {/* ==================== 3. 主页面内容 ==================== */}
+      {/* 3. 主页面内容 */}
       <div className="relative w-full max-w-[768px]">
-        
-        {/* 背景图：改用 w-full h-auto 让它自适应撑开 */}
         <Image
           src={bgPic}
           alt="Activity Background"
@@ -127,7 +151,6 @@ export default function PeerActivityPage() {
           quality={100}
         />
 
-        {/* 标题图片：绝对定位在顶部居中 */}
         <div className="absolute top-[3%] left-1/2 -translate-x-1/2 w-[80%] z-30 pointer-events-none">
           <Image
             src={titlePic}
@@ -137,7 +160,7 @@ export default function PeerActivityPage() {
           />
         </div>
 
-        {/* ==================== 4. 绝对定位交互点按钮 ==================== */}
+        {/* 4. 绝对定位交互点按钮 */}
         <div className="absolute top-[20%] left-[22%] z-20 w-[30%] aspect-[4/3]">
           <OutlineButton onClick={() => openGallery(1)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
             <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
