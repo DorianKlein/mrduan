@@ -1,239 +1,153 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image, { StaticImageData } from "next/image";
-import { OutlineButton } from "./components/OutlineButton";
-import { ImageModal } from "./components/ImageModal";
-import { galleryConfig } from "./components/galleryConfig";
 
-// 1. 引入首屏核心大图
-import bgPic from "./components/pic/BG (1).webp";
-import titlePic from "./components/pic/title-1.png"; 
+interface ImageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  images: (StaticImageData | string)[];
+}
 
-export default function PeerActivityPage() {
-  const [activeGalleryId, setActiveGalleryId] = useState<number | null>(null);
-
-  // 加载状态
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [isFadeOut, setIsFadeOut] = useState(false);
-
-  const hasStartedLoading = useRef(false);
+export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // 🔥 核心修复 1：新增一个局部加载状态，给手机端图片对象解析提供缓冲时间
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (hasStartedLoading.current) return;
-    hasStartedLoading.current = true;
-
-    // 🔥 核心修复 1：利用 Object.values 动态扁平化拉取所有 import 的静态对象
-    const galleryImages = Object.values(galleryConfig).flat() as StaticImageData[];
-    
-    // 把首屏大图和所有相册图融合成一个顶层静态队列
-    const allStaticImages = [bgPic, titlePic, ...galleryImages].filter(Boolean);
-    const totalImages = allStaticImages.length;
-
-    if (totalImages === 0) {
-      setIsLoading(false);
-      return;
-    }
-
-    let loadedCount = 0;
-
-    // 强行兜底定时器（6秒），手机端防死锁
-    const safetyTimeout = setTimeout(() => {
-      handleLoadComplete();
-    }, 6000);
-
-    const handleLoadComplete = () => {
-      setIsFadeOut(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-      clearTimeout(safetyTimeout);
-    };
-
-    // 🔥 核心修复 2：极低并发控制（1张1张串行），专治安卓手机 Webview 内存吞吐卡死
-    const CONCURRENCY_LIMIT = 1; 
-    let currentIndex = 0;
-
-    const launchNextImage = () => {
-      if (currentIndex >= totalImages) return;
-
-      const staticObj = allStaticImages[currentIndex];
-      currentIndex++;
-
-      // 🔥 核心修复 3：安卓兼容性绝招 —— 强制触发底层预解码（Decode）
-      // 提取 Next.js 静态导入的真正编译后 URL 字符串
-      const realUrl = staticObj?.src || (staticObj as any).default?.src || "";
-
-      if (!realUrl) {
-        handleImageEvent();
-        return;
-      }
-
-      const img = new window.Image();
+    if (isOpen) {
+      setCurrentIndex(0);
+      setIsReady(false);
       
-      function handleImageEvent() {
-        loadedCount++;
-        const percent = Math.round((loadedCount / totalImages) * 100);
-        setLoadProgress(percent);
-
-        if (loadedCount >= totalImages) {
-          handleLoadComplete();
-        } else {
-          launchNextImage();
-        }
-      }
-
-      img.onload = () => {
-        // 在安卓设备上，onload 触发时不代表图片真的在内存中解压完成了
-        // 使用 HTMLImageElement.decode() 强制浏览器内核在后台完成像素解码，彻底解决首次点开空白 Bug
-        if (typeof img.decode === "function") {
-          img.decode()
-            .then(handleImageEvent)
-            .catch(handleImageEvent); // 即使解码微报错也继续
-        } else {
-          handleImageEvent();
-        }
-      };
-
-      img.onerror = handleImageEvent;
-      img.src = realUrl;
-    };
-
-    // 启动单轨串行加载
-    for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalImages); i++) {
-      launchNextImage();
+      // 给浏览器一个 50ms 的极短宏任务宏延迟，确保 Next.js 的 Chunks 和静态对象完全反序列化
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setIsReady(false);
     }
+  }, [isOpen, images]);
 
-    return () => clearTimeout(safetyTimeout);
-  }, []);
+  // 🔥 核心修复 2：只要翻页，就提前静默预载它的“下一张”和“上一张”，防止滑屏卡顿
+  useEffect(() => {
+    if (!isOpen || !images || images.length <= 1) return;
 
-  const openGallery = (id: number) => {
-    setActiveGalleryId(id);
+    const nextIdx = (currentIndex + 1) % images.length;
+    const prevIdx = (currentIndex - 1 + images.length) % images.length;
+
+    [nextIdx, prevIdx].forEach((idx) => {
+      const srcObj = images[idx];
+      if (srcObj) {
+        const img = new window.Image();
+        img.src = typeof srcObj === "string" ? srcObj : (srcObj as any).src || (srcObj as any).default?.src || "";
+      }
+    });
+  }, [currentIndex, isOpen, images]);
+
+  if (!isOpen) return null;
+
+  // 🔥 核心修复 3：放宽判断界限。只要 images 数组有长度，说明这不是一个“空文件夹”
+  // 绝对不能因为一瞬间没拿到 currentImage 就判死刑显示“敬请期待”
+  const isFolderEmpty = !images || images.length === 0;
+  
+  // 安全地提取当前图片源
+  const currentImage = images && images[currentIndex] ? images[currentIndex] : null;
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFolderEmpty) return;
+    setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
-  const closeGallery = () => {
-    setActiveGalleryId(null);
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFolderEmpty) return;
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   return (
-    <main className="w-full min-h-[100dvh] bg-[#fdfaf4] flex flex-col items-center relative overflow-x-hidden">
-      
-      {/* 1. 开屏预加载进度条遮罩 */}
-      {isLoading && (
-        <div 
-          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fdfaf4] transition-opacity duration-500 ease-out ${
-            isFadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-        >
-          <div className="mb-6 text-base font-bold text-[#8B5A2B] tracking-wide animate-pulse">
-            内容正在加载中...
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity"
+      onClick={onClose}
+    >
+      {/* 关闭按钮 */}
+      <button 
+        className="absolute top-4 right-4 text-white text-3xl font-bold z-50 p-4 hover:text-gray-300"
+        onClick={onClose}
+      >
+        ×
+      </button>
+
+      {/* 如果文件夹不为空，则进入图片展示逻辑 */}
+      {!isFolderEmpty ? (
+        <div className="relative w-full max-w-[800px] h-[80vh] flex items-center justify-center p-4">
+          {/* 左侧切换按钮 */}
+          {images.length > 1 && (
+            <button 
+              className="absolute left-2 md:left-4 text-white text-4xl p-4 bg-black/30 rounded-full hover:bg-black/50 z-20"
+              onClick={handlePrev}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* 当前照片容器 */}
+          <div 
+            className="relative w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()} // 点击图片时不会触发关闭
+          >
+            {/* 🔥 核心修复 4：只有就绪且拿到了有效的 currentImage 才会渲染 Next.js Image，否则显示局部骨架屏，绝不跳到提示字样分支 */}
+            {isReady && currentImage ? (
+              <Image
+                src={currentImage}
+                alt={`Gallery Image ${currentIndex + 1}`}
+                className="w-auto h-auto max-w-full max-h-full object-contain animate-fadeIn"
+                quality={100}
+                priority // 提升当前展示图片的优先级
+                {...(typeof currentImage === 'string' ? { fill: true } : {})}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="w-8 h-8 border-4 border-t-transparent border-white/80 rounded-full animate-spin" />
+                <span className="text-white/60 text-xs tracking-wider">图片加载中...</span>
+              </div>
+            )}
           </div>
-          <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden border border-gray-100 shadow-inner">
-            <div 
-              className="h-full bg-[#8B5A2B] rounded-full transition-all duration-300 ease-out" 
-              style={{ width: `${loadProgress}%` }}
-            />
-          </div>
-          <div className="mt-3 text-xs font-semibold text-gray-500 tabular-nums">
-            {loadProgress}%
-          </div>
+
+          {/* 右侧切换按钮 */}
+          {images.length > 1 && (
+            <button 
+              className="absolute right-2 md:right-4 text-white text-4xl p-4 bg-black/30 rounded-full hover:bg-black/50 z-20"
+              onClick={handleNext}
+            >
+              ›
+            </button>
+          )}
+
+          {/* 底部分页点 */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
+              {images.map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                    idx === currentIndex ? 'bg-white' : 'bg-white/40'
+                  }`} 
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* 只有当配置里这个数组彻底为空 0 时，才显示敬请期待 */
+        <div className="text-white text-xl font-bold tracking-widest p-4 text-center">
+          <p>更多精彩，敬请期待</p>
+          <p className="text-sm font-normal mt-2 text-white/60">（该文件夹尚未添加图片）</p>
         </div>
       )}
-
-      {/* 2. 交互弹窗组件 */}
-      <ImageModal 
-        isOpen={activeGalleryId !== null}
-        onClose={closeGallery}
-        images={activeGalleryId ? galleryConfig[activeGalleryId] : []}
-      />
-
-      {/* 3. 主页面内容 */}
-      <div className="relative w-full max-w-[768px]">
-        
-        <Image
-          src={bgPic}
-          alt="Activity Background"
-          className="w-full h-auto block pointer-events-none"
-          priority
-          quality={100}
-        />
-
-        <div className="absolute top-[3%] left-1/2 -translate-x-1/2 w-[80%] z-30 pointer-events-none">
-          <Image
-            src={titlePic}
-            alt="第3季 青春同行 花YOUNG大连"
-            className="w-full h-auto drop-shadow-lg"
-            priority
-          />
-        </div>
-
-        {/* 4. 绝对定位交互点按钮 */}
-        <div className="absolute top-[20%] left-[22%] z-20 w-[30%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(1)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              团市委“连青空间”
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[28%] left-[52%] z-20 w-[30%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(2)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              大连市西岗文化馆<br/>（核雕）
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[36%] left-[24%] z-20 w-[28%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(3)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              金阿山艺术馆
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[43.5%] left-[60%] z-20 w-[30%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(4)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              钟氏面塑工艺品馆
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[52%] left-[22%] z-20 w-[30%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(5)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              金家街非遗文化体验馆
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[65%] left-[60%] z-20 w-[30%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(6)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              东关街<br/>（泽惠园槐花饼）
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[76%] left-[29%] z-20 w-[28%] aspect-[4/3]">
-          <OutlineButton onClick={() => openGallery(7)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[11px] sm:text-sm md:text-base font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              东关街<br/>（甲骨刻辞）
-            </span>
-          </OutlineButton>
-        </div>
-
-        <div className="absolute top-[84%] left-[60%] z-20 w-[36%] aspect-[5/4]">
-          <OutlineButton onClick={() => openGallery(8)} className="w-full h-full bg-transparent p-1 sm:p-2 border-0 outline-none hover:scale-105 active:scale-95 cursor-pointer">
-            <span className="text-[10px] sm:text-xs md:text-sm font-extrabold text-black leading-tight text-center pb-1 pointer-events-none [text-shadow:_0_1px_4px_rgb(255_255_255_/_100%),_0_0_2px_rgb(255_255_255_/_100%)]">
-              东关街<br/>（时光印记活字印刷体验馆）
-            </span>
-          </OutlineButton>
-        </div>
-
-      </div>
-    </main>
+    </div>
   );
-}
+};
