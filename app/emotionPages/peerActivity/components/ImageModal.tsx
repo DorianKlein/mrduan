@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image, { StaticImageData } from "next/image";
 
 interface ImageModalProps {
@@ -12,26 +12,39 @@ interface ImageModalProps {
 export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // 🔥 核心修复 1：每次弹窗打开，或者切换不同的图组(images)时，必须把索引重置为 0
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentIndex(0);
+    }
+  }, [isOpen, images]);
+
   if (!isOpen) return null;
+
+  // 严格的防空验证
+  const hasImages = images && images.length > 0;
+  
+  // 🔥 核心修复 2：获取当前安全的图片对象，如果索引越界或不存在，直接安全兜底为 null
+  const currentImage = hasImages && images[currentIndex] ? images[currentIndex] : null;
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!hasImages) return;
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!hasImages) return;
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
-
-  const hasImages = images && images.length > 0;
 
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity"
       onClick={onClose}
     >
-      {/* 关按钮 */}
+      {/* 关闭按钮 */}
       <button 
         className="absolute top-4 right-4 text-white text-3xl font-bold z-50 p-4 hover:text-gray-300"
         onClick={onClose}
@@ -39,7 +52,8 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
         ×
       </button>
 
-      {hasImages ? (
+      {/* 🔥 核心修复 3：不仅要数组有长度，还要确保当前取到的图片对象不为 null，双重保险 */}
+      {hasImages && currentImage ? (
         <div className="relative w-full max-w-[800px] h-[80vh] flex items-center justify-center p-4">
           {/* 左侧切换按钮 */}
           {images.length > 1 && (
@@ -51,18 +65,18 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
             </button>
           )}
 
-          {/* 当期照片 */}
+          {/* 当前照片容器 */}
           <div 
             className="relative w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()} // 点击图片时不会触发关闭
           >
             <Image
-              src={images[currentIndex]}
+              src={currentImage} // 使用安全提取的图片源
               alt={`Gallery Image ${currentIndex + 1}`}
-              className="w-auto h-auto max-w-full max-h-full object-contain"
+              className="w-auto h-auto max-w-full max-h-full object-contain animate-fadeIn"
               quality={100}
-              // 由于可能是 string 或 StaticImport，强制类型转换
-              {...(typeof images[currentIndex] === 'string' ? { fill: true } : {})}
+              // 由于可能是 string 或 StaticImport，安全地转换类型
+              {...(typeof currentImage === 'string' ? { fill: true } : {})}
             />
           </div>
 
@@ -82,7 +96,9 @@ export const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, images 
               {images.map((_, idx) => (
                 <div 
                   key={idx} 
-                  className={`w-2 h-2 rounded-full ${idx === currentIndex ? 'bg-white' : 'bg-white/40'}`} 
+                  className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                    idx === currentIndex ? 'bg-white' : 'bg-white/40'
+                  }`} 
                 />
               ))}
             </div>
