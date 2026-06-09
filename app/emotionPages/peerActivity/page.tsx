@@ -1,33 +1,35 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import bgPic from "./components/pic/BG (1).webp";
-import titlePic from "./components/pic/title-1.png"; 
+import Image, { StaticImageData } from "next/image";
 import { OutlineButton } from "./components/OutlineButton";
 import { ImageModal } from "./components/ImageModal";
 import { galleryConfig } from "./components/galleryConfig";
 
+// 1. 引入首屏核心大图
+import bgPic from "./components/pic/BG (1).webp";
+import titlePic from "./components/pic/title-1.png"; 
+
 export default function PeerActivityPage() {
   const [activeGalleryId, setActiveGalleryId] = useState<number | null>(null);
 
-  // 加载状态管理
+  // 加载状态
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
   const [isFadeOut, setIsFadeOut] = useState(false);
 
-  // 使用 ref 来防止在 React 严格模式下 Effect 重复触发导致的网络混乱
   const hasStartedLoading = useRef(false);
 
   useEffect(() => {
     if (hasStartedLoading.current) return;
     hasStartedLoading.current = true;
 
-    // 1. 收集所有需要加载的图片源
-    const galleryImages = Object.values(galleryConfig).flat();
-    // 确保首屏最核心的背景和标题最先加载
-    const allImages = [bgPic, titlePic, ...galleryImages].filter(Boolean);
-    const totalImages = allImages.length;
+    // 🔥 核心修复 1：利用 Object.values 动态扁平化拉取所有 import 的静态对象
+    const galleryImages = Object.values(galleryConfig).flat() as StaticImageData[];
+    
+    // 把首屏大图和所有相册图融合成一个顶层静态队列
+    const allStaticImages = [bgPic, titlePic, ...galleryImages].filter(Boolean);
+    const totalImages = allStaticImages.length;
 
     if (totalImages === 0) {
       setIsLoading(false);
@@ -36,7 +38,7 @@ export default function PeerActivityPage() {
 
     let loadedCount = 0;
 
-    // 安全兜底定时器：手机端网络复杂，6秒后不管加载多少，绝对放行，防止死屏
+    // 强行兜底定时器（6秒），手机端防死锁
     const safetyTimeout = setTimeout(() => {
       handleLoadComplete();
     }, 6000);
@@ -49,32 +51,27 @@ export default function PeerActivityPage() {
       clearTimeout(safetyTimeout);
     };
 
-    // 2. 手机端优化核心：队列串行/并发控制加载（一次只加载 3 张，防止塞死手机网络信道）
-    const CONCURRENCY_LIMIT = 3; 
+    // 🔥 核心修复 2：极低并发控制（1张1张串行），专治安卓手机 Webview 内存吞吐卡死
+    const CONCURRENCY_LIMIT = 1; 
     let currentIndex = 0;
 
     const launchNextImage = () => {
       if (currentIndex >= totalImages) return;
 
-      const src = allImages[currentIndex];
+      const staticObj = allStaticImages[currentIndex];
       currentIndex++;
 
-      const img = new window.Image();
-      
-      // 极其严格的路径解析，确保 Next.js 的静态导入在手机端百分之百能识别
-      let imageUrl = "";
-      if (typeof src === "string") {
-        imageUrl = src;
-      } else if (src && typeof src === "object") {
-        imageUrl = (src as any).src || (src as any).default?.src || "";
-      }
+      // 🔥 核心修复 3：安卓兼容性绝招 —— 强制触发底层预解码（Decode）
+      // 提取 Next.js 静态导入的真正编译后 URL 字符串
+      const realUrl = staticObj?.src || (staticObj as any).default?.src || "";
 
-      if (!imageUrl) {
-        // 如果路径为空，直接跳过并算作加载完成
+      if (!realUrl) {
         handleImageEvent();
         return;
       }
 
+      const img = new window.Image();
+      
       function handleImageEvent() {
         loadedCount++;
         const percent = Math.round((loadedCount / totalImages) * 100);
@@ -83,17 +80,27 @@ export default function PeerActivityPage() {
         if (loadedCount >= totalImages) {
           handleLoadComplete();
         } else {
-          // 当前这张好了，立刻补上下一张，保持通道占满但不过载
           launchNextImage();
         }
       }
 
-      img.onload = handleImageEvent;
-      img.onerror = handleImageEvent; // 失败也放行，防止单张图挂掉导致手机端卡死
-      img.src = imageUrl;
+      img.onload = () => {
+        // 在安卓设备上，onload 触发时不代表图片真的在内存中解压完成了
+        // 使用 HTMLImageElement.decode() 强制浏览器内核在后台完成像素解码，彻底解决首次点开空白 Bug
+        if (typeof img.decode === "function") {
+          img.decode()
+            .then(handleImageEvent)
+            .catch(handleImageEvent); // 即使解码微报错也继续
+        } else {
+          handleImageEvent();
+        }
+      };
+
+      img.onerror = handleImageEvent;
+      img.src = realUrl;
     };
 
-    // 启动首批并发队列
+    // 启动单轨串行加载
     for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalImages); i++) {
       launchNextImage();
     }
@@ -143,6 +150,7 @@ export default function PeerActivityPage() {
 
       {/* 3. 主页面内容 */}
       <div className="relative w-full max-w-[768px]">
+        
         <Image
           src={bgPic}
           alt="Activity Background"
