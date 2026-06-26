@@ -24,6 +24,68 @@ const PERFECT_RADIUS = 15;
 const TOTAL_PLATFORMS = 50;
 const EASY_MODE_FAILS = 2;
 const ASSIST_MODE_FAILS = 3;
+const ENCOURAGING_MESSAGES = [
+  "你刚刚那一下很稳，继续相信自己",
+  "做得很好，每一步都在靠近终点",
+  "你的节奏越来越好了",
+  "别急，你已经掌握感觉了",
+  "这一跳很漂亮，继续保持",
+  "你比刚开始更从容了",
+  "稳住，我们一步一步来",
+  "你真的有在变强",
+  "这一步很关键，你做到了",
+  "你的判断很棒",
+  "继续走，你已经在路上了",
+  "这份耐心会带你到终点",
+  "你正在把不确定变成确定",
+  "很好，给自己一点掌声",
+  "你已经越来越接近完美了",
+  "你的手感正在回来",
+  "这一刻很值得被肯定",
+  "你没有放弃，这就很了不起",
+  "慢慢来，你做得很好",
+  "这一跳说明你完全可以",
+  "继续保持，你的状态很好",
+  "你比自己想象中更稳",
+  "每一次尝试都算数",
+  "你正在一点点突破自己",
+  "漂亮，继续向前",
+  "你的专注很有力量",
+  "这一跳很有感觉",
+  "你已经找到节奏了",
+  "继续，你离成功更近了",
+  "很棒，我们继续下一步",
+  "今天已经很努力了，别忘了夸夸自己",
+  "你不用一直完美，也依然值得被喜欢",
+  "慢一点也没关系，你有自己的节奏",
+  "辛苦的时候，先照顾好自己也很重要",
+  "你愿意继续尝试，本身就很勇敢",
+  "别把所有压力都扛在自己身上",
+  "你已经做得比自己以为的更好了",
+  "偶尔停下来休息，也是在好好前进",
+  "你不是一个人在努力，我在这里陪你",
+  "今天的小进步，也值得被认真庆祝",
+  "就算状态一般，你也依然很珍贵",
+  "你可以不用那么着急，生活会慢慢展开",
+  "能坚持到现在，真的很不容易",
+  "你的感受很重要，不需要假装没事",
+  "请相信，你值得被温柔对待",
+  "哪怕只完成一点点，也已经很棒了",
+  "不顺利的时候，也不代表你不够好",
+  "你已经很认真地生活了",
+  "先深呼吸一下，我们慢慢来",
+  "你身上有很多闪光点，只是有时自己忘了",
+  "今天也要对自己温柔一点",
+  "你值得拥有轻松一点的时刻",
+  "不用和别人比较，你已经在变好了",
+  "你可以把心放宽一点，没关系的",
+  "你的努力不会白费，它们都在悄悄积累",
+  "就算慢一点，也是在向前走",
+  "你不需要证明什么，你本来就很好",
+  "谢谢你没有放弃自己",
+  "生活偶尔很难，但你一直很勇敢",
+  "愿你今天也能被好好接住",
+];
 
 const createInitialBlocks = (): Block[] => [
   { id: 0, x: 0, y: 0, size: 86, theme: "mint" },
@@ -33,6 +95,8 @@ const createInitialBlocks = (): Block[] => [
 const getBlockCenter = (block: Block): Point => ({ x: block.x, y: block.y - block.size * 0.44 });
 
 const distanceBetween = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
+
+const getRandomEncouragingMessage = () => ENCOURAGING_MESSAGES[Math.floor(Math.random() * ENCOURAGING_MESSAGES.length)];
 
 const createNextBlock = (from: Block, id: number, isEasyMode = false): Block => {
   const direction = Math.random() > 0.5 ? 1 : -1;
@@ -219,7 +283,7 @@ export default function JumpPage() {
     setScore(nextScore);
     scoreRef.current = nextScore;
     setCombo((previousCombo) => (isPerfect ? previousCombo + 1 : 0));
-    setMessage(isAssistModeRef.current ? "稳稳命中中心" : isPerfect ? "完美落点 +2" : "稳稳落下 +1");
+    setMessage(getRandomEncouragingMessage());
     setCurrentIndex(nextIndex);
     currentIndexRef.current = nextIndex;
     setCamera({ x: target.x, y: target.y - 28 });
@@ -430,12 +494,12 @@ export default function JumpPage() {
 
           <div className={styles.chargePanel} aria-live="polite">
             <div className={styles.message}>{message}</div>
-            <div className={styles.chargeTrack}>
-              <span style={{ width: `${Math.round(charge * 100)}%` }} />
+            <div className={`${styles.chargeTrack} ${isPressing ? styles.charging : ""}`}>
+              <span />
             </div>
             <div className={styles.metaLine}>
               <span>目标距离 {targetDistance}</span>
-              <span>{combo > 0 ? `连击 x${combo}` : "完美落点 +2"}</span>
+              <span>{combo > 0 ? `连击 x${combo}` : "相信你的节奏"}</span>
             </div>
           </div>
 
@@ -459,7 +523,7 @@ export default function JumpPage() {
             <div className={styles.gameOverCard}>
               <span>挑战完成</span>
               <strong>{score}</strong>
-              <p>{score >= bestScore ? "新的高分诞生了" : "你已经走完了 50 个平台"}</p>
+              {/* <p>{score >= bestScore ? "新的高分诞生了" : "你已经走完了 50 个平台"}</p> */}
               <button
                 type="button"
                 onPointerDown={(event) => event.stopPropagation()}
