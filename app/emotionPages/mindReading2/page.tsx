@@ -131,16 +131,6 @@ export default function MindReading2Page() {
     return clean;
   }, [buzz, clean, ph, ri]);
 
-  useEffect(() => {
-    if (ph !== "r1" && ph !== "r2" && ph !== "hold" && ph !== "clear" && ph !== "done") return;
-
-    const timer = window.setTimeout(() => {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
-    }, 80);
-
-    return () => window.clearTimeout(timer);
-  }, [ph, ri]);
-
   return (
     <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-[#090513] px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-[calc(env(safe-area-inset-bottom)+120px)] text-white select-none" onContextMenu={e => e.preventDefault()}>
       <style jsx global>{`
