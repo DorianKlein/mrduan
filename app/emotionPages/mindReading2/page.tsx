@@ -131,8 +131,18 @@ export default function MindReading2Page() {
     return clean;
   }, [buzz, clean, ph, ri]);
 
+  useEffect(() => {
+    if (ph !== "r1" && ph !== "r2" && ph !== "hold" && ph !== "clear" && ph !== "done") return;
+
+    const timer = window.setTimeout(() => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [ph, ri]);
+
   return (
-    <main className="fixed inset-0 h-[100dvh] w-screen overflow-hidden overscroll-none bg-[#090513] px-4 py-[calc(env(safe-area-inset-top)+14px)] text-white select-none [touch-action:none]" onContextMenu={e => e.preventDefault()}>
+    <main className="relative min-h-[100dvh] w-full overflow-x-hidden bg-[#090513] px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-[calc(env(safe-area-inset-bottom)+120px)] text-white select-none" onContextMenu={e => e.preventDefault()}>
       <style jsx global>{`
         html, body { overscroll-behavior: none; }
         @keyframes scan { 0% { transform: translateY(-120%); opacity: 0; } 20% { opacity: .55; } 100% { transform: translateY(120%); opacity: 0; } }
@@ -140,14 +150,14 @@ export default function MindReading2Page() {
         @keyframes rise { from { transform: translateY(16px) scale(.97); opacity: 0; filter: blur(12px); } to { transform: none; opacity: 1; filter: blur(0); } }
       `}</style>
       
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none fixed inset-0">
         <div className="absolute -left-28 top-8 h-72 w-72 rounded-full bg-fuchsia-500/30 blur-[80px]" />
         <div className="absolute -right-28 top-40 h-80 w-80 rounded-full bg-cyan-400/24 blur-[90px]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.04)_1px,transparent_1px)] bg-[size:34px_34px] opacity-40" />
         <div className="absolute inset-x-0 top-0 h-1/2 animate-[scan_4.8s_linear_infinite] bg-gradient-to-b from-transparent via-cyan-200/10 to-transparent" />
       </div>
 
-      <section className="relative z-10 mx-auto flex h-[calc(100dvh-env(safe-area-inset-top)-28px)] max-w-md flex-col">
+      <section className="relative z-10 mx-auto flex w-full max-w-md flex-col">
         <header className="mb-3 text-center">
           <h1 className="text-2xl font-black leading-tight tracking-[-.05em]">读心术2<br />命运符号预言</h1>
         </header>
@@ -170,7 +180,7 @@ export default function MindReading2Page() {
           </div>
         </div>
 
-        <section className={`${ph === "ready" || ph === "r1" || ph === "r2" ? "hidden" : "min-h-0 flex-1"} rounded-[1.8rem] border border-white/12 bg-slate-950/55 p-4 pb-24 shadow-[0_18px_60px_rgba(0,0,0,.28)] backdrop-blur-2xl`} onPointerDown={press} onPointerUp={rel} onPointerCancel={rel} onPointerLeave={rel}>
+        <section className={`${ph === "ready" || ph === "r1" || ph === "r2" ? "hidden" : "min-h-[360px]"} rounded-[1.8rem] border border-white/12 bg-slate-950/55 p-4 shadow-[0_18px_60px_rgba(0,0,0,.28)] backdrop-blur-2xl mb-4`} onPointerDown={press} onPointerUp={rel} onPointerCancel={rel} onPointerLeave={rel}>
           {ph === "hold" && (
             <div className="flex h-full flex-col items-center justify-center text-center animate-[rise_.7s_ease-out_both]">
               <div className="relative mb-6 grid h-28 w-28 place-items-center rounded-full border border-white/20" style={{ background: `conic-gradient(from -90deg,rgba(255,255,255,.92) ${hp * 360}deg,rgba(255,255,255,.1) ${hp * 360}deg)` }}><Sparkles className="h-11 w-11 drop-shadow-[0_0_22px_white]" /></div>
@@ -200,21 +210,21 @@ export default function MindReading2Page() {
         </section>
 
         {ph === "ready" && (
-          <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+14px)] left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_-10px_46px_rgba(0,0,0,.38)] animate-[rise_.45s_ease-out_both]">
+          <div className="mb-4 w-full rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_10px_36px_rgba(0,0,0,.28)] animate-[rise_.45s_ease-out_both]">
             <Panel tag="round 01 / setup" title="第一步：脑内移动 5 步" text="请将目光盯在左上角的「晨星」上。接下来在脑海中横向或纵向连续移动 5 步（可折返，严禁走斜线）。" tip="⚠️ 核心限制：必须严格数满 5 步，多一步少一步磁场都会混乱哦！" />
             <button onClick={() => setPh("r1")} className="mt-3 w-full rounded-2xl bg-slate-950/90 px-5 py-3 text-sm font-black tracking-[.16em] text-white active:scale-[.98]">我已经停在新的符号上</button>
           </div>
         )}
 
         {ph === "r1" && (
-          <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+14px)] left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_-10px_46px_rgba(0,0,0,.38)] animate-[rise_.45s_ease-out_both]">
+          <div className="mb-4 w-full rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_10px_36px_rgba(0,0,0,.28)] animate-[rise_.45s_ease-out_both]">
             <Panel tag="round 02 / filter" title="第二步：再任意移动 2 步" text="通过基础磁场测算，你绝无可能停留在对角边缘。系统已悄然抹除【晨星】与【静莲】。现在从你脚下踩着的符号开始，在剩下的明亮符号中再横向或纵向移动 2 步。" tip="（同样可以来回折返，不要跨越已经变暗死掉的格子。）" />
             <button onClick={() => setPh("r2")} className="mt-3 w-full rounded-2xl bg-slate-950/90 px-5 py-3 text-sm font-black tracking-[.16em] text-white active:scale-[.98]">走好了，继续收束</button>
           </div>
         )}
 
         {ph === "r2" && (
-          <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+14px)] left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_-10px_46px_rgba(0,0,0,.38)] animate-[rise_.45s_ease-out_both]">
+          <div className="mb-4 w-full rounded-[1.7rem] border border-cyan-100/35 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-amber-300 p-3 text-slate-950 shadow-[0_10px_36px_rgba(0,0,0,.28)] animate-[rise_.45s_ease-out_both]">
             <Panel tag="round 03 / convergence" title="最后一步：再移动 3 步" text="矩阵进一步收束，已为你驱散【暖心】与【灵感火花】。现在，请从你当前停留的格子上，最后横向或纵向移动 3 步。" tip="锁定你最终的驻留之地，死死盯住它，千万不要移开视线。" />
             <button onClick={() => setPh("hold")} className="mt-3 w-full rounded-2xl bg-slate-950/90 px-5 py-3 text-sm font-black tracking-[.16em] text-white active:scale-[.98]">走完了，开始读心</button>
           </div>
