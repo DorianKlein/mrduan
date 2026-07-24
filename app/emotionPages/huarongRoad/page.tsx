@@ -612,7 +612,7 @@ export default function HuarongRoadPage() {
               <span className={styles.moveCount}>
                 <strong>{moves}</strong> 步
               </span>
-              {!won && (
+              {!won && cfg.cols < 5 && (
                 <button
                   type="button"
                   className={`${styles.hintBtn} ${hintOn ? styles.hintBtnActive : ""} ${btnPulse && !hintOn ? styles.hintBtnPulse : ""}`}
