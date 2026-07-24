@@ -1,0 +1,476 @@
+/* ===== Page Shell ===== */
+.pageShell {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 200, 220, 0.6), transparent 30%),
+    radial-gradient(circle at 80% 90%, rgba(200, 160, 255, 0.5), transparent 30%),
+    linear-gradient(150deg, #1a0a2e 0%, #2d1b4e 40%, #1a0a2e 100%);
+  color: #fff;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+/* ===== Phone Frame ===== */
+.phoneFrame {
+  position: relative;
+  width: min(100%, 430px);
+  height: min(100svh - 28px, 880px);
+  min-height: 680px;
+  border-radius: 34px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(40, 15, 70, 0.95), rgba(20, 5, 40, 0.98));
+  border: 1px solid rgba(200, 100, 200, 0.3);
+  box-shadow:
+    0 0 60px rgba(200, 80, 200, 0.2),
+    0 28px 90px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 150, 255, 0.2);
+}
+
+/* ===== Screens ===== */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Welcome Screen ===== */
+.welcomeTitle {
+  font-size: clamp(32px, 9vw, 46px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin: 0 0 8px;
+  background: linear-gradient(135deg, #ff9de2, #ffb347, #ff6eb4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(255, 100, 180, 0.5));
+}
+
+.welcomeSub {
+  font-size: 14px;
+  color: rgba(255, 200, 240, 0.7);
+  text-align: center;
+  margin: 0 0 36px;
+  letter-spacing: 0.06em;
+}
+
+.previewHeart {
+  margin-bottom: 36px;
+  filter: drop-shadow(0 0 24px rgba(255, 80, 160, 0.7));
+}
+
+.difficultyLabel {
+  font-size: 13px;
+  color: rgba(255, 200, 240, 0.6);
+  letter-spacing: 0.12em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.difficultyGroup {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.diffBtn {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 120, 200, 0.3);
+  background: rgba(255, 80, 160, 0.08);
+  color: rgba(255, 200, 240, 0.7);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.diffBtn:hover,
+.diffBtn.selected {
+  border-color: rgba(255, 120, 200, 0.8);
+  background: rgba(255, 80, 160, 0.22);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(255, 80, 160, 0.3);
+}
+
+.diffBtn.selected {
+  background: linear-gradient(135deg, rgba(255, 80, 160, 0.35), rgba(200, 60, 220, 0.35));
+  box-shadow: 0 0 24px rgba(255, 80, 160, 0.4);
+}
+
+.diffInfo {
+  font-size: 12px;
+  color: rgba(255, 180, 220, 0.5);
+  margin-top: 4px;
+  display: block;
+}
+
+.startBtn {
+  width: 100%;
+  max-width: 260px;
+  height: 54px;
+  border-radius: 999px;
+  border: none;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6eb4, #ff9de2, #ffb347);
+  box-shadow: 0 0 30px rgba(255, 100, 180, 0.5), 0 10px 30px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.startBtn:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 20px rgba(255, 100, 180, 0.4);
+}
+
+/* ===== Game Screen ===== */
+.gameHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.gameTitle {
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #ff9de2, #ffb347);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.moveCount {
+  font-size: 13px;
+  color: rgba(255, 200, 240, 0.6);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 80, 160, 0.1);
+  border: 1px solid rgba(255, 120, 200, 0.2);
+}
+
+.moveCount strong {
+  color: #ff9de2;
+  font-size: 15px;
+}
+
+.backBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 120, 200, 0.3);
+  background: rgba(255, 80, 160, 0.08);
+  color: rgba(255, 200, 240, 0.7);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Hint button ===== */
+.hintBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 200, 100, 0.35);
+  background: rgba(255, 180, 60, 0.1);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.hintBtn:active {
+  background: rgba(255, 180, 60, 0.28);
+}
+
+.hintBtnPulse {
+  animation: hintBtnGlow 1s ease-in-out infinite alternate;
+  border-color: rgba(255, 210, 80, 0.9);
+  background: rgba(255, 180, 60, 0.18);
+}
+
+.hintBtnActive {
+  border-color: rgba(255, 210, 80, 0.9);
+  background: rgba(255, 180, 60, 0.28);
+  box-shadow: 0 0 12px rgba(255, 200, 60, 0.5);
+}
+
+@keyframes hintBtnGlow {
+  from { box-shadow: 0 0 6px rgba(255, 200, 60, 0.4);  border-color: rgba(255, 210, 80, 0.6); }
+  to   { box-shadow: 0 0 18px rgba(255, 220, 60, 0.9); border-color: rgba(255, 230, 100, 1); }
+}
+
+/* ===== Hinted tile ===== */
+.tileHinted {
+  animation: tileFlash 0.5s ease-in-out infinite alternate !important;
+  z-index: 5 !important;
+}
+
+@keyframes tileFlash {
+  from { box-shadow: 0 0 0px rgba(255, 220, 80, 0);    border-color: rgba(255, 220, 80, 0.4); }
+  to   { box-shadow: 0 0 18px rgba(255, 220, 80, 0.9); border-color: rgba(255, 240, 100, 1); }
+}
+
+.backBtn:active {
+  background: rgba(255, 80, 160, 0.2);
+}
+
+
+/* ===== Tiles layer ===== */
+.tilesLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.tilesLayerFadeOut {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+/* ===== Puzzle Board ===== */
+.boardWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.board {
+  position: relative;
+  border-radius: 20px;
+  background: rgba(10, 0, 25, 0.8);
+  border: 1px solid rgba(200, 80, 200, 0.2);
+  box-shadow:
+    0 0 40px rgba(200, 80, 200, 0.15),
+    inset 0 0 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.boardGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 80, 180, 0.04), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== Tiles ===== */
+.tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: left 0.18s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.18s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(20, 5, 50, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(255, 100, 200, 0.08);
+}
+
+.tile:active {
+  filter: brightness(1.15);
+}
+
+.tileEmpty {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px dashed rgba(255, 100, 200, 0.12) !important;
+  cursor: default;
+  pointer-events: none;
+  box-shadow: none !important;
+}
+
+.tileInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Pixel Heart on Tile ===== */
+.pixelGrid {
+  display: grid;
+  gap: 0;
+  image-rendering: pixelated;
+}
+
+.pixel {
+  border-radius: 1px;
+  transition: background-color 0.3s ease;
+}
+
+/* ===== Game hint ===== */
+.hintBar {
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 200, 240, 0.4);
+  padding: 10px 0 4px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+/* ===== Win Screen ===== */
+.winScreen {
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 60, 150, 0.15), transparent 60%),
+    linear-gradient(145deg, rgba(40, 15, 70, 0.98), rgba(20, 5, 40, 1));
+}
+
+.winHeart {
+  margin-bottom: 24px;
+  animation: winPulse 0.8s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 30px rgba(255, 80, 160, 0.9));
+}
+
+
+
+.playAgainBtn {
+  width: 100%;
+  max-width: 240px;
+  height: 50px;
+  border-radius: 999px;
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6eb4, #c84bdf);
+  box-shadow: 0 0 28px rgba(200, 75, 223, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.playAgainBtn:active {
+  transform: scale(0.97);
+}
+
+/* ===== Win Overlay (on top of board) ===== */
+.winOverlay {
+  position: absolute;
+  inset: 6px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: overlayFadeIn 0.5s ease forwards;
+}
+
+.winOverlayGlow {
+  position: absolute;
+  inset: 6px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===== Win Footer (below board, replaces hint bar) ===== */
+.winFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 4px;
+  flex-shrink: 0;
+  animation: overlayFadeIn 0.5s ease 0.2s both;
+}
+
+.winStats {
+  font-size: 13px;
+  color: rgba(255, 200, 240, 0.65);
+  margin: 0;
+  text-align: center;
+}
+
+.winStats strong {
+  color: #ff9de2;
+}
+
+/* ===== Heart Rain ===== */
+.heartRain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 100;
+  border-radius: inherit;
+}
+
+.rainHeart {
+  position: absolute;
+  top: -60px;
+  font-size: 20px;
+  animation: fallDown linear forwards;
+  opacity: 0.9;
+  will-change: transform, opacity;
+  line-height: 1;
+}
+
+@keyframes fallDown {
+  0%   { transform: translateY(0) rotate(0deg) scale(1);   opacity: 0.9; }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(1000px) rotate(360deg) scale(0.7); opacity: 0; }
+}
+
+/* ===== Ambient particles ===== */
+.ambientParticle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleDrift ease-in-out infinite alternate;
+}
+
+@keyframes particleDrift {
+  from { transform: translateY(0) translateX(0); opacity: 0.3; }
+  to   { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
+}
