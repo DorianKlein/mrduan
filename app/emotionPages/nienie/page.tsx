@@ -31,6 +31,8 @@ const HEALING_WORDS = [
 const MAX_PULL = 120;
 const TAP_THRESHOLD = 8;
 const MAX_TILT = 26;
+const SETTLE_MS = 660;
+const SQUEEZE_MS = 340;
 
 const clampPull = (dx: number, dy: number) => {
   const distance = Math.hypot(dx, dy);
@@ -42,25 +44,61 @@ const clampPull = (dx: number, dy: number) => {
 const getHealingWord = () => HEALING_WORDS[Math.floor(Math.random() * HEALING_WORDS.length)];
 
 export default function NieniePage() {
-  const [pull, setPull] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [isSqueezing, setIsSqueezing] = useState(false);
-  const [isSettling, setIsSettling] = useState(false);
   const [count, setCount] = useState(0);
   const [floatTexts, setFloatTexts] = useState<FloatText[]>([]);
 
   const stageRef = useRef<HTMLDivElement>(null);
+  const catRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
+
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const movedFar = useRef(false);
+  const latestPull = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number | null>(null);
   const nextTextId = useRef(1);
   const squeezeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const paint = useCallback((x: number, y: number) => {
+    const cat = catRef.current;
+    const shadow = shadowRef.current;
+    if (!cat) return;
+
+    const ratio = Math.min(Math.hypot(x, y) / MAX_PULL, 1);
+    const angle = ratio > 0.001 ? (Math.atan2(y, x) * 180) / Math.PI : 0;
+
+    cat.style.setProperty("--pull-x", `${x}px`);
+    cat.style.setProperty("--pull-y", `${y}px`);
+    cat.style.setProperty("--tilt-y", `${(x / MAX_PULL) * MAX_TILT}deg`);
+    cat.style.setProperty("--tilt-x", `${(-y / MAX_PULL) * MAX_TILT}deg`);
+    cat.style.setProperty("--squash-angle", `${angle}deg`);
+    cat.style.setProperty("--squash-along", `${1 - ratio * 0.24}`);
+    cat.style.setProperty("--bulge-across", `${1 + ratio * 0.2}`);
+    cat.style.setProperty("--press-z", `${ratio * 18}px`);
+
+    if (shadow) {
+      shadow.style.setProperty("--shadow-x", `${x * 0.5}px`);
+      shadow.style.setProperty("--shadow-scale", `${1 + ratio * 0.16}`);
+      shadow.style.setProperty("--shadow-fade", `${0.82 + ratio * 0.18}`);
+    }
+  }, []);
+
+  const schedulePaint = useCallback(() => {
+    if (rafId.current !== null) return;
+
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      const { x, y } = latestPull.current;
+      paint(x, y);
+    });
+  }, [paint]);
 
   useEffect(() => {
     document.title = "捏捏猫 - 解压放松";
     return () => {
       if (squeezeTimer.current) clearTimeout(squeezeTimer.current);
       if (settleTimer.current) clearTimeout(settleTimer.current);
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
     };
   }, []);
 
@@ -72,7 +110,7 @@ export default function NieniePage() {
     const id = nextTextId.current++;
 
     setFloatTexts((current) => [
-      ...current.slice(-6),
+      ...current.slice(-5),
       { id, x: clientX - rect.left, y: clientY - rect.top, text: getHealingWord() },
     ]);
 
@@ -82,22 +120,36 @@ export default function NieniePage() {
   }, []);
 
   const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const cat = catRef.current;
+    if (!cat) return;
+
+    cat.setPointerCapture(event.pointerId);
     dragStart.current = { x: event.clientX, y: event.clientY };
     movedFar.current = false;
-    setIsDragging(true);
+    latestPull.current = { x: 0, y: 0 };
+
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    if (squeezeTimer.current) clearTimeout(squeezeTimer.current);
+
+    cat.classList.remove(styles.settling, styles.squeezing);
+    cat.classList.add(styles.dragging);
+    shadowRef.current?.classList.add(styles.shadowDragging);
   }, []);
 
-  const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragStart.current) return;
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragStart.current) return;
 
-    const dx = event.clientX - dragStart.current.x;
-    const dy = event.clientY - dragStart.current.y;
+      const dx = event.clientX - dragStart.current.x;
+      const dy = event.clientY - dragStart.current.y;
 
-    if (Math.hypot(dx, dy) > TAP_THRESHOLD) movedFar.current = true;
+      if (!movedFar.current && Math.hypot(dx, dy) > TAP_THRESHOLD) movedFar.current = true;
 
-    setPull(clampPull(dx, dy));
-  }, []);
+      latestPull.current = clampPull(dx, dy);
+      schedulePaint();
+    },
+    [schedulePaint],
+  );
 
   const handlePointerUp = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -107,51 +159,37 @@ export default function NieniePage() {
       dragStart.current = null;
       movedFar.current = false;
 
-      setIsDragging(false);
-      setPull({ x: 0, y: 0 });
-      setCount((value) => value + 1);
-      popWord(event.clientX, event.clientY);
-
-      if (wasDrag) {
-        setIsSettling(true);
-        if (settleTimer.current) clearTimeout(settleTimer.current);
-        settleTimer.current = setTimeout(() => setIsSettling(false), 660);
-        return;
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
       }
 
-      setIsSqueezing(true);
-      if (squeezeTimer.current) clearTimeout(squeezeTimer.current);
-      squeezeTimer.current = setTimeout(() => setIsSqueezing(false), 340);
+      const cat = catRef.current;
+      latestPull.current = { x: 0, y: 0 };
+
+      if (cat) {
+        cat.classList.remove(styles.dragging);
+        shadowRef.current?.classList.remove(styles.shadowDragging);
+        paint(0, 0);
+
+        if (wasDrag) {
+          cat.classList.add(styles.settling);
+          settleTimer.current = setTimeout(() => {
+            cat.classList.remove(styles.settling);
+          }, SETTLE_MS);
+        } else {
+          cat.classList.add(styles.squeezing);
+          squeezeTimer.current = setTimeout(() => {
+            cat.classList.remove(styles.squeezing);
+          }, SQUEEZE_MS);
+        }
+      }
+
+      setCount((value) => value + 1);
+      popWord(event.clientX, event.clientY);
     },
-    [popWord],
+    [paint, popWord],
   );
-
-  const pullRatio = Math.min(Math.hypot(pull.x, pull.y) / MAX_PULL, 1);
-  const squashAngle = pullRatio > 0.001 ? (Math.atan2(pull.y, pull.x) * 180) / Math.PI : 0;
-
-  const catStyle = {
-    "--pull-x": `${pull.x}px`,
-    "--pull-y": `${pull.y}px`,
-    "--tilt-y": `${(pull.x / MAX_PULL) * MAX_TILT}deg`,
-    "--tilt-x": `${(-pull.y / MAX_PULL) * MAX_TILT}deg`,
-    "--squash-angle": `${squashAngle}deg`,
-    "--squash-along": `${1 - pullRatio * 0.24}`,
-    "--bulge-across": `${1 + pullRatio * 0.2}`,
-    "--press-z": `${pullRatio * 18}px`,
-    "--shadow-x": `${pull.x * 0.5}px`,
-    "--shadow-scale": `${1 + pullRatio * 0.16}`,
-    "--shadow-fade": `${0.82 + pullRatio * 0.18}`,
-    "--shadow-blur": `${6 - pullRatio * 2}px`,
-  } as React.CSSProperties;
-
-  const catClassName = [
-    styles.cat,
-    isDragging ? styles.dragging : "",
-    isSettling ? styles.settling : "",
-    isSqueezing ? styles.squeezing : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
 
   return (
     <main className={styles.pageShell}>
@@ -174,11 +212,12 @@ export default function NieniePage() {
           </header>
 
           <div className={styles.catArea}>
-            <div className={styles.catShadow} style={catStyle} />
+            <div className={styles.catShadow} ref={shadowRef} />
 
-            <div className={styles.catScene} style={catStyle}>
+            <div className={styles.catScene}>
               <div
-                className={catClassName}
+                ref={catRef}
+                className={styles.cat}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
