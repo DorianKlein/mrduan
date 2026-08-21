@@ -1,0 +1,106 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 14px;
+  color: #fff;
+  background: #101522;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.shell { width: min(100%, 390px); }
+.header { display: flex; align-items: flex-end; justify-content: space-between; margin: 0 auto 18px; }
+.eyebrow { margin: 0 0 8px; color: #91a2c3; font-size: 10px; letter-spacing: 1.8px; }
+.header h1 { margin: 0; color: #f8f9ff; font-size: 32px; letter-spacing: 2px; }
+.subtitle { margin: 7px 0 0; color: #aab6cd; font-size: 13px; }
+.counter { min-width: 64px; color: #fff; font-size: 25px; font-weight: 700; text-align: right; }
+.counter span { color: #687895; font-size: 14px; font-weight: 500; }
+.counter small { display: block; color: #71809d; font-size: 10px; font-weight: 400; }
+
+/* 修改 .game 高度，保持与逻辑高度 HEIGHT(530) 一致，避免逻辑坐标错位 */
+.game {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  height: 530px; /* 固定为 530px */
+  margin: 0 auto;
+  overflow: hidden;
+  touch-action: none;
+  border: 1px solid #34405c;
+  border-radius: 20px;
+  background: #171e31;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .28), inset 0 1px rgba(255,255,255,.06);
+}
+
+.game::before, .game::after { position: absolute; content: ""; inset: 0; pointer-events: none; }
+.game::before { background: linear-gradient(180deg, rgba(89, 110, 162, .12), transparent 32%, rgba(9, 12, 22, .24)); }
+.game::after { border-radius: inherit; box-shadow: inset 0 0 40px rgba(3, 7, 18, .42); }
+.stars { position: absolute; inset: 0; opacity: .65; background-image: radial-gradient(circle at 12% 22%, #fff 0 1px, transparent 1.5px), radial-gradient(circle at 87% 17%, #fff 0 1px, transparent 1.5px), radial-gradient(circle at 74% 46%, #8ea2d2 0 1px, transparent 1.5px), radial-gradient(circle at 24% 74%, #8ea2d2 0 1px, transparent 1.5px), radial-gradient(circle at 54% 30%, #fff 0 1px, transparent 1.5px); }
+.brick { position: absolute; z-index: 2; border-radius: 6px; box-shadow: inset 0 2px rgba(255,255,255,.28), 0 4px 8px rgba(0,0,0,.18); animation: brickIn .35s ease-out both; }
+.brick::after { position: absolute; inset: 4px 7px auto; height: 2px; content: ""; border-radius: 2px; background: rgba(255,255,255,.2); }
+.ball { position: absolute; z-index: 5; width: 12px; height: 12px; margin: -6px; border-radius: 50%; box-shadow: 0 0 8px 3px rgba(255,255,255,.4); }
+.paddle { 
+  position: absolute; 
+  z-index: 4; 
+  bottom: 18px; 
+  left: 0; /* 改为固定从左边开始，借助 transform 偏移 */
+  width: 74px; 
+  height: 11px; 
+  border-radius: 8px; 
+  background: #f3f6ff; 
+  box-shadow: 0 0 14px rgba(159, 191, 255, .85); 
+  /* 移除 transition: left .04s linear; 避免 DOM 操作时产生延迟滞后感 */
+  will-change: transform; /* 开启 GPU 加速 */
+}
+.paddle span { display: block; width: 24px; height: 3px; margin: 3px auto; border-radius: 3px; background: #9babce; }
+/* 提升 z-index 到最高层(12)，并将动画改为 1s 渐隐 */
+.message { 
+  position: absolute; 
+  z-index: 12; /* 设置为最上层 */
+  width: 120px; 
+  margin-left: -60px; 
+  transform: translateY(-50%); 
+  opacity: 1; 
+  font-size: 12px; 
+  font-weight: 600; 
+  line-height: 1.3; 
+  text-align: center; 
+  text-shadow: 0 1px 4px #111827; 
+  animation: messageFloat 1s linear forwards; /* 执行 1 秒 */
+  pointer-events: none; 
+}
+.startHint { position: absolute; z-index: 8; top: 42%; left: 50%; display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translate(-50%, -50%); color: #fff; text-align: center; }
+.playIcon { display: grid; width: 50px; height: 50px; place-items: center; padding-left: 3px; border: 1px solid rgba(255,255,255,.38); border-radius: 50%; color: #c8d6ff; font-size: 18px; background: rgba(103, 126, 183, .24); box-shadow: 0 5px 25px rgba(0,0,0,.2); }
+.startHint strong { font-size: 16px; }
+.startHint small { color: #8e9bb6; font-size: 11px; }
+.winPanel { position: absolute; z-index: 10; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 34px; text-align: center; background: rgba(16, 21, 34, .9); animation: panelIn .4s ease-out; }
+.confetti { color: #feca57; font-size: 26px; letter-spacing: 6px; }
+.winPanel h2 { margin: 14px 0 10px; font-size: 28px; }
+.winPanel p { margin: 0; color: #c4cee1; font-size: 14px; line-height: 1.8; }
+.winPanel button { margin-top: 24px; padding: 11px 25px; border: 0; border-radius: 20px; color: #192033; font: inherit; font-size: 14px; font-weight: 700; background: #feca57; cursor: pointer; }
+.footer { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; color: #8795b2; font-size: 11px; }
+.dot { color: #53617d; }
+.resetButton { position: absolute; right: 15px; width: 30px; height: 30px; border: 1px solid #3e4a66; border-radius: 50%; color: #a9b6d0; font-size: 20px; line-height: 1; background: transparent; cursor: pointer; }
+
+@keyframes brickIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+
+/* 出现时即开始执行渐隐，1s内完全消失 */
+@keyframes messageFloat { 
+  0% { 
+    opacity: 1; 
+    transform: translateY(-50%); 
+  } 
+  100% { 
+    opacity: 0; 
+    transform: translateY(-100%); 
+  } 
+}
+
+@keyframes panelIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 370px) {
+  .page { padding-top: 14px; }
+  .header h1 { font-size: 28px; }
+  .subtitle { font-size: 12px; }
+  .game { min-height: 420px; }
+}
