@@ -29,7 +29,7 @@
 
 .container {
   width: 100%;
-  max-width: 420px;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -38,11 +38,13 @@
   height: 100%;
   max-height: 100vh;
   justify-content: center;
+  align-items: center;
 }
 
 .header {
   text-align: center;
   color: #F6F1E8;
+  flex-shrink: 0;
 }
 
 .header h1 {
@@ -68,16 +70,28 @@
 
 .canvasWrapper {
   position: relative;
-  width: 100%;
-  height: 600px;
-  background: rgba(246, 241, 232, 0.03);
-  border-radius: 24px;
+  width: calc(min(var(--circle-size, 85vw), var(--circle-size, 85vh)));
+  height: calc(min(var(--circle-size, 85vw), var(--circle-size, 85vh)));
+  border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(226, 217, 200, 0.1);
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(246, 241, 232, 0.03) 0%,
+    rgba(246, 241, 232, 0.03) 60%,
+    #3D3530 60%,
+    #2A2723 70%,
+    #1F2421 100%
+  );
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.8),
+    0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* 调整这个值来改变圆的大小，建议范围 70-95 */
+:root {
+  --circle-size: 85vmin;
 }
 
 .addButton {
@@ -347,15 +361,11 @@
     font-size: 40px;
   }
 
-  .canvasWrapper {
-    height: 500px;
-  }
-
-  .inputSection {
-    padding: 18px;
-  }
-
   .modalContent {
     padding: 20px;
+  }
+  
+  :root {
+    --circle-size: 90vmin;
   }
 }

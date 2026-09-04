@@ -18,9 +18,20 @@ type Bubble = {
   settled: boolean;
 };
 
+type Particle = {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  opacity: number;
+  color: string;
+};
+
 const PLACEHOLDER_TEXTS = [
   "今天有什么让你不开心的吗？",
-  "把烦恼写下来，让它飘走吧",
+  "把烦恼写下来",
   "说出来会好一点的...",
   "这里很安全，可以说任何话",
 ];
@@ -44,10 +55,15 @@ export default function MoodCavePage() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const frameRef = useRef<number | null>(null);
   const nextBubbleId = useRef(0);
+  const nextParticleId = useRef(0);
 
-  const WIDTH = 375;
+  // 可调整的圆形大小参数 (建议范围 70-95)
+  const CIRCLE_SIZE_PERCENT = 85;
+  
+  const WIDTH = 600;
   const HEIGHT = 600;
 
   useEffect(() => {
@@ -145,6 +161,22 @@ export default function MoodCavePage() {
       
       if (dist < bubble.size / 2 && !popped) {
         popped = true;
+        
+        for (let i = 0; i < 12; i++) {
+          const angle = (Math.PI * 2 * i) / 12;
+          const speed = Math.random() * 2 + 2;
+          particlesRef.current.push({
+            id: nextParticleId.current++,
+            x: bubble.x,
+            y: bubble.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: Math.random() * 3 + 2,
+            opacity: 1,
+            color: `hsl(${Math.random() * 40 + 30}, 70%, 60%)`,
+          });
+        }
+        
         return false;
       }
       return true;
@@ -262,6 +294,26 @@ export default function MoodCavePage() {
       });
 
       setBubbles(bubblesRef.current);
+      
+      particlesRef.current = particlesRef.current.filter((particle) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.15;
+        particle.opacity -= 0.02;
+
+        if (particle.opacity > 0) {
+          ctx.save();
+          ctx.globalAlpha = particle.opacity;
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        return particle.opacity > 0;
+      });
+
       frameRef.current = requestAnimationFrame(animate);
     };
 
@@ -304,8 +356,8 @@ export default function MoodCavePage() {
           {bubbles.length === 0 && (
             <div className={styles.emptyHint}>
               <div className={styles.emptyIcon}>🌙</div>
-              <p>点击右上角添加烦恼</p>
-              <p className={styles.emptySubtext}>看着它们慢慢飘走</p>
+              <p>晚上好</p>
+              <p className={styles.emptySubtext}>点击右上角添加烦恼</p>
             </div>
           )}
         </div>
