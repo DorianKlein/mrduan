@@ -333,9 +333,7 @@ export default function MoodCavePage() {
           </h1>
           <p className={styles.subtitle}>说出来，然后放下</p>
         </header>
-
-        <div className={styles.canvasWrapper}>
-          <button 
+        <button 
             className={styles.addButton}
             onClick={() => setShowInputModal(true)}
             aria-label="添加烦恼"
@@ -345,7 +343,7 @@ export default function MoodCavePage() {
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
           </button>
-          
+        <div className={styles.canvasWrapper}>
           <canvas
             ref={canvasRef}
             className={styles.canvas}
