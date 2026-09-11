@@ -61,13 +61,13 @@ const MOOD_RESPONSES: Record<Mood, string[]> = {
   ],
 };
 
-const FOLLOW_UP_QUESTIONS = [
-  "今天发生了什么好事吗？",
-  "想聊聊最近的烦恼吗？",
-  "有什么想要分享的吗？",
-  "需要一些鼓励的话吗？",
-  "要不要听个小故事？",
-  "想要一句温暖的话吗？",
+const FOLLOW_UP_OPTIONS = [
+  "今天有件开心的事",
+  "最近有些烦恼",
+  "想听个温暖的故事",
+  "给我一句鼓励吧",
+  "只是想聊聊天",
+  "分享今天的小确幸",
 ];
 
 const WARM_MESSAGES = [
@@ -144,7 +144,7 @@ export default function MoodChatPage() {
     sendBotMessage(response);
 
     setTimeout(() => {
-      const shuffled = [...FOLLOW_UP_QUESTIONS].sort(() => Math.random() - 0.5);
+      const shuffled = [...FOLLOW_UP_OPTIONS].sort(() => Math.random() - 0.5);
       setQuickReplies(shuffled.slice(0, 3));
       setShowQuickReplies(true);
     }, 1500);
@@ -154,25 +154,51 @@ export default function MoodChatPage() {
     addMessage("user", reply);
     setShowQuickReplies(false);
 
-    if (reply.includes("鼓励") || reply.includes("温暖")) {
+    if (reply.includes("鼓励")) {
       const warmMsg = WARM_MESSAGES[Math.floor(Math.random() * WARM_MESSAGES.length)];
       sendBotMessage(warmMsg);
     } else if (reply.includes("故事")) {
       sendBotMessage("从前有一只小猫，它每天都会对着镜子说：\n\n「今天的我也很可爱！」🐱\n\n后来它发现，自信真的能让生活变得更美好。");
+    } else if (reply.includes("烦恼")) {
+      const responses = [
+        "嗯，我在听。说出来会好受一些",
+        "遇到烦心事确实不容易，慢慢说",
+        "先深呼吸一下，我们一起面对",
+        "烦恼就像天上的云，总会飘走的",
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      sendBotMessage(response);
+    } else if (reply.includes("开心")) {
+      const responses = [
+        "太好了！快跟我分享一下 ✨",
+        "哇，听起来很棒！详细说说？",
+        "开心的事情要多说几遍呢",
+        "你的快乐也感染到我了 🌟",
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      sendBotMessage(response);
+    } else if (reply.includes("小确幸")) {
+      const responses = [
+        "生活中的小美好最珍贵了",
+        "这些小确幸串起了美好的日常",
+        "记得把这些小幸福都记下来 📝",
+        "平凡日子里的闪光时刻 ✨",
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      sendBotMessage(response);
     } else {
       const responses = [
-        "我一直在这里陪着你 💙",
-        "无论发生什么，都要记得照顾好自己",
-        "你的感受都是valid的，不需要隐藏",
-        "每一个情绪都值得被看见和接纳",
-        "有我陪着你呢 🌟",
+        "我会一直陪着你聊天的",
+        "想说什么就说什么吧，我在听",
+        "有时候，被人倾听本身就是一种治愈",
+        "这里很安全，可以放心表达",
       ];
       const response = responses[Math.floor(Math.random() * responses.length)];
       sendBotMessage(response);
     }
 
     setTimeout(() => {
-      const shuffled = [...FOLLOW_UP_QUESTIONS].sort(() => Math.random() - 0.5);
+      const shuffled = [...FOLLOW_UP_OPTIONS].sort(() => Math.random() - 0.5);
       setQuickReplies(shuffled.slice(0, 3));
       setShowQuickReplies(true);
     }, 1500);
@@ -281,7 +307,18 @@ export default function MoodChatPage() {
         )}
       </div>
 
-      <div className={styles.floatingHeart}>💝</div>
+      <div className={styles.floatingEmojis}>
+        <span className={styles.emoji1}>💝</span>
+        <span className={styles.emoji2}>✨</span>
+        <span className={styles.emoji3}>🌙</span>
+        <span className={styles.emoji4}>⭐</span>
+        <span className={styles.emoji5}>🌸</span>
+        <span className={styles.emoji6}>🫧</span>
+        <span className={styles.emoji7}>🌈</span>
+        <span className={styles.emoji8}>💫</span>
+        <span className={styles.emoji9}>🍃</span>
+        <span className={styles.emoji10}>☁️</span>
+      </div>
     </main>
   );
 }
