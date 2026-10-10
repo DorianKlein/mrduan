@@ -1,0 +1,198 @@
+.page {
+  min-height: 100svh;
+  overflow: hidden;
+  background: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scene {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.backdrop,
+.balloonLayer,
+.redCircle,
+.mapReveal {
+  position: absolute;
+  inset: 0;
+}
+
+.backdrop {
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+
+.backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.balloonLayer {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  left: var(--left);
+  bottom: -14%;
+  width: clamp(34px, 8vw, 70px);
+  height: clamp(48px, 11vw, 96px);
+  opacity: 0;
+  transform: translateX(-50%) scale(var(--size));
+  animation: balloonRise var(--duration) linear var(--delay) forwards;
+}
+
+.balloon i {
+  position: absolute;
+  inset: 0 0 18%;
+  border-radius: 50% 50% 48% 48% / 46% 46% 55% 55%;
+  background: #c90012;
+}
+
+.balloon b {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid #c90012;
+  transform: translateX(-50%);
+}
+
+.redCircle {
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: #c90012;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: circleExpand 2.6s cubic-bezier(0.2, 0.8, 0.25, 1) 8.8s forwards;
+}
+
+.mapReveal {
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  animation: mapDuringExpand 2.6s ease 8.8s forwards;
+}
+
+.mapReveal img {
+  display: block;
+  width: min(88vw, 760px);
+  height: auto;
+  filter: brightness(0) saturate(100%);
+}
+
+.titleReveal {
+  position: absolute;
+  z-index: 5;
+  top: 12vh;
+  left: 50%;
+  width: min(76vw, 460px);
+  opacity: 0;
+  transform: translateX(-50%);
+  animation: titleImageIn 1.2s ease 11.4s forwards;
+}
+
+.titleReveal img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bottomMessage {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 7vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-family: serif;
+  font-size: clamp(20px, 6vw, 42px);
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: bottomMessageIn 1.2s ease 11.4s forwards;
+}
+
+@keyframes balloonRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, 0, 0) scale(var(--size));
+  }
+  8% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+    transform: translate3d(calc(-50% + var(--sway)), -112vh, 0) scale(var(--size));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - var(--sway)), -130vh, 0) scale(var(--size));
+  }
+}
+
+@keyframes circleExpand {
+  0% { transform: scale(0); }
+  100% { transform: scale(1.55); }
+}
+
+@keyframes mapDuringExpand {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes titleImageIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes bottomMessageIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balloon,
+  .redCircle,
+  .mapReveal,
+  .titleReveal,
+  .bottomMessage {
+    animation: none;
+  }
+
+  .redCircle { transform: scale(1.55); }
+  .mapReveal { opacity: 1; }
+  .titleReveal { opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .backdrop img {
+    width: 112%;
+    max-width: none;
+  }
+
+  .mapReveal img {
+    width: 94vw;
+  }
+}
