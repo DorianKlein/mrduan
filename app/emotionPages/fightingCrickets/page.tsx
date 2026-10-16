@@ -16,128 +16,104 @@ interface CricketSpec {
   color: string;
   secondaryColor: string;
   glowColor: string;
-  sizeLabel: string;
-  speedLabel: string;
   radius: number;
   baseSpeed: number;
   mass: number;
   maxHp: number;
   baseAtk: number;
-  wallSkillName: string;
   wallSkillDesc: string;
-  clashSkillName: string;
   clashSkillDesc: string;
 }
 
 const CRICKETS: Record<CricketId, CricketSpec> = {
   fire: {
     id: 'fire',
-    name: '赤焰暴君',
-    title: '狂战 · 火',
-    icon: '🔥',
-    color: '#ff3b5c',
-    secondaryColor: '#ff9a00',
-    glowColor: 'rgba(255, 59, 92, 0.65)',
-    sizeLabel: '中型',
-    speedLabel: '常速',
-    radius: 23,
-    baseSpeed: 2.5,
+    name: '绯樱暴君',
+    title: '元气 · 冲刺',
+    icon: '🌸',
+    color: '#ff7597',
+    secondaryColor: '#ffd6e0',
+    glowColor: 'rgba(255, 117, 151, 0.42)',
+    radius: 34,
+    baseSpeed: 1.45,
     mass: 1.05,
     maxHp: 320,
     baseAtk: 26,
-    wallSkillName: '蓄力氮气弹射',
-    wallSkillDesc: '碰壁叠加烈焰加速并拖出火尾，越撞越快。',
-    clashSkillName: '动能重击',
-    clashSkillDesc: '借冲刺势能打出破甲重击，将对手猛烈撞退。',
+    wallSkillDesc: '碰壁叠加花焰加速，越跑越快',
+    clashSkillDesc: '借冲刺势能把对手重重弹开',
   },
   rock: {
     id: 'rock',
-    name: '玄铁重装',
-    title: '反伤 · 岩',
-    icon: '🛡️',
-    color: '#f5a623',
-    secondaryColor: '#ffe082',
-    glowColor: 'rgba(245, 166, 35, 0.65)',
-    sizeLabel: '大型',
-    speedLabel: '慢速',
-    radius: 29,
-    baseSpeed: 1.85,
+    name: '琥珀重装',
+    title: '暖阳 · 守护',
+    icon: '🍯',
+    color: '#f5a65b',
+    secondaryColor: '#ffecc8',
+    glowColor: 'rgba(245, 166, 91, 0.42)',
+    radius: 41,
+    baseSpeed: 1.1,
     mass: 1.65,
     maxHp: 420,
     baseAtk: 22,
-    wallSkillName: '震地护盾',
-    wallSkillDesc: '多次碰壁后开启金光护盾，并震出减速冲击波。',
-    clashSkillName: '荆棘铁壁',
-    clashSkillDesc: '身板厚重减免伤害，并将冲击力反弹给对手。',
+    wallSkillDesc: '多次碰壁张开暖阳护盾并震出减速波',
+    clashSkillDesc: '身板厚重减免伤害，并反弹一部分冲击力',
   },
   wind: {
     id: 'wind',
-    name: '疾风幻影',
-    title: '连击 · 雷',
-    icon: '⚡',
-    color: '#00f0ff',
-    secondaryColor: '#80f8ff',
-    glowColor: 'rgba(0, 240, 255, 0.65)',
-    sizeLabel: '小型',
-    speedLabel: '迅捷',
-    radius: 18,
-    baseSpeed: 3.3,
+    name: '晴空幻影',
+    title: '轻风 · 分身',
+    icon: '🦋',
+    color: '#6ec6ff',
+    secondaryColor: '#dcf2ff',
+    glowColor: 'rgba(110, 198, 255, 0.45)',
+    radius: 28,
+    baseSpeed: 1.9,
     mass: 0.78,
     maxHp: 270,
     baseAtk: 19,
-    wallSkillName: '分身残影',
-    wallSkillDesc: '碰壁时概率分裂出电光幻象，多球协同围殴。',
-    clashSkillName: '高频电弧',
-    clashSkillDesc: '碰撞触发连锁感电，短暂麻痹对手打断节奏。',
+    wallSkillDesc: '碰壁有概率唤出小分身一起围殴对手',
+    clashSkillDesc: '碰撞触发微风酥麻，短暂打断对手节奏',
   },
   void: {
     id: 'void',
-    name: '噬魂黑洞',
-    title: '吸血 · 暗',
-    icon: '🌀',
-    color: '#b845ff',
-    secondaryColor: '#e29eff',
-    glowColor: 'rgba(184, 69, 255, 0.65)',
-    sizeLabel: '中型',
-    speedLabel: '中慢',
-    radius: 24,
-    baseSpeed: 2.15,
+    name: '星云黑洞',
+    title: '微醺 · 汲取',
+    icon: '🔮',
+    color: '#b388eb',
+    secondaryColor: '#ede0ff',
+    glowColor: 'rgba(179, 136, 235, 0.45)',
+    radius: 35,
+    baseSpeed: 1.3,
     mass: 1.18,
     maxHp: 350,
     baseAtk: 23,
-    wallSkillName: '引力脉冲',
-    wallSkillDesc: '碰壁释放暗紫引力波，强行把对手拉向自己。',
-    clashSkillName: '生命汲取',
-    clashSkillDesc: '碰撞攻击对手的同时汲取能量，恢复自身生命。',
+    wallSkillDesc: '碰壁释放星云引力，把对手轻轻拉向自己',
+    clashSkillDesc: '碰撞攻击的同时汲取元气，恢复自身体力',
   },
   light: {
     id: 'light',
-    name: '极光棱镜',
-    title: '弹幕 · 光',
-    icon: '💎',
-    color: '#38ff8e',
-    secondaryColor: '#ffffff',
-    glowColor: 'rgba(56, 255, 142, 0.65)',
-    sizeLabel: '小型',
-    speedLabel: '常速',
-    radius: 19,
-    baseSpeed: 2.7,
+    name: '薄荷棱镜',
+    title: '星光 · 折射',
+    icon: '✨',
+    color: '#5cd6a9',
+    secondaryColor: '#d8faed',
+    glowColor: 'rgba(92, 214, 169, 0.45)',
+    radius: 29,
+    baseSpeed: 1.6,
     mass: 0.85,
     maxHp: 285,
     baseAtk: 20,
-    wallSkillName: '折射激光',
-    wallSkillDesc: '每次碰壁发射折射激光束，远距离穿透削血。',
-    clashSkillName: '闪避卸力',
-    clashSkillDesc: '交锋时借力弹开脱身，并在原地留下延时炸弹。',
+    wallSkillDesc: '每次碰壁折射出柔光射线，远距离消耗对手',
+    clashSkillDesc: '交锋时轻巧弹开，并在原地留下一颗星光泡泡',
   },
 };
 
 const CRICKET_LIST: CricketSpec[] = Object.values(CRICKETS);
 
 const EMOTION_STAKES = [
-  { id: 'luck', label: '✨ 今日好运加持', winQuote: '好运已到账！今天连呼吸都是顺风局！', loseQuote: '电子蛐蛐替你踩了今日唯一的坑，接下来全是坦途！' },
-  { id: 'relax', label: '🧘 烦恼原地清零', winQuote: '刚才那波漂亮反击，已经把烦心事统统撞碎了！', loseQuote: '胜败乃兵家常事，深呼吸，给心情放个轻松假！' },
-  { id: 'offwork', label: '🍹 准时下班开溜', winQuote: '气势如虹！今天状态拉满，到点潇洒走人！', loseQuote: '虽然蛐蛐惜败，但摸鱼回血的快乐实打实到手了！' },
+  { id: 'luck', label: '✨ 今日好运加持', winQuote: '好运已签收！今天连微风都是甜的，诸事顺遂～', loseQuote: '小圆球替你挡掉了今天唯一的小水逆，接下来全是好事！' },
+  { id: 'relax', label: '🧘 烦恼原地清零', winQuote: '刚才那波漂亮反击，已经把不开心统统撞碎啦！', loseQuote: '胜负只是小插曲，伸个懒腰，今天也要对自己温柔一点～' },
+  { id: 'offwork', label: '🍹 准时下班开溜', winQuote: '元气拉满！今天顺顺利利，到点立刻快乐收工！', loseQuote: '休息片刻充充电，轻松快乐的心情已经提前到账啦！' },
 ];
 
 interface FighterEntity {
@@ -226,29 +202,29 @@ interface FloatingText {
 }
 
 const CRICKET_STYLES = `/* ==========================================================================
-   几何电子斗蛐蛐 (Cyber Cricket Arena)
+   元气电子斗蛐蛐 · 柔和奶油马卡龙主题 (Soft Pastel & Minimalist Theme)
    路径建议: components/emotionPages/cyberCricket/cyber-cricket.css
    ========================================================================== */
 
 :root {
-  --cc-bg-deep: #070810;
-  --cc-bg-panel: #101322;
-  --cc-bg-card: rgba(22, 27, 48, 0.85);
-  --cc-border-subtle: rgba(255, 255, 255, 0.09);
-  --cc-text-main: #f3f6ff;
-  --cc-text-dim: #8f9bb7;
-  --cc-fire: #ff3b5c;
-  --cc-rock: #f5a623;
-  --cc-wind: #00f0ff;
-  --cc-void: #b845ff;
-  --cc-light: #38ff8e;
-  --cc-gold: #ffd700;
+  --cc-bg-page: #fdf8fa;
+  --cc-bg-shell: #fffcfd;
+  --cc-bg-card: #ffffff;
+  --cc-bg-soft: #faf2f6;
+  --cc-border-subtle: #f2e2ea;
+  --cc-text-main: #4a3a45;
+  --cc-text-dim: #9b8794;
+  --cc-accent-pink: #ff85a1;
+  --cc-accent-peach: #ffa894;
+  --cc-accent-lavender: #b392f0;
+  --cc-accent-mint: #68d391;
+  --cc-accent-sky: #6ec6ff;
 }
 
 .cc-viewport-wrapper {
   width: 100%;
   min-height: 100dvh;
-  background: radial-gradient(circle at 50% 15%, #171b34 0%, #070810 70%);
+  background: linear-gradient(155deg, #fff9fb 0%, #fdf0f5 50%, #f4f0ff 100%);
   color: var(--cc-text-main);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   display: flex;
@@ -262,35 +238,35 @@ const CRICKET_STYLES = `/* =====================================================
 
 .cc-mobile-shell {
   width: 100%;
-  max-width: 430px;
+  max-width: 420px;
   min-height: 100dvh;
-  background: linear-gradient(180deg, #0b0d19 0%, #070811 100%);
+  background: var(--cc-bg-shell);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 48px rgba(198, 152, 176, 0.22);
 }
 
 @media (min-width: 480px) {
   .cc-viewport-wrapper {
-    padding: 12px 0;
+    padding: 14px 0;
   }
   .cc-mobile-shell {
-    min-height: min(860px, 95dvh);
-    height: min(860px, 95dvh);
-    border-radius: 32px;
-    border: 2px solid rgba(255, 255, 255, 0.12);
+    min-height: min(840px, 94dvh);
+    height: min(840px, 94dvh);
+    border-radius: 34px;
+    border: 2px solid #f7e8f0;
   }
 }
 
-/* 顶部导航栏 */
+/* 顶部极简导航栏 */
 .cc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 8px;
-  background: rgba(11, 13, 25, 0.85);
+  padding: 14px 18px 10px;
+  background: rgba(255, 252, 253, 0.9);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--cc-border-subtle);
   z-index: 20;
@@ -304,35 +280,32 @@ const CRICKET_STYLES = `/* =====================================================
 
 .cc-brand-badge {
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #ff3b5c, #b845ff);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(255, 59, 92, 0.35);
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: #ffe5ec;
+  color: #e85d80;
 }
 
 .cc-brand-title {
   font-size: 15px;
   font-weight: 800;
-  background: linear-gradient(90deg, #ffffff, #b9c6e8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--cc-text-main);
+  letter-spacing: 0.3px;
 }
 
 .cc-header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .cc-icon-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--cc-bg-soft);
+  border: 1px solid var(--cc-border-subtle);
   color: var(--cc-text-main);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 5px 11px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -343,39 +316,11 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #f5e6ee;
 }
 
 .cc-icon-btn:active {
-  transform: scale(0.95);
-}
-
-/* 情绪价值连胜/气运条 */
-.cc-mood-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px;
-  background: rgba(255, 215, 0, 0.06);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.14);
-  font-size: 12px;
-}
-
-.cc-mood-quote {
-  color: #ffd97d;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 65%;
-}
-
-.cc-mood-score {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 700;
-  color: #fff;
+  transform: scale(0.96);
 }
 
 /* 备战选角大厅 */
@@ -383,65 +328,59 @@ const CRICKET_STYLES = `/* =====================================================
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 12px 14px 16px;
+  padding: 12px 16px 16px;
   gap: 10px;
   overflow-y: auto;
 }
 
+/* 1v1 柔和展示台 */
 .cc-vs-stage {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
-  background: radial-gradient(circle at 50% 50%, rgba(45, 58, 108, 0.35), rgba(16, 19, 34, 0.9));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
+  background: linear-gradient(180deg, #fff7fa 0%, #ffffff 100%);
+  border: 1px solid var(--cc-border-subtle);
+  border-radius: 22px;
   padding: 12px 10px;
-  position: relative;
+  box-shadow: 0 4px 16px rgba(218, 175, 196, 0.12);
 }
 
 .cc-slot-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 8px;
-  border-radius: 14px;
-  background: rgba(10, 12, 22, 0.65);
-  border: 2px solid transparent;
+  padding: 10px 6px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1.5px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
-}
-
-.cc-slot-card.active-editing {
-  background: rgba(255, 255, 255, 0.07);
 }
 
 .cc-slot-tag {
   font-size: 10px;
-  font-weight: 800;
-  padding: 2px 8px;
+  font-weight: 700;
+  padding: 2px 9px;
   border-radius: 99px;
   margin-bottom: 8px;
-  text-transform: uppercase;
 }
 
 .cc-orb-preview {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 20px;
   position: relative;
   margin-bottom: 6px;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cc-slot-card:hover .cc-orb-preview {
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 
 .cc-vs-divider {
@@ -452,24 +391,22 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-vs-badge {
-  font-size: 18px;
-  font-weight: 900;
-  font-style: italic;
-  background: linear-gradient(180deg, #ffd700, #ff5e3a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 12px rgba(255, 94, 58, 0.4);
+  font-size: 14px;
+  font-weight: 800;
+  color: #d8a2b8;
+  letter-spacing: 1px;
 }
 
-/* 押注选择器 */
+/* 统一柔和卡片容器 */
 .cc-bet-box {
   background: var(--cc-bg-card);
   border: 1px solid var(--cc-border-subtle);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 20px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
+  box-shadow: 0 4px 14px rgba(218, 175, 196, 0.08);
 }
 
 .cc-section-label {
@@ -489,9 +426,9 @@ const CRICKET_STYLES = `/* =====================================================
 
 .cc-bet-btn {
   padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid var(--cc-border-subtle);
+  background: var(--cc-bg-soft);
   color: var(--cc-text-main);
   font-size: 12px;
   font-weight: 700;
@@ -504,18 +441,18 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-bet-btn.selected-p1 {
-  background: rgba(0, 240, 255, 0.16);
-  border-color: #00f0ff;
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+  background: #eaf6ff;
+  border-color: #8fd3ff;
+  color: #2b7bb9;
 }
 
 .cc-bet-btn.selected-p2 {
-  background: rgba(255, 59, 92, 0.16);
-  border-color: #ff3b5c;
-  box-shadow: 0 0 14px rgba(255, 59, 92, 0.25);
+  background: #fff0f4;
+  border-color: #ffa6bd;
+  color: #d94b72;
 }
 
-/* 蛐蛐图鉴选择网格 */
+/* 蛐蛐圆球选择网格 */
 .cc-roster-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -523,9 +460,9 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-cricket-option {
-  background: rgba(18, 22, 40, 0.9);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: #fcf8fa;
+  border: 1.5px solid #f3e6ed;
+  border-radius: 16px;
   padding: 8px 6px;
   display: flex;
   flex-direction: column;
@@ -536,7 +473,7 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-cricket-option:hover {
-  background: rgba(30, 36, 64, 0.95);
+  background: #fff2f7;
 }
 
 .cc-cricket-option:active {
@@ -544,46 +481,46 @@ const CRICKET_STYLES = `/* =====================================================
 }
 
 .cc-mini-orb {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
-/* 选中蛐蛐详情卡 */
+/* 极简技能说明条 */
 .cc-detail-card {
-  background: rgba(15, 19, 36, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #fdf6f9;
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.5;
+  color: var(--cc-text-main);
 }
 
-/* 底部开战大按钮 */
+/* 底部开战柔和渐变按钮 */
 .cc-start-btn {
   margin-top: auto;
   width: 100%;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 99px;
   border: none;
-  background: linear-gradient(135deg, #ff3b5c 0%, #ff7b00 50%, #ffd700 100%);
-  color: #090a10;
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 1px;
+  background: linear-gradient(135deg, #ff85a1 0%, #ffa894 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(255, 59, 92, 0.45);
+  box-shadow: 0 8px 22px rgba(255, 133, 161, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .cc-start-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(255, 59, 92, 0.6);
+  box-shadow: 0 10px 26px rgba(255, 133, 161, 0.45);
 }
 
 .cc-start-btn:active {
@@ -595,7 +532,7 @@ const CRICKET_STYLES = `/* =====================================================
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 8px 12px 12px;
+  padding: 10px 14px 14px;
   gap: 8px;
   position: relative;
 }
@@ -604,17 +541,18 @@ const CRICKET_STYLES = `/* =====================================================
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 8px;
-  background: rgba(14, 17, 32, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 8px 10px;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--cc-border-subtle);
+  border-radius: 18px;
+  padding: 9px 12px;
+  box-shadow: 0 4px 12px rgba(218, 175, 196, 0.1);
 }
 
 .cc-hp-bar-track {
   width: 100%;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 9px;
+  background: #f5ebf0;
   border-radius: 99px;
   overflow: hidden;
   position: relative;
@@ -623,70 +561,57 @@ const CRICKET_STYLES = `/* =====================================================
 .cc-hp-bar-fill {
   height: 100%;
   border-radius: 99px;
-  transition: width 0.12s ease-out;
+  transition: width 0.15s ease-out;
 }
 
 .cc-timer-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 56px;
 }
 
-.cc-timer-num {
-  font-size: 20px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.cc-timer-num.danger {
-  color: #ff3b5c;
-  animation: cc-pulse-fast 0.55s infinite alternate;
-}
-
-/* 弹幕解说条 */
+/* 轻柔解说气泡条 */
 .cc-commentary-banner {
-  background: rgba(16, 20, 38, 0.92);
-  border-left: 3px solid #ffd700;
-  border-radius: 8px;
-  padding: 6px 10px;
+  background: #fff5f8;
+  border: 1px solid #f8dce6;
+  border-radius: 99px;
+  padding: 6px 14px;
   font-size: 12px;
-  font-weight: 700;
-  color: #f8f9ff;
+  font-weight: 600;
+  color: #7d5a6d;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   min-height: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
-/* Canvas 物理擂台容器 */
+/* 奶油果冻风物理擂台容器 */
 .cc-canvas-wrap {
   flex: 1;
   width: 100%;
   min-height: 350px;
   position: relative;
-  border-radius: 18px;
+  border-radius: 26px;
   overflow: hidden;
-  background: #06070f;
-  border: 2px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+  background: radial-gradient(circle at 50% 45%, #ffffff 0%, #fdf4f8 75%, #f7e6ef 100%);
+  border: 2px solid #f3dce7;
+  box-shadow: inset 0 0 30px rgba(235, 195, 215, 0.28);
 }
 
 .cc-canvas-wrap.sudden-death {
-  border-color: rgba(255, 59, 92, 0.75);
-  box-shadow: inset 0 0 45px rgba(255, 59, 92, 0.28), 0 0 18px rgba(255, 59, 92, 0.35);
+  border-color: #ff9ebb;
+  box-shadow: inset 0 0 36px rgba(255, 141, 161, 0.25);
 }
 
 .cc-canvas-wrap.screen-shake {
-  animation: cc-shake 0.22s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: cc-shake 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* 底部压住/点击暴走控制台 */
+/* 底部蓄力助威按钮 */
 .cc-controls-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .cc-berserk-btn {
@@ -694,38 +619,30 @@ const CRICKET_STYLES = `/* =====================================================
   position: relative;
   overflow: hidden;
   padding: 13px 16px;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 215, 0, 0.65);
-  background: linear-gradient(135deg, #2b1222 0%, #4a1535 100%);
-  color: #fff;
+  border-radius: 99px;
+  border: none;
+  background: linear-gradient(135deg, #ff85a1 0%, #ffb38a 100%);
+  color: #ffffff;
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 20px rgba(255, 59, 92, 0.35);
+  gap: 6px;
+  box-shadow: 0 6px 18px rgba(255, 133, 161, 0.35);
   transition: all 0.15s ease;
   touch-action: manipulation;
 }
 
-.cc-berserk-btn.ready {
-  background: linear-gradient(135deg, #ff2a54 0%, #ff7b00 60%, #ffd000 100%);
-  color: #0b0c14;
-  border-color: #ffffff;
-  box-shadow: 0 0 24px rgba(255, 123, 0, 0.65);
-}
-
 .cc-berserk-btn.charging {
   transform: scale(0.97);
-  box-shadow: 0 0 32px rgba(255, 215, 0, 0.95);
+  box-shadow: 0 0 24px rgba(255, 133, 161, 0.65);
 }
 
 .cc-berserk-btn.used {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.38);
+  background: #f3eaf0;
+  color: #b5a2ae;
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -740,46 +657,41 @@ const CRICKET_STYLES = `/* =====================================================
   transition: width 0.05s linear;
 }
 
-/* 结算弹窗 */
+/* 柔和结算弹窗 */
 .cc-result-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(6, 8, 16, 0.86);
+  background: rgba(255, 248, 251, 0.78);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
+  padding: 20px;
   z-index: 40;
   animation: cc-fade-in 0.25s ease-out;
 }
 
 .cc-result-card {
   width: 100%;
-  background: linear-gradient(180deg, #161b33 0%, #0d1021 100%);
-  border: 1.5px solid rgba(255, 215, 0, 0.35);
-  border-radius: 22px;
-  padding: 18px 16px;
+  background: #ffffff;
+  border: 1.5px solid #f5dce8;
+  border-radius: 26px;
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.85);
-}
-
-@keyframes cc-pulse-fast {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.12); opacity: 0.78; }
+  gap: 14px;
+  box-shadow: 0 16px 40px rgba(196, 148, 172, 0.22);
 }
 
 @keyframes cc-shake {
-  10%, 90% { transform: translate3d(-2px, 1px, 0); }
-  20%, 80% { transform: translate3d(3px, -2px, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 2px, 0); }
-  40%, 60% { transform: translate3d(4px, -1px, 0); }
+  10%, 90% { transform: translate3d(-1.5px, 1px, 0); }
+  20%, 80% { transform: translate3d(2px, -1.5px, 0); }
+  30%, 50%, 70% { transform: translate3d(-2.5px, 1.5px, 0); }
+  40%, 60% { transform: translate3d(2.5px, -1px, 0); }
 }
 
 @keyframes cc-fade-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
 `;
@@ -794,28 +706,23 @@ export default function CyberCricketPage() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
 
-  // 战斗 HUD 极简同步状态
   const [actualP1, setActualP1] = useState<CricketSpec>(CRICKETS.fire);
   const [actualP2, setActualP2] = useState<CricketSpec>(CRICKETS.wind);
   const [hudState, setHudState] = useState({
     p1HpPct: 100,
-    p1Shield: false,
     p1Berserk: false,
     p2HpPct: 100,
-    p2Shield: false,
     p2Berserk: false,
     suddenDeath: false,
   });
 
-  const [commentary, setCommentary] = useState<string>('🎙️ 选好你的本命圆球，放入斗盆即可自动开撞！');
+  const [commentary, setCommentary] = useState<string>('🌸 选两颗喜欢的果冻圆球，开启轻松解压小对决～');
   const [screenShake, setScreenShake] = useState<boolean>(false);
 
-  // 场外暴走（压住蓄力 / 松开释放，每局1次）
   const [berserkUsed, setBerserkUsed] = useState<boolean>(false);
   const [isChargingBerserk, setIsChargingBerserk] = useState<boolean>(false);
   const [chargeProgress, setChargeProgress] = useState<number>(0);
 
-  // 极简结算弹窗状态
   const [battleResult, setBattleResult] = useState<{
     winner: Side;
     betWon: boolean;
@@ -841,6 +748,7 @@ export default function CyberCricketPage() {
     betSideRef.current = betSide;
   }, [betSide]);
 
+  // 轻柔治愈系音效合成 (Soft Marimba / Bubble Chime Web Audio)
   const playSfx = useCallback(
     (type: 'wall' | 'clash' | 'skill' | 'laser' | 'berserk' | 'explosion' | 'win' | 'charge') => {
       if (!soundEnabledRef.current) return;
@@ -859,104 +767,79 @@ export default function CyberCricketPage() {
         if (type === 'wall') {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(220 + Math.random() * 90, now);
-          osc.frequency.exponentialRampToValueAtTime(85, now + 0.09);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(340 + Math.random() * 80, now);
+          osc.frequency.exponentialRampToValueAtTime(480, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.09);
+          osc.stop(now + 0.08);
         } else if (type === 'clash') {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(150, now);
-          osc.frequency.exponentialRampToValueAtTime(42, now + 0.14);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.14);
-        } else if (type === 'laser') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(820, now);
-          osc.frequency.exponentialRampToValueAtTime(220, now + 0.12);
-          gain.gain.setValueAtTime(0.12, now);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.12);
+          gain.gain.setValueAtTime(0.14, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
           osc.stop(now + 0.12);
-        } else if (type === 'skill') {
+        } else if (type === 'laser' || type === 'skill') {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(340, now);
-          osc.frequency.exponentialRampToValueAtTime(680, now + 0.15);
-          gain.gain.setValueAtTime(0.12, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.15);
+          osc.stop(now + 0.14);
         } else if (type === 'explosion') {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(115, now);
-          osc.frequency.exponentialRampToValueAtTime(28, now + 0.22);
-          gain.gain.setValueAtTime(0.22, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.18);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.22);
+          osc.stop(now + 0.18);
         } else if (type === 'charge') {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.linearRampToValueAtTime(620, now + 0.35);
-          gain.gain.setValueAtTime(0.09, now);
+          osc.frequency.setValueAtTime(330, now);
+          osc.frequency.linearRampToValueAtTime(660, now + 0.35);
+          gain.gain.setValueAtTime(0.08, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
           osc.stop(now + 0.35);
-        } else if (type === 'berserk') {
-          [261.6, 329.6, 392.0, 523.2].forEach((freq, idx) => {
+        } else if (type === 'berserk' || type === 'win') {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.04);
-            gain.gain.setValueAtTime(0.13, now + idx * 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.3);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.11, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.28);
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.start(now + idx * 0.04);
-            osc.stop(now + idx * 0.04 + 0.3);
-          });
-        } else if (type === 'win') {
-          [392.0, 493.88, 587.33, 783.99].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
-            gain.gain.setValueAtTime(0.15, now + idx * 0.09);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.32);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + idx * 0.09);
-            osc.stop(now + idx * 0.09 + 0.32);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.28);
           });
         }
       } catch {
-        // 忽略浏览器自动播放限制异常
+        // 忽略音频自动播放限制
       }
     },
     []
@@ -964,7 +847,7 @@ export default function CyberCricketPage() {
 
   const triggerShake = useCallback(() => {
     setScreenShake(true);
-    window.setTimeout(() => setScreenShake(false), 220);
+    window.setTimeout(() => setScreenShake(false), 200);
   }, []);
 
   const engineRef = useRef<{
@@ -1008,7 +891,6 @@ export default function CyberCricketPage() {
     setP1Slot(first.id);
     setP2Slot(second.id);
     playSfx('skill');
-    setCommentary(`🎲 重新洗牌！【${first.name}】对决【${second.name}】！`);
   };
 
   const startBattle = () => {
@@ -1027,16 +909,14 @@ export default function CyberCricketPage() {
 
     setHudState({
       p1HpPct: 100,
-      p1Shield: chosenP1.id === 'rock',
       p1Berserk: false,
       p2HpPct: 100,
-      p2Shield: chosenP2.id === 'rock',
       p2Berserk: false,
       suddenDeath: false,
     });
 
     const betTargetName = betSide === 'p1' ? chosenP1.name : chosenP2.name;
-    setCommentary(`🔥 比赛开始！你支持了【${betTargetName}】，关键时刻长按下方按钮助它暴走！`);
+    setCommentary(`✨ 对决开始！正在为【${betTargetName}】加油助威～`);
     playSfx('berserk');
     setPhase('battle');
   };
@@ -1077,7 +957,7 @@ export default function CyberCricketPage() {
     engineRef.current.triggerBerserkNow(powerBonus);
   };
 
-  // 核心 Canvas 物理与技能循环（节奏放缓、去除数字噪音）
+  // 柔和奶油风 Canvas 物理与技能循环
   useEffect(() => {
     if (phase !== 'battle') return;
     const canvas = canvasRef.current;
@@ -1143,28 +1023,28 @@ export default function CyberCricketPage() {
     state.timeLeft = 40;
     state.finished = false;
 
-    const spawnParticles = (x: number, y: number, color: string, count = 10, speedMul = 0.85) => {
+    const spawnParticles = (x: number, y: number, color: string, count = 8, speedMul = 0.75) => {
       for (let i = 0; i < count; i++) {
         const ang = Math.random() * Math.PI * 2;
-        const spd = (1.1 + Math.random() * 2.8) * speedMul;
+        const spd = (1.0 + Math.random() * 2.4) * speedMul;
         state.particles.push({
           x,
           y,
           vx: Math.cos(ang) * spd,
           vy: Math.sin(ang) * spd,
-          r: 2 + Math.random() * 2.8,
+          r: 2.5 + Math.random() * 2.5,
           color,
-          alpha: 1,
-          decay: 0.024 + Math.random() * 0.018,
+          alpha: 0.9,
+          decay: 0.025 + Math.random() * 0.018,
         });
       }
     };
 
     const addFloatingText = (x: number, y: number, text: string, color: string, scale = 1) => {
       state.texts.push({
-        x: Math.max(40, Math.min(width - 40, x)),
+        x: Math.max(42, Math.min(width - 42, x)),
         y: Math.max(28, Math.min(height - 20, y)),
-        vy: -1.1,
+        vy: -1.0,
         text,
         color,
         scale,
@@ -1175,7 +1055,7 @@ export default function CyberCricketPage() {
     const applyDamage = (attacker: FighterEntity, defender: FighterEntity, rawDmg: number, effectLabel = '') => {
       let dmg = Math.max(4, Math.round(rawDmg));
       if (state.timeLeft <= 15) {
-        dmg = Math.round(dmg * 1.38);
+        dmg = Math.round(dmg * 1.35);
       }
       if (defender.berserkTimer > 0) {
         dmg = Math.round(dmg * 0.72);
@@ -1189,7 +1069,7 @@ export default function CyberCricketPage() {
         defender.shield -= absorbed;
         dmg -= absorbed;
         if (absorbed > 0 && effectLabel) {
-          addFloatingText(defender.x, defender.y - defender.radius - 8, '🛡️抵挡', '#ffe082', 0.95);
+          addFloatingText(defender.x, defender.y - defender.radius - 8, '护盾抵挡', '#e09145', 0.95);
         }
       }
 
@@ -1200,15 +1080,14 @@ export default function CyberCricketPage() {
             defender.x,
             defender.y - defender.radius - 10,
             effectLabel,
-            attacker.berserkTimer > 0 ? '#ffd700' : attacker.spec.color,
-            dmg >= 38 ? 1.25 : 1.0
+            attacker.berserkTimer > 0 ? '#ff6b8b' : attacker.spec.color,
+            dmg >= 38 ? 1.18 : 1.0
           );
         }
       }
       return dmg;
     };
 
-    // 触发碰壁反弹技能
     const triggerWallSkill = (fighter: FighterEntity, enemy: FighterEntity, forceUltimate = false) => {
       fighter.wallCount += 1;
       const spec = fighter.spec;
@@ -1216,15 +1095,15 @@ export default function CyberCricketPage() {
       if (spec.id === 'fire') {
         const prev = fighter.nitroStacks;
         fighter.nitroStacks = Math.min(3, fighter.nitroStacks + (forceUltimate ? 2 : 1));
-        const boost = 1.08 + fighter.nitroStacks * 0.08;
+        const boost = 1.04 + fighter.nitroStacks * 0.04;
         fighter.vx *= boost;
         fighter.vy *= boost;
-        spawnParticles(fighter.x, fighter.y, '#ff5e3a', 8, 0.9);
+        spawnParticles(fighter.x, fighter.y, spec.color, 7, 0.8);
         if (fighter.nitroStacks > prev) {
-          addFloatingText(fighter.x, fighter.y - 24, '🔥烈焰加速', '#ff9a00', 0.95);
+          addFloatingText(fighter.x, fighter.y - 24, '🌸花焰加速', '#e85d80', 0.95);
         }
         if (fighter.nitroStacks === 3) {
-          setCommentary(`🔥【${spec.name}】全身烈焰拉满，下一撞威力惊人！`);
+          setCommentary(`🌸【${spec.name}】花焰蓄满，下一撞元气满满！`);
         }
       } else if (spec.id === 'rock') {
         if (forceUltimate || fighter.wallCount % 3 === 0) {
@@ -1233,21 +1112,21 @@ export default function CyberCricketPage() {
             x: fighter.x,
             y: fighter.y,
             r: fighter.radius,
-            maxR: 150,
-            color: '#f5a623',
-            alpha: 0.92,
-            lineWidth: 4,
+            maxR: 145,
+            color: '#f5a65b',
+            alpha: 0.75,
+            lineWidth: 3.5,
           });
           const dist = Math.hypot(enemy.x - fighter.x, enemy.y - fighter.y);
-          if (dist <= 160) {
+          if (dist <= 155) {
             enemy.slowTimer = 2.2;
-            enemy.vx *= 0.68;
-            enemy.vy *= 0.68;
-            applyDamage(fighter, enemy, 14, '震波减速');
+            enemy.vx *= 0.7;
+            enemy.vy *= 0.7;
+            applyDamage(fighter, enemy, 14, '柔波减速');
           }
           playSfx('skill');
-          addFloatingText(fighter.x, fighter.y - 26, '🛡️震地护盾', '#ffe082', 1.0);
-          setCommentary(`🛡️【${spec.name}】碰壁开启震地护盾，震波压制全场！`);
+          addFloatingText(fighter.x, fighter.y - 26, '🍯暖阳护盾', '#e08b3e', 1.0);
+          setCommentary(`🍯【${spec.name}】张开暖阳护盾，稳稳守护全场～`);
         }
       } else if (spec.id === 'wind') {
         const myClones = state.clones.filter((c) => c.owner === fighter.side);
@@ -1258,37 +1137,37 @@ export default function CyberCricketPage() {
             owner: fighter.side,
             x: fighter.x,
             y: fighter.y,
-            vx: Math.cos(ang) * 3.8,
-            vy: Math.sin(ang) * 3.8,
-            radius: 10,
+            vx: Math.cos(ang) * 2.1,
+            vy: Math.sin(ang) * 2.1,
+            radius: 15,
             life: 4.0,
             color: spec.color,
           });
           playSfx('skill');
-          addFloatingText(fighter.x, fighter.y - 24, '⚡幻影分身', '#00f0ff', 1.0);
-          setCommentary(`⚡【${spec.name}】碰壁分化出电光残影，前后夹击对手！`);
+          addFloatingText(fighter.x, fighter.y - 24, '🦋幻影分身', '#4a9fd8', 1.0);
+          setCommentary(`🦋【${spec.name}】唤出轻风小分身，一起包围对手～`);
         }
       } else if (spec.id === 'void') {
         if (forceUltimate || fighter.wallCount % 2 === 1) {
           state.rings.push({
             x: fighter.x,
             y: fighter.y,
-            r: 130,
+            r: 125,
             maxR: fighter.radius,
-            color: '#b845ff',
-            alpha: 0.88,
-            lineWidth: 3,
+            color: '#b388eb',
+            alpha: 0.7,
+            lineWidth: 2.5,
             inward: true,
           });
           const dx = fighter.x - enemy.x;
           const dy = fighter.y - enemy.y;
           const dist = Math.max(20, Math.hypot(dx, dy));
-          const pullForce = forceUltimate ? 2.1 : 1.25;
+          const pullForce = forceUltimate ? 1.2 : 0.75;
           enemy.vx += (dx / dist) * pullForce;
           enemy.vy += (dy / dist) * pullForce;
-          addFloatingText(fighter.x, fighter.y - 24, '🌀引力拉扯', '#e29eff', 0.95);
+          addFloatingText(fighter.x, fighter.y - 24, '🔮星云牵引', '#9362d6', 0.95);
           if (Math.random() < 0.4) {
-            setCommentary(`🌀【${spec.name}】释放引力脉冲，强行把对手扯离原路线！`);
+            setCommentary(`🔮【${spec.name}】释放星云引力，悄悄打乱对手步伐～`);
           }
         }
       } else if (spec.id === 'light') {
@@ -1298,7 +1177,7 @@ export default function CyberCricketPage() {
           Math.atan2(height / 2 - fighter.y, width / 2 - fighter.x) + (Math.random() * 0.5 - 0.25),
         ];
         angles.forEach((ang, idx) => {
-          const rayLen = 420;
+          const rayLen = 400;
           const x2 = fighter.x + Math.cos(ang) * rayLen;
           const y2 = fighter.y + Math.sin(ang) * rayLen;
           state.lasers.push({
@@ -1307,9 +1186,9 @@ export default function CyberCricketPage() {
             y1: fighter.y,
             x2,
             y2,
-            life: 0.3,
-            maxLife: 0.3,
-            color: idx === 0 ? '#38ff8e' : '#ffffff',
+            life: 0.28,
+            maxLife: 0.28,
+            color: idx === 0 ? '#5cd6a9' : '#ff9ebb',
           });
 
           const A = enemy.x - fighter.x;
@@ -1324,28 +1203,27 @@ export default function CyberCricketPage() {
           const distToRay = Math.hypot(enemy.x - xx, enemy.y - yy);
 
           if (distToRay <= enemy.radius + 7) {
-            applyDamage(fighter, enemy, idx === 0 ? 15 : 11, idx === 0 ? '⚡极光穿透' : '');
-            spawnParticles(enemy.x, enemy.y, '#38ff8e', 7, 0.8);
+            applyDamage(fighter, enemy, idx === 0 ? 15 : 11, idx === 0 ? '✨柔光折射' : '');
+            spawnParticles(enemy.x, enemy.y, '#5cd6a9', 6, 0.75);
           }
         });
         if (Math.random() < 0.4) {
-          setCommentary(`💎【${spec.name}】借墙壁折射出极光射线，远程消耗对手！`);
+          setCommentary(`✨【${spec.name}】借墙折射出星光射线，优雅命中！`);
         }
       }
     };
 
-    // 绑定场外暴走触发器
     state.triggerBerserkNow = (powerBonus: number) => {
       const target = betSideRef.current === 'p1' ? p1 : p2;
       const rival = betSideRef.current === 'p1' ? p2 : p1;
       target.berserkTimer = 5.5 * powerBonus;
-      target.radius = Math.round(target.spec.radius * 1.24);
+      target.radius = Math.round(target.spec.radius * 1.22);
       target.shield += Math.round(35 * powerBonus);
 
       const dx = rival.x - target.x;
       const dy = rival.y - target.y;
       const dist = Math.max(1, Math.hypot(dx, dy));
-      const dashSpeed = target.spec.baseSpeed * 1.55;
+      const dashSpeed = target.spec.baseSpeed * 1.25;
       target.vx = (dx / dist) * dashSpeed;
       target.vy = (dy / dist) * dashSpeed;
 
@@ -1353,26 +1231,25 @@ export default function CyberCricketPage() {
         x: target.x,
         y: target.y,
         r: target.radius,
-        maxR: 195,
-        color: '#ffd700',
-        alpha: 1,
-        lineWidth: 5,
+        maxR: 185,
+        color: '#ff85a1',
+        alpha: 0.85,
+        lineWidth: 4,
       });
-      spawnParticles(target.x, target.y, '#ffd700', 22, 1.25);
-      addFloatingText(target.x, target.y - 32, '🔥全盛暴走!', '#ffd700', 1.35);
+      spawnParticles(target.x, target.y, '#ff85a1', 18, 1.1);
+      addFloatingText(target.x, target.y - 32, '💖元气暴走!', '#e85d80', 1.25);
       triggerWallSkill(target, rival, true);
       playSfx('berserk');
       triggerShake();
-      setCommentary(`🚨 场外助威生效！【${target.spec.name}】体型暴涨，气势全开冲向对手！`);
+      setCommentary(`💖 心愿注入！【${target.spec.name}】元气大爆发，全速冲向对手！`);
     };
 
     const secondInterval = window.setInterval(() => {
       if (state.finished) return;
       state.timeLeft = Math.max(0, state.timeLeft - 1);
       if (state.timeLeft === 15) {
-        setCommentary('⚡ 进入最后缩圈决战时刻！四壁带电收缩，对决全面升温！');
+        setCommentary('🌸 决胜时刻到！场地轻轻向内聚拢，胜负即将揭晓～');
         playSfx('berserk');
-        triggerShake();
       }
     }, 1000);
 
@@ -1387,17 +1264,15 @@ export default function CyberCricketPage() {
         return;
       }
 
-      // 蓄力时子弹时间慢放
-      const dtScale = isChargingRef.current ? 0.42 : 1.0;
+      const dtScale = isChargingRef.current ? 0.45 : 1.0;
 
-      // 死斗模式缩圈边界
       const shrinkRatio = state.timeLeft <= 15 ? (15 - state.timeLeft) / 15 : 0;
-      const padX = Math.round(shrinkRatio * (width * 0.16));
-      const padY = Math.round(shrinkRatio * (height * 0.14));
-      const minX = 8 + padX;
-      const maxX = width - 8 - padX;
-      const minY = 8 + padY;
-      const maxY = height - 8 - padY;
+      const padX = Math.round(shrinkRatio * (width * 0.15));
+      const padY = Math.round(shrinkRatio * (height * 0.13));
+      const minX = 10 + padX;
+      const maxX = width - 10 - padX;
+      const minY = 10 + padY;
+      const maxY = height - 10 - padY;
 
       const stepFighter = (f: FighterEntity, enemy: FighterEntity) => {
         if (f.berserkTimer > 0) {
@@ -1413,18 +1288,18 @@ export default function CyberCricketPage() {
         const curSpd = Math.hypot(f.vx, f.vy);
         let targetMinSpd = f.spec.baseSpeed;
         if (f.spec.id === 'fire') {
-          targetMinSpd *= 1 + f.nitroStacks * 0.14;
+          targetMinSpd *= 1 + f.nitroStacks * 0.08;
         }
         if (f.berserkTimer > 0) {
-          targetMinSpd *= 1.32;
+          targetMinSpd *= 1.18;
         }
         if (f.slowTimer > 0) {
-          targetMinSpd *= 0.65;
+          targetMinSpd *= 0.68;
         }
         if (state.timeLeft <= 15) {
-          targetMinSpd *= 1.15;
+          targetMinSpd *= 1.08;
         }
-        const maxAllowedSpd = targetMinSpd * 1.35;
+        const maxAllowedSpd = targetMinSpd * 1.22;
 
         if (f.stunTimer > 0) {
           f.vx *= 0.88;
@@ -1445,16 +1320,16 @@ export default function CyberCricketPage() {
 
         f.x += f.vx * dtScale;
         f.y += f.vy * dtScale;
-        f.rotation += curSpd * 0.025 * dtScale;
+        f.rotation += curSpd * 0.02 * dtScale;
 
         f.trail.push({
           x: f.x,
           y: f.y,
-          r: f.radius * (f.spec.id === 'fire' && f.nitroStacks > 0 ? 0.9 : 0.76),
-          alpha: f.berserkTimer > 0 ? 0.55 : 0.34,
-          color: f.berserkTimer > 0 ? '#ffd700' : f.spec.color,
+          r: f.radius * 0.75,
+          alpha: f.berserkTimer > 0 ? 0.38 : 0.24,
+          color: f.berserkTimer > 0 ? '#ff85a1' : f.spec.color,
         });
-        if (f.trail.length > 8) {
+        if (f.trail.length > 7) {
           f.trail.shift();
         }
 
@@ -1462,30 +1337,30 @@ export default function CyberCricketPage() {
         if (f.x - f.radius < minX) {
           f.x = minX + f.radius;
           f.vx = Math.abs(f.vx);
-          f.vy += (Math.random() - 0.5) * 0.45;
+          f.vy += (Math.random() - 0.5) * 0.22;
           hitWall = true;
         } else if (f.x + f.radius > maxX) {
           f.x = maxX - f.radius;
           f.vx = -Math.abs(f.vx);
-          f.vy += (Math.random() - 0.5) * 0.45;
+          f.vy += (Math.random() - 0.5) * 0.22;
           hitWall = true;
         }
 
         if (f.y - f.radius < minY) {
           f.y = minY + f.radius;
           f.vy = Math.abs(f.vy);
-          f.vx += (Math.random() - 0.5) * 0.45;
+          f.vx += (Math.random() - 0.5) * 0.22;
           hitWall = true;
         } else if (f.y + f.radius > maxY) {
           f.y = maxY - f.radius;
           f.vy = -Math.abs(f.vy);
-          f.vx += (Math.random() - 0.5) * 0.45;
+          f.vx += (Math.random() - 0.5) * 0.22;
           hitWall = true;
         }
 
         if (hitWall) {
           playSfx('wall');
-          spawnParticles(f.x, f.y, f.spec.color, 5, 0.65);
+          spawnParticles(f.x, f.y, f.spec.color, 5, 0.6);
           triggerWallSkill(f, enemy, false);
         }
       };
@@ -1493,7 +1368,6 @@ export default function CyberCricketPage() {
       stepFighter(p1, p2);
       stepFighter(p2, p1);
 
-      // 主圆球敌我肉搏碰撞
       const dx = p2.x - p1.x;
       const dy = p2.y - p1.y;
       const dist = Math.hypot(dx, dy);
@@ -1513,7 +1387,7 @@ export default function CyberCricketPage() {
         const ky = p1.vy - p2.vy;
         const relVel = Math.hypot(kx, ky);
         const p = (2 * (nx * kx + ny * ky)) / totalMass;
-        const restitution = 1.03;
+        const restitution = 1.02;
 
         p1.vx = (p1.vx - p * p2.spec.mass * nx) * restitution;
         p1.vy = (p1.vy - p * p2.spec.mass * ny) * restitution;
@@ -1521,26 +1395,26 @@ export default function CyberCricketPage() {
         p2.vy = (p2.vy + p * p1.spec.mass * ny) * restitution;
 
         if (p1.invulnTimer <= 0 && p2.invulnTimer <= 0) {
-          p1.invulnTimer = 0.18;
-          p2.invulnTimer = 0.18;
+          p1.invulnTimer = 0.2;
+          p2.invulnTimer = 0.2;
 
           const midX = (p1.x + p2.x) / 2;
           const midY = (p1.y + p2.y) / 2;
 
           playSfx('clash');
-          state.hitStopFrames = relVel > 5.5 ? 3 : 2;
-          if (relVel > 5.2 || p1.nitroStacks >= 2 || p2.nitroStacks >= 2 || p1.berserkTimer > 0 || p2.berserkTimer > 0) {
+          state.hitStopFrames = relVel > 5.2 ? 3 : 2;
+          if (relVel > 5.0 || p1.nitroStacks >= 2 || p2.nitroStacks >= 2 || p1.berserkTimer > 0 || p2.berserkTimer > 0) {
             triggerShake();
           }
 
-          spawnParticles(midX, midY, '#ffffff', 12, 1.0);
+          spawnParticles(midX, midY, '#ff85a1', 10, 0.9);
           state.rings.push({
             x: midX,
             y: midY,
             r: 8,
-            maxR: 62,
-            color: '#ffffff',
-            alpha: 0.8,
+            maxR: 58,
+            color: '#ffb3c6',
+            alpha: 0.75,
             lineWidth: 2.5,
           });
 
@@ -1548,35 +1422,35 @@ export default function CyberCricketPage() {
             const spd = Math.hypot(attacker.vx, attacker.vy);
             let raw = attacker.spec.baseAtk * (0.8 + spd * 0.14);
             if (attacker.berserkTimer > 0) {
-              raw *= 1.5;
+              raw *= 1.48;
             }
 
-            let label = '重击!';
+            let label = '砰砰!';
             if (attacker.spec.id === 'fire') {
               if (attacker.nitroStacks > 0) {
-                raw *= 1 + attacker.nitroStacks * 0.32;
-                label = attacker.nitroStacks === 3 ? '💥烈焰破甲!' : '🔥破甲重击';
-                defender.vx += nx * pushSign * (1.3 + attacker.nitroStacks * 0.55);
-                defender.vy += ny * pushSign * (1.3 + attacker.nitroStacks * 0.55);
+                raw *= 1 + attacker.nitroStacks * 0.3;
+                label = attacker.nitroStacks === 3 ? '🌸满花重击!' : '🌸花焰冲撞';
+                defender.vx += nx * pushSign * (0.75 + attacker.nitroStacks * 0.28);
+                defender.vy += ny * pushSign * (0.75 + attacker.nitroStacks * 0.28);
                 attacker.nitroStacks = 0;
               }
             } else if (attacker.spec.id === 'wind') {
               defender.stunTimer = 0.28;
-              label = '⚡感电麻痹';
-              spawnParticles(defender.x, defender.y, '#00f0ff', 8, 0.9);
+              label = '🦋轻风酥麻';
+              spawnParticles(defender.x, defender.y, '#6ec6ff', 7, 0.8);
             } else if (attacker.spec.id === 'light') {
-              attacker.vx -= nx * pushSign * 1.85;
-              attacker.vy -= ny * pushSign * 1.85;
-              label = '💎借力闪避';
-              if (state.mines.length < 4) {
+              attacker.vx -= nx * pushSign * 1.05;
+              attacker.vy -= ny * pushSign * 1.05;
+              label = '✨轻巧借力';
+              if (state.mines.length < 3) {
                 state.mines.push({
                   owner: attacker.side,
                   x: midX,
                   y: midY,
-                  radius: 14,
+                  radius: 18,
                   timer: 1.2,
                   maxTimer: 1.2,
-                  color: '#38ff8e',
+                  color: '#5cd6a9',
                 });
               }
             }
@@ -1586,13 +1460,13 @@ export default function CyberCricketPage() {
             if (attacker.spec.id === 'void' && actualDealt > 0) {
               const heal = Math.max(4, Math.round(actualDealt * 0.45));
               attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
-              addFloatingText(attacker.x, attacker.y + 18, '🌀生命汲取', '#38ff8e', 0.95);
+              addFloatingText(attacker.x, attacker.y + 18, '🔮汲取回血', '#9362d6', 0.95);
             }
 
             if (defender.spec.id === 'rock' && actualDealt > 0) {
               const reflect = Math.max(5, Math.round(actualDealt * 0.48));
               attacker.hp = Math.max(0, attacker.hp - reflect);
-              addFloatingText(attacker.x, attacker.y - 26, '🛡️荆棘反伤', '#f5a623', 0.95);
+              addFloatingText(attacker.x, attacker.y - 26, '🍯暖盾反震', '#e08b3e', 0.95);
             }
           };
 
@@ -1600,14 +1474,14 @@ export default function CyberCricketPage() {
           resolveMeleeHit(p2, p1, -1);
 
           if (p1.hp > 0 && p1.hp < p1.maxHp * 0.25) {
-            setCommentary(`😱 危！【${p1.spec.name}】陷入残血，看能否靠撞墙绝地反击！`);
+            setCommentary(`💓 【${p1.spec.name}】体力告急，快看看能不能靠碰壁逆转！`);
           } else if (p2.hp > 0 && p2.hp < p2.maxHp * 0.25) {
-            setCommentary(`🔥 优势明显！【${p2.spec.name}】已经摇摇欲坠！`);
+            setCommentary(`✨ 优势很大！【${p2.spec.name}】快要招架不住啦～`);
           }
         }
       }
 
-      // 更新疾风幻影分身球
+      // 更新分身球
       for (let i = state.clones.length - 1; i >= 0; i--) {
         const clone = state.clones[i];
         clone.life -= 0.016 * dtScale;
@@ -1619,8 +1493,8 @@ export default function CyberCricketPage() {
         const ownerEntity = clone.owner === 'p1' ? p1 : p2;
 
         const ang = Math.atan2(target.y - clone.y, target.x - clone.x);
-        clone.vx = clone.vx * 0.94 + Math.cos(ang) * 0.32;
-        clone.vy = clone.vy * 0.94 + Math.sin(ang) * 0.32;
+        clone.vx = clone.vx * 0.94 + Math.cos(ang) * 0.18;
+        clone.vy = clone.vy * 0.94 + Math.sin(ang) * 0.18;
         clone.x += clone.vx * dtScale;
         clone.y += clone.vy * dtScale;
 
@@ -1628,14 +1502,14 @@ export default function CyberCricketPage() {
         if (clone.y - clone.radius < minY || clone.y + clone.radius > maxY) clone.vy *= -1;
 
         if (Math.hypot(target.x - clone.x, target.y - clone.y) < target.radius + clone.radius) {
-          applyDamage(ownerEntity, target, 14, '⚡残影围殴');
-          spawnParticles(clone.x, clone.y, clone.color, 8, 0.85);
+          applyDamage(ownerEntity, target, 14, '🦋分身助阵');
+          spawnParticles(clone.x, clone.y, clone.color, 7, 0.75);
           playSfx('wall');
           state.clones.splice(i, 1);
         }
       }
 
-      // 更新极光棱镜延时炸弹
+      // 更新星光泡泡炸弹
       for (let i = state.mines.length - 1; i >= 0; i--) {
         const mine = state.mines[i];
         mine.timer -= 0.016 * dtScale;
@@ -1647,18 +1521,18 @@ export default function CyberCricketPage() {
             x: mine.x,
             y: mine.y,
             r: 8,
-            maxR: 84,
-            color: '#38ff8e',
-            alpha: 0.92,
-            lineWidth: 4,
+            maxR: 80,
+            color: '#5cd6a9',
+            alpha: 0.8,
+            lineWidth: 3.5,
           });
-          spawnParticles(mine.x, mine.y, '#38ff8e', 14, 1.1);
+          spawnParticles(mine.x, mine.y, '#5cd6a9', 12, 1.0);
           const distToTarget = Math.hypot(target.x - mine.x, target.y - mine.y);
-          if (distToTarget <= 84 + target.radius) {
-            applyDamage(ownerEntity, target, 28, '💥极光炸弹!');
+          if (distToTarget <= 80 + target.radius) {
+            applyDamage(ownerEntity, target, 26, '✨星光绽放!');
             const ang = Math.atan2(target.y - mine.y, target.x - mine.x);
-            target.vx += Math.cos(ang) * 2.5;
-            target.vy += Math.sin(ang) * 2.5;
+            target.vx += Math.cos(ang) * 1.3;
+            target.vy += Math.sin(ang) * 1.3;
           }
           state.mines.splice(i, 1);
         }
@@ -1671,28 +1545,28 @@ export default function CyberCricketPage() {
         let reason = '';
         if (p1.hp <= 0 && p2.hp <= 0) {
           winnerSide = 'p1';
-          reason = '双方极限对撞同归于尽，我方险胜一筹！';
+          reason = '双方同时力竭，我方凭借微弱优势胜出～';
         } else if (p2.hp <= 0) {
           winnerSide = 'p1';
-          reason = `【${p1.spec.name}】正面对决将对手彻底击溃！`;
+          reason = `【${p1.spec.name}】一路元气冲撞，赢得了本局胜利！`;
         } else if (p1.hp <= 0) {
           winnerSide = 'p2';
-          reason = `【${p2.spec.name}】火力全开拿下了本局胜利！`;
+          reason = `【${p2.spec.name}】发挥出色，拿下了这场对决！`;
         } else {
           const p1Pct = p1.hp / p1.maxHp;
           const p2Pct = p2.hp / p2.maxHp;
           winnerSide = p1Pct >= p2Pct ? 'p1' : 'p2';
-          reason = '对决时间到，按场上剩余状态判定胜出！';
+          reason = '时间结束，按场上剩余体力判定胜出～';
         }
 
         const betWon = winnerSide === betSideRef.current;
         const winFighter = winnerSide === 'p1' ? p1 : p2;
         const mvpTitle =
           winFighter.hp < winFighter.maxHp * 0.25
-            ? '🔥 绝境反杀战神'
+            ? '🌸 逆风翻盘小锦鲤'
             : winFighter.wallCount >= 10
-            ? '⚡ 贴墙弹射高手'
-            : '👑 擂台霸主';
+            ? '🦋 灵巧弹射达人'
+            : '👑 全场元气主角';
 
         playSfx('win');
         setBattleResult({
@@ -1703,91 +1577,65 @@ export default function CyberCricketPage() {
         });
       }
 
-      // 同步极简 HUD
       if (timestamp - lastHudSync > 90 || state.finished) {
         lastHudSync = timestamp;
         setHudState({
           p1HpPct: Math.max(0, Math.round((p1.hp / p1.maxHp) * 100)),
-          p1Shield: p1.shield > 0,
           p1Berserk: p1.berserkTimer > 0,
           p2HpPct: Math.max(0, Math.round((p2.hp / p2.maxHp) * 100)),
-          p2Shield: p2.shield > 0,
           p2Berserk: p2.berserkTimer > 0,
           suddenDeath: state.timeLeft <= 15,
         });
       }
 
-      // ==================== 绘制擂台画面 ====================
+      // ==================== 绘制柔和奶油风擂台 ====================
       ctx.clearRect(0, 0, width, height);
 
-      // 背景极简网格
+      // 中心浅粉装饰圆环
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
-      ctx.lineWidth = 1;
-      const gridStep = 36;
-      for (let gx = 0; gx < width; gx += gridStep) {
-        ctx.beginPath();
-        ctx.moveTo(gx, 0);
-        ctx.lineTo(gx, height);
-        ctx.stroke();
-      }
-      for (let gy = 0; gy < height; gy += gridStep) {
-        ctx.beginPath();
-        ctx.moveTo(0, gy);
-        ctx.lineTo(width, gy);
-        ctx.stroke();
-      }
-
-      ctx.strokeStyle = state.timeLeft <= 15 ? 'rgba(255, 59, 92, 0.16)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeStyle = 'rgba(232, 165, 190, 0.22)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 62, 0, Math.PI * 2);
+      ctx.arc(width / 2, height / 2, 56, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(232, 165, 190, 0.12)';
+      ctx.beginPath();
+      ctx.arc(width / 2, height / 2, 110, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
-      // 缩圈边界绘制
+      // 缩圈柔粉边界
       if (padX > 0 || padY > 0 || state.timeLeft <= 15) {
         ctx.save();
-        ctx.fillStyle = 'rgba(255, 42, 84, 0.11)';
+        ctx.fillStyle = 'rgba(255, 166, 189, 0.15)';
         ctx.fillRect(0, 0, width, minY);
         ctx.fillRect(0, maxY, width, height - maxY);
         ctx.fillRect(0, minY, minX, maxY - minY);
         ctx.fillRect(maxX, minY, width - maxX, maxY - minY);
 
-        ctx.strokeStyle = '#ff3b5c';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#ff85a1';
+        ctx.lineWidth = 2.5;
         ctx.setLineDash([8, 6]);
-        ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
-        ctx.restore();
-      } else {
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
-        ctx.lineWidth = 2;
         ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
         ctx.restore();
       }
 
-      // 绘制极光炸弹
+      // 绘制星光泡泡
       state.mines.forEach((mine) => {
         ctx.save();
-        const pulse = 1 + Math.sin(timestamp * 0.02) * 0.18;
+        const pulse = 1 + Math.sin(timestamp * 0.02) * 0.15;
         ctx.strokeStyle = mine.color;
-        ctx.fillStyle = 'rgba(56, 255, 142, 0.2)';
+        ctx.fillStyle = 'rgba(92, 214, 169, 0.22)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(mine.x, mine.y, mine.radius * pulse, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(56, 255, 142, 0.25)';
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.arc(mine.x, mine.y, 84 * (1 - mine.timer / mine.maxTimer), 0, Math.PI * 2);
-        ctx.stroke();
         ctx.restore();
       });
 
-      // 绘制激光束
+      // 绘制柔光射线
       for (let i = state.lasers.length - 1; i >= 0; i--) {
         const l = state.lasers[i];
         l.life -= 0.016;
@@ -1798,10 +1646,9 @@ export default function CyberCricketPage() {
         const alpha = l.life / l.maxLife;
         ctx.save();
         ctx.strokeStyle = l.color;
-        ctx.globalAlpha = alpha;
-        ctx.lineWidth = 5 * alpha + 1;
-        ctx.shadowColor = l.color;
-        ctx.shadowBlur = 14;
+        ctx.globalAlpha = alpha * 0.85;
+        ctx.lineWidth = 4.5 * alpha + 1;
+        ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(l.x1, l.y1);
         ctx.lineTo(l.x2, l.y2);
@@ -1809,15 +1656,15 @@ export default function CyberCricketPage() {
         ctx.restore();
       }
 
-      // 绘制冲击波圆环
+      // 绘制涟漪圆环
       for (let i = state.rings.length - 1; i >= 0; i--) {
         const ring = state.rings[i];
         if (ring.inward) {
-          ring.r -= 3.6;
-          ring.alpha -= 0.032;
+          ring.r -= 3.4;
+          ring.alpha -= 0.03;
         } else {
           ring.r += (ring.maxR - ring.r) * 0.14 + 1.2;
-          ring.alpha -= 0.035;
+          ring.alpha -= 0.032;
         }
         if (ring.alpha <= 0 || (ring.inward && ring.r <= ring.maxR)) {
           state.rings.splice(i, 1);
@@ -1833,29 +1680,27 @@ export default function CyberCricketPage() {
         ctx.restore();
       }
 
-      // 绘制疾风幻影分身球
+      // 绘制轻风小分身
       state.clones.forEach((clone) => {
         ctx.save();
-        ctx.shadowColor = clone.color;
-        ctx.shadowBlur = 12;
         ctx.fillStyle = clone.color;
-        ctx.globalAlpha = 0.82;
+        ctx.globalAlpha = 0.78;
         ctx.beginPath();
         ctx.arc(clone.x, clone.y, clone.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2;
         ctx.stroke();
         ctx.restore();
       });
 
-      // 绘制双方主圆球蛐蛐（无数字干扰，纯净视觉）
+      // 绘制果冻质感主圆球
       const drawFighter = (f: FighterEntity) => {
         f.trail.forEach((t, idx) => {
           const ratio = (idx + 1) / f.trail.length;
           ctx.save();
           ctx.fillStyle = t.color;
-          ctx.globalAlpha = ratio * t.alpha * 0.42;
+          ctx.globalAlpha = ratio * t.alpha * 0.35;
           ctx.beginPath();
           ctx.arc(t.x, t.y, t.r * ratio, 0, Math.PI * 2);
           ctx.fill();
@@ -1865,40 +1710,38 @@ export default function CyberCricketPage() {
         ctx.save();
         ctx.translate(f.x, f.y);
 
-        // 蓄力瞄准准星光环
+        // 蓄力柔和花环
         if (isChargingRef.current && f.side === betSideRef.current) {
           ctx.save();
-          ctx.strokeStyle = '#ffd700';
+          ctx.strokeStyle = '#ff85a1';
           ctx.lineWidth = 2.5;
-          ctx.setLineDash([4, 4]);
+          ctx.setLineDash([5, 5]);
           ctx.rotate(f.rotation * 2);
           ctx.beginPath();
-          ctx.arc(0, 0, f.radius + 14 + chargeValRef.current * 8, 0, Math.PI * 2);
+          ctx.arc(0, 0, f.radius + 12 + chargeValRef.current * 7, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }
 
-        // 暴走金色闪电光环
+        // 暴走暖粉光圈
         if (f.berserkTimer > 0) {
           ctx.save();
-          ctx.strokeStyle = '#ffd700';
+          ctx.strokeStyle = '#ff85a1';
           ctx.lineWidth = 3;
-          ctx.shadowColor = '#ffd700';
-          ctx.shadowBlur = 20;
           ctx.setLineDash([6, 4]);
-          ctx.rotate(-f.rotation * 1.5);
+          ctx.rotate(-f.rotation * 1.4);
           ctx.beginPath();
-          ctx.arc(0, 0, f.radius + 9, 0, Math.PI * 2);
+          ctx.arc(0, 0, f.radius + 8, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
         }
 
-        // 吸收护盾圈
+        // 护盾光圈
         if (f.shield > 0) {
           ctx.save();
-          ctx.strokeStyle = '#ffe082';
-          ctx.fillStyle = 'rgba(255, 224, 130, 0.15)';
-          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#f5a65b';
+          ctx.fillStyle = 'rgba(245, 166, 91, 0.14)';
+          ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.arc(0, 0, f.radius + 5, 0, Math.PI * 2);
           ctx.fill();
@@ -1906,93 +1749,51 @@ export default function CyberCricketPage() {
           ctx.restore();
         }
 
-        // 赤焰暴君烈焰环
-        if (f.spec.id === 'fire' && f.nitroStacks > 0) {
-          for (let s = 1; s <= f.nitroStacks; s++) {
-            ctx.beginPath();
-            ctx.strokeStyle = '#ff9a00';
-            ctx.lineWidth = 1.8;
-            ctx.arc(0, 0, f.radius + s * 3.5, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-        }
+        // 果冻圆球渐变主体
+        const grad = ctx.createRadialGradient(-f.radius * 0.32, -f.radius * 0.32, 2, 0, 0, f.radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.28, f.spec.secondaryColor);
+        grad.addColorStop(0.95, f.spec.color);
 
-        // 圆球主体渐变
-        const grad = ctx.createRadialGradient(-f.radius * 0.3, -f.radius * 0.3, 3, 0, 0, f.radius);
-        grad.addColorStop(0, f.spec.secondaryColor);
-        grad.addColorStop(0.65, f.spec.color);
-        grad.addColorStop(1, '#090b16');
-
-        ctx.shadowColor = f.berserkTimer > 0 ? '#ffd700' : f.spec.color;
-        ctx.shadowBlur = f.berserkTimer > 0 ? 24 : 16;
+        ctx.shadowColor = f.spec.glowColor;
+        ctx.shadowBlur = 14;
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(0, 0, f.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 属性几何纹章内核
-        ctx.save();
-        ctx.rotate(f.rotation);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-        ctx.lineWidth = 1.8;
-        if (f.spec.id === 'rock') {
-          ctx.beginPath();
-          for (let k = 0; k < 6; k++) {
-            const a = (Math.PI / 3) * k;
-            const rx = Math.cos(a) * (f.radius * 0.58);
-            const ry = Math.sin(a) * (f.radius * 0.58);
-            if (k === 0) ctx.moveTo(rx, ry);
-            else ctx.lineTo(rx, ry);
-          }
-          ctx.closePath();
-          ctx.stroke();
-        } else if (f.spec.id === 'wind') {
-          ctx.beginPath();
-          for (let k = 0; k < 3; k++) {
-            const a = ((Math.PI * 2) / 3) * k;
-            const rx = Math.cos(a) * (f.radius * 0.65);
-            const ry = Math.sin(a) * (f.radius * 0.65);
-            if (k === 0) ctx.moveTo(rx, ry);
-            else ctx.lineTo(rx, ry);
-          }
-          ctx.closePath();
-          ctx.stroke();
-        } else if (f.spec.id === 'light') {
-          ctx.beginPath();
-          for (let k = 0; k < 4; k++) {
-            const a = (Math.PI / 2) * k;
-            const rx = Math.cos(a) * (f.radius * 0.65);
-            const ry = Math.sin(a) * (f.radius * 0.65);
-            if (k === 0) ctx.moveTo(rx, ry);
-            else ctx.lineTo(rx, ry);
-          }
-          ctx.closePath();
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.arc(0, 0, f.radius * 0.52, 0, Math.PI * 1.4);
-          ctx.stroke();
-        }
-        ctx.restore();
+        // 果冻高光小圆点
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.beginPath();
+        ctx.arc(-f.radius * 0.3, -f.radius * 0.3, f.radius * 0.22, 0, Math.PI * 2);
+        ctx.fill();
 
-        // 圆周生命弧线环
+        // 外圈白色柔边与体力进度环
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, f.radius - 1, 0, Math.PI * 2);
+        ctx.stroke();
+
         const hpRatio = Math.max(0, f.hp / f.maxHp);
-        ctx.strokeStyle = f.side === 'p1' ? '#00f0ff' : '#ff3b5c';
-        ctx.lineWidth = 3.2;
+        ctx.strokeStyle = f.side === 'p1' ? '#5ab2f7' : '#ff7597';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.arc(0, 0, f.radius - 1.5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hpRatio);
         ctx.stroke();
 
-        // 球心属性图标（替代杂乱的血量数字）
-        ctx.font = '14px sans-serif';
+        // 中心图标随球体放大
+        ctx.shadowBlur = 0;
+        ctx.font = `${Math.round(f.radius * 0.62)}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(f.spec.icon, 0, 1);
+        ctx.fillText(f.spec.icon, 0, 2);
 
-        // 头顶阵营标识
-        ctx.fillStyle = f.side === 'p1' ? '#00f0ff' : '#ff3b5c';
-        ctx.font = '900 10px sans-serif';
-        ctx.fillText(f.side === 'p1' ? '我方' : '对手', 0, -f.radius - 8);
+        // 阵营小标签
+        ctx.fillStyle = f.side === 'p1' ? '#4a90d9' : '#e85d80';
+        ctx.font = '800 11px sans-serif';
+        ctx.fillText(f.side === 'p1' ? '我方' : '对手', 0, -f.radius - 10);
 
         ctx.restore();
       };
@@ -2000,7 +1801,7 @@ export default function CyberCricketPage() {
       drawFighter(p1);
       drawFighter(p2);
 
-      // 绘制粒子特效
+      // 绘制粒子
       for (let i = state.particles.length - 1; i >= 0; i--) {
         const pt = state.particles[i];
         pt.x += pt.vx * dtScale;
@@ -2019,21 +1820,21 @@ export default function CyberCricketPage() {
         ctx.restore();
       }
 
-      // 绘制技能效果文字（不含琐碎数字）
+      // 绘制轻柔招式提示字
       for (let i = state.texts.length - 1; i >= 0; i--) {
         const ft = state.texts[i];
         ft.y += ft.vy * dtScale;
-        ft.alpha -= 0.02;
+        ft.alpha -= 0.022;
         if (ft.alpha <= 0) {
           state.texts.splice(i, 1);
           continue;
         }
         ctx.save();
-        ctx.font = `900 ${Math.round(12 * ft.scale)}px sans-serif`;
+        ctx.font = `800 ${Math.round(12 * ft.scale)}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.globalAlpha = Math.max(0, ft.alpha);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+        ctx.lineWidth = 3.5;
         ctx.strokeText(ft.text, ft.x, ft.y);
         ctx.fillStyle = ft.color;
         ctx.fillText(ft.text, ft.x, ft.y);
@@ -2064,7 +1865,7 @@ export default function CyberCricketPage() {
     const isEditing = editingSide === side;
     const isRandom = slot === 'random';
     const spec = isRandom ? null : CRICKETS[slot];
-    const sideColor = side === 'p1' ? '#00f0ff' : '#ff3b5c';
+    const sideColor = side === 'p1' ? '#6ec6ff' : '#ff85a1';
 
     return (
       <div
@@ -2076,33 +1877,33 @@ export default function CyberCricketPage() {
         }}
         className="cc-slot-card"
         style={{
-          borderColor: isEditing ? sideColor : 'rgba(255,255,255,0.08)',
-          boxShadow: isEditing ? `0 0 18px ${side === 'p1' ? 'rgba(0,240,255,0.22)' : 'rgba(255,59,92,0.22)'}` : 'none',
+          borderColor: isEditing ? sideColor : '#f5e8ef',
+          background: isEditing ? (side === 'p1' ? '#f5fbff' : '#fff7fa') : '#ffffff',
         }}
       >
         <span
           className="cc-slot-tag"
           style={{
-            background: side === 'p1' ? 'rgba(0, 240, 255, 0.18)' : 'rgba(255, 59, 92, 0.18)',
-            color: sideColor,
+            background: side === 'p1' ? '#e6f4ff' : '#ffe8ef',
+            color: side === 'p1' ? '#3b86c4' : '#e0587c',
           }}
         >
-          {side === 'p1' ? 'P1 我方出战' : 'P2 敌方擂主'}
+          {side === 'p1' ? '我方圆球' : '对手圆球'}
         </span>
 
         <div
           className="cc-orb-preview"
           style={{
             background: isRandom
-              ? 'radial-gradient(circle at 30% 30%, #ffd700, #8a2be2)'
-              : `radial-gradient(circle at 30% 30%, ${spec?.secondaryColor}, ${spec?.color})`,
-            boxShadow: isRandom ? '0 0 18px rgba(255, 215, 0, 0.5)' : `0 0 18px ${spec?.glowColor}`,
+              ? 'radial-gradient(circle at 30% 30%, #fff0f5, #d8b4f8)'
+              : `radial-gradient(circle at 30% 30%, #ffffff, ${spec?.secondaryColor} 35%, ${spec?.color} 100%)`,
+            boxShadow: isRandom ? '0 6px 14px rgba(179, 136, 235, 0.35)' : `0 6px 14px ${spec?.glowColor}`,
           }}
         >
           {isRandom ? '🎲' : spec?.icon}
         </div>
 
-        <div style={{ fontWeight: 800, fontSize: '14px', color: '#fff' }}>
+        <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--cc-text-main)' }}>
           {isRandom ? '随机盲盒' : spec?.name}
         </div>
         <div style={{ fontSize: '11px', color: 'var(--cc-text-dim)', marginTop: '2px' }}>
@@ -2117,11 +1918,11 @@ export default function CyberCricketPage() {
       <style>{CRICKET_STYLES}</style>
 
       <div className="cc-mobile-shell">
-        {/* 顶部栏（无 mrduan 字样，简洁清爽） */}
+        {/* 顶部栏 */}
         <header className="cc-header">
           <div className="cc-brand">
-            <span className="cc-brand-badge">斗技场</span>
-            <span className="cc-brand-title">赛博电子斗蛐蛐</span>
+            <span className="cc-brand-badge">元气解压</span>
+            <span className="cc-brand-title">果冻圆球斗蛐蛐</span>
           </div>
           <div className="cc-header-actions">
             <button
@@ -2141,7 +1942,7 @@ export default function CyberCricketPage() {
           </div>
         </header>
 
-        {/* ==================== 阶段 1: 选角与押注备战大厅 ==================== */}
+        {/* ==================== 阶段 1: 柔和精简选角大厅 ==================== */}
         {phase === 'lobby' && (
           <main className="cc-lobby">
             {/* 1v1 对战席位 */}
@@ -2163,15 +1964,15 @@ export default function CyberCricketPage() {
               {renderSlotPreview('p2', p2Slot)}
             </section>
 
-            {/* 蛐蛐选择面板 */}
+            {/* 圆球选择与一句话简介合并在一个清爽卡片中 */}
             <section className="cc-bet-box">
               <div className="cc-section-label">
                 <span>
                   正在为{' '}
-                  <strong style={{ color: editingSide === 'p1' ? '#00f0ff' : '#ff3b5c' }}>
-                    {editingSide === 'p1' ? 'P1 我方' : 'P2 对手'}
+                  <strong style={{ color: editingSide === 'p1' ? '#3b86c4' : '#e0587c' }}>
+                    {editingSide === 'p1' ? '我方' : '对手'}
                   </strong>{' '}
-                  挑选蛐蛐：
+                  挑选圆球：
                 </span>
                 <button
                   type="button"
@@ -2179,7 +1980,7 @@ export default function CyberCricketPage() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#ffd700',
+                    color: '#e0587c',
                     fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -2203,26 +2004,25 @@ export default function CyberCricketPage() {
                         playSfx('wall');
                       }}
                       style={{
-                        borderColor: selected ? c.color : 'rgba(255,255,255,0.08)',
-                        background: selected ? 'rgba(255,255,255,0.1)' : 'rgba(18, 22, 40, 0.9)',
+                        borderColor: selected ? c.color : '#f3e6ed',
+                        background: selected ? '#fff5f8' : '#fcf8fa',
                       }}
                     >
                       <div
                         className="cc-mini-orb"
                         style={{
-                          background: `radial-gradient(circle at 30% 30%, ${c.secondaryColor}, ${c.color})`,
-                          boxShadow: `0 0 10px ${c.glowColor}`,
+                          background: `radial-gradient(circle at 30% 30%, #ffffff, ${c.secondaryColor} 35%, ${c.color} 100%)`,
+                          boxShadow: `0 4px 10px ${c.glowColor}`,
                         }}
                       >
                         {c.icon}
                       </div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>{c.name}</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--cc-text-main)' }}>{c.name}</div>
                       <div style={{ fontSize: '10px', color: 'var(--cc-text-dim)' }}>{c.title}</div>
                     </button>
                   );
                 })}
 
-                {/* 随机盲盒选项 */}
                 <button
                   type="button"
                   className="cc-cricket-option"
@@ -2232,62 +2032,49 @@ export default function CyberCricketPage() {
                     playSfx('skill');
                   }}
                   style={{
-                    borderColor: currentEditingSlot === 'random' ? '#ffd700' : 'rgba(255,255,255,0.08)',
-                    background: currentEditingSlot === 'random' ? 'rgba(255, 215, 0, 0.14)' : 'rgba(18, 22, 40, 0.9)',
+                    borderColor: currentEditingSlot === 'random' ? '#b388eb' : '#f3e6ed',
+                    background: currentEditingSlot === 'random' ? '#f6f0ff' : '#fcf8fa',
                   }}
                 >
                   <div
                     className="cc-mini-orb"
                     style={{
-                      background: 'radial-gradient(circle at 30% 30%, #ffd700, #8a2be2)',
-                      boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                      background: 'radial-gradient(circle at 30% 30%, #ffffff, #d8b4f8)',
+                      boxShadow: '0 4px 10px rgba(179, 136, 235, 0.35)',
                     }}
                   >
                     🎲
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#ffd700' }}>随机抽签</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#8a5cf5' }}>随机抽签</div>
                   <div style={{ fontSize: '10px', color: 'var(--cc-text-dim)' }}>盲盒出战</div>
                 </button>
               </div>
-            </section>
 
-            {/* 极简技能效果说明（无数字） */}
-            <section className="cc-detail-card">
-              {currentEditingSlot === 'random' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <div style={{ fontWeight: 800, color: '#ffd700', fontSize: '13px' }}>
-                    🎲 随机盲盒出战
-                  </div>
+              {/* 简洁技能一句话说明 */}
+              <div className="cc-detail-card">
+                {currentEditingSlot === 'random' ? (
                   <div style={{ color: 'var(--cc-text-dim)' }}>
-                    开局自动抽取一只属性圆球登场，胜负全凭今日手气！
+                    🎲 <strong>随机盲盒：</strong>开局自动抽取一颗果冻圆球登场，给今天留一点小惊喜～
                   </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 800, fontSize: '13px', color: previewSpec.color }}>
-                      {previewSpec.icon} {previewSpec.name}
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--cc-text-dim)' }}>
-                      {previewSpec.sizeLabel} · {previewSpec.speedLabel}
-                    </span>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div>
+                      <strong style={{ color: '#e0587c' }}>碰壁效果：</strong>
+                      <span>{previewSpec.wallSkillDesc}</span>
+                    </div>
+                    <div>
+                      <strong style={{ color: '#3b86c4' }}>相撞效果：</strong>
+                      <span>{previewSpec.clashSkillDesc}</span>
+                    </div>
                   </div>
-                  <div>
-                    <strong style={{ color: '#ffd700' }}>【碰壁】{previewSpec.wallSkillName}：</strong>
-                    <span style={{ color: '#d7e0f5' }}>{previewSpec.wallSkillDesc}</span>
-                  </div>
-                  <div>
-                    <strong style={{ color: '#00f0ff' }}>【对撞】{previewSpec.clashSkillName}：</strong>
-                    <span style={{ color: '#d7e0f5' }}>{previewSpec.clashSkillDesc}</span>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </section>
 
-            {/* 赛前押注 & 祝福心愿 */}
+            {/* 赛前支持与今日小确幸心愿 */}
             <section className="cc-bet-box">
               <div className="cc-section-label">
-                <span>🎯 选择支持方与今日心愿：</span>
+                <span>🌷 选择支持方与今日小确幸：</span>
               </div>
               <div className="cc-bet-buttons">
                 <button
@@ -2306,7 +2093,7 @@ export default function CyberCricketPage() {
                 </button>
               </div>
 
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {EMOTION_STAKES.map((stake) => (
                   <button
                     key={stake.id}
@@ -2319,9 +2106,9 @@ export default function CyberCricketPage() {
                       fontSize: '11px',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      border: stakeId === stake.id ? '1px solid #ffd700' : '1px solid rgba(255,255,255,0.1)',
-                      background: stakeId === stake.id ? 'rgba(255, 215, 0, 0.16)' : 'rgba(255,255,255,0.04)',
-                      color: stakeId === stake.id ? '#ffd700' : 'var(--cc-text-dim)',
+                      border: stakeId === stake.id ? '1px solid #ff85a1' : '1px solid #f2e2ea',
+                      background: stakeId === stake.id ? '#fff0f4' : '#fcf8fa',
+                      color: stakeId === stake.id ? '#e0587c' : 'var(--cc-text-dim)',
                       whiteSpace: 'nowrap',
                     }}
                   >
@@ -2337,62 +2124,47 @@ export default function CyberCricketPage() {
           </main>
         )}
 
-        {/* ==================== 阶段 2: 手机屏幕限定擂台搏斗 ==================== */}
+        {/* ==================== 阶段 2: 柔和果冻擂台对决 ==================== */}
         {phase === 'battle' && (
           <main className="cc-arena-view">
-            {/* 顶部双方极简血条 HUD（不显示杂乱数字） */}
+            {/* 顶部极简体力条 */}
             <section className="cc-hud-top">
-              {/* P1 血条 */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 800 }}>
-                  <span style={{ color: '#00f0ff' }}>
-                    {actualP1.icon} {actualP1.name} {betSide === 'p1' ? '🎯' : ''}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700 }}>
+                  <span style={{ color: '#3b86c4' }}>
+                    {actualP1.icon} {actualP1.name}
                   </span>
-                  {hudState.p1Berserk ? (
-                    <span style={{ color: '#ffd700', fontSize: '10px' }}>⚡暴走</span>
-                  ) : hudState.p1Shield ? (
-                    <span style={{ color: '#ffe082', fontSize: '10px' }}>🛡️护盾</span>
-                  ) : null}
                 </div>
                 <div className="cc-hp-bar-track">
                   <div
                     className="cc-hp-bar-fill"
                     style={{
                       width: `${hudState.p1HpPct}%`,
-                      background: 'linear-gradient(90deg, #0072ff, #00f0ff)',
+                      background: 'linear-gradient(90deg, #8fd3ff, #5ab2f7)',
                     }}
                   />
                 </div>
               </div>
 
-              {/* 阶段标识 */}
               <div className="cc-timer-box">
                 <span
                   style={{
                     fontSize: '11px',
-                    color: hudState.suddenDeath ? '#ff3b5c' : '#ffd700',
-                    fontWeight: 900,
-                    padding: '3px 8px',
+                    color: hudState.suddenDeath ? '#e0587c' : '#b594a6',
+                    fontWeight: 800,
+                    padding: '3px 9px',
                     borderRadius: '99px',
-                    background: hudState.suddenDeath ? 'rgba(255, 59, 92, 0.16)' : 'rgba(255, 215, 0, 0.12)',
+                    background: hudState.suddenDeath ? '#ffe8ef' : '#faf2f6',
                   }}
                 >
-                  {hudState.suddenDeath ? '⚡缩圈决战' : '⚔️激战中'}
+                  {hudState.suddenDeath ? '🌸 决胜时刻' : 'VS'}
                 </span>
               </div>
 
-              {/* P2 血条 */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 800 }}>
-                  {hudState.p2Berserk ? (
-                    <span style={{ color: '#ffd700', fontSize: '10px' }}>⚡暴走</span>
-                  ) : hudState.p2Shield ? (
-                    <span style={{ color: '#ffe082', fontSize: '10px' }}>🛡️护盾</span>
-                  ) : (
-                    <span />
-                  )}
-                  <span style={{ color: '#ff3b5c' }}>
-                    {betSide === 'p2' ? '🎯' : ''} {actualP2.name} {actualP2.icon}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '12px', fontWeight: 700 }}>
+                  <span style={{ color: '#e0587c' }}>
+                    {actualP2.name} {actualP2.icon}
                   </span>
                 </div>
                 <div className="cc-hp-bar-track">
@@ -2400,7 +2172,7 @@ export default function CyberCricketPage() {
                     className="cc-hp-bar-fill"
                     style={{
                       width: `${hudState.p2HpPct}%`,
-                      background: 'linear-gradient(90deg, #ff3b5c, #ff8a00)',
+                      background: 'linear-gradient(90deg, #ff85a1, #ffb3c6)',
                       marginLeft: 'auto',
                     }}
                   />
@@ -2408,14 +2180,14 @@ export default function CyberCricketPage() {
               </div>
             </section>
 
-            {/* 实时解说条 */}
+            {/* 温柔解说提示条 */}
             <div className="cc-commentary-banner">
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {commentary}
               </span>
             </div>
 
-            {/* 物理碰撞 Canvas 容器 */}
+            {/* 奶油果冻物理擂台 */}
             <div
               ref={wrapRef}
               className={`cc-canvas-wrap ${hudState.suddenDeath ? 'sudden-death' : ''} ${screenShake ? 'screen-shake' : ''}`}
@@ -2423,13 +2195,13 @@ export default function CyberCricketPage() {
               <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
             </div>
 
-            {/* 底部控制台：压住加一次暴走 + 返回选角 */}
+            {/* 底部控制台 */}
             <section className="cc-controls-bar">
               <button
                 type="button"
                 className="cc-icon-btn"
                 onClick={() => setPhase('lobby')}
-                style={{ padding: '13px 14px', borderRadius: '14px' }}
+                style={{ padding: '13px 15px', borderRadius: '99px' }}
               >
                 ↩ 换蛐蛐
               </button>
@@ -2458,15 +2230,15 @@ export default function CyberCricketPage() {
                 )}
                 <span style={{ position: 'relative', zIndex: 2 }}>
                   {berserkUsed
-                    ? '⚡ 本局暴走已释放'
+                    ? '✨ 本局心愿助威已释放'
                     : isChargingBerserk
-                    ? '🔥 蓄力注入中... 松开爆发！'
-                    : `🔥 按住蓄力 · 助【${betSide === 'p1' ? actualP1.name : actualP2.name}】暴走`}
+                    ? '💖 蓄力注入中... 松开爆发！'
+                    : `💖 按住蓄力 · 助【${betSide === 'p1' ? actualP1.name : actualP2.name}】爆发`}
                 </span>
               </button>
             </section>
 
-            {/* 极简赛后结算弹窗（无统计数据表） */}
+            {/* 极简治愈结算弹窗 */}
             {battleResult && (
               <div className="cc-result-overlay">
                 <div className="cc-result-card">
@@ -2477,50 +2249,49 @@ export default function CyberCricketPage() {
                         padding: '4px 12px',
                         borderRadius: '99px',
                         fontSize: '11px',
-                        fontWeight: 800,
-                        background: battleResult.betWon ? 'rgba(56, 255, 142, 0.18)' : 'rgba(255, 215, 0, 0.16)',
-                        color: battleResult.betWon ? '#38ff8e' : '#ffd700',
+                        fontWeight: 700,
+                        background: '#ffe8ef',
+                        color: '#e0587c',
                         marginBottom: '8px',
                       }}
                     >
                       {battleResult.mvpTitle}
                     </span>
-                    <h2 style={{ margin: '0 0 6px', fontSize: '22px', fontWeight: 900, color: '#fff' }}>
+                    <h2 style={{ margin: '0 0 6px', fontSize: '21px', fontWeight: 800, color: 'var(--cc-text-main)' }}>
                       {battleResult.winner === 'p1'
-                        ? `🏆 【${actualP1.name}】获胜！`
-                        : `🏆 【${actualP2.name}】获胜！`}
+                        ? `🎉 【${actualP1.name}】获胜啦！`
+                        : `🎉 【${actualP2.name}】获胜啦！`}
                     </h2>
                     <div style={{ fontSize: '12px', color: 'var(--cc-text-dim)' }}>{battleResult.reason}</div>
                   </div>
 
-                  {/* 情绪价值签语 */}
                   <div
                     style={{
-                      background: 'rgba(255, 215, 0, 0.08)',
-                      border: '1px solid rgba(255, 215, 0, 0.25)',
-                      borderRadius: '14px',
-                      padding: '12px 14px',
+                      background: '#fff5f8',
+                      border: '1px solid #f8dce6',
+                      borderRadius: '16px',
+                      padding: '14px',
                       fontSize: '13px',
-                      lineHeight: 1.55,
+                      lineHeight: 1.6,
                       textAlign: 'center',
                     }}
                   >
-                    <div style={{ fontWeight: 800, color: '#ffd700', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: 800, color: '#e0587c', marginBottom: '4px' }}>
                       {battleResult.betWon
-                        ? `🎉 押注命中 · ${activeStake.label}`
-                        : `🌈 虽败犹荣 · 霉运已替你挡下`}
+                        ? `🌷 心愿达成 · ${activeStake.label}`
+                        : `🌈 温柔签语 · 霉运已替你挡下`}
                     </div>
-                    <div style={{ color: '#e6ecff' }}>
+                    <div style={{ color: 'var(--cc-text-main)' }}>
                       {battleResult.betWon ? activeStake.winQuote : activeStake.loseQuote}
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <button
                       type="button"
                       className="cc-bet-btn"
                       onClick={() => setPhase('lobby')}
-                      style={{ padding: '12px', fontSize: '13px' }}
+                      style={{ padding: '12px', fontSize: '13px', borderRadius: '99px' }}
                     >
                       🔄 换蛐蛐重选
                     </button>
@@ -2539,13 +2310,13 @@ export default function CyberCricketPage() {
           </main>
         )}
 
-        {/* 极简玩法弹窗 */}
+        {/* 简洁玩法说明弹窗 */}
         {showGuideModal && (
           <div className="cc-result-overlay" onClick={() => setShowGuideModal(false)}>
             <div className="cc-result-card" onClick={(e) => e.stopPropagation()}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#ffd700' }}>
-                  📖 电子斗蛐蛐玩法说明
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#e0587c' }}>
+                  📖 玩法小贴士
                 </h3>
                 <button
                   type="button"
@@ -2555,18 +2326,15 @@ export default function CyberCricketPage() {
                   ✕ 关闭
                 </button>
               </div>
-              <div style={{ fontSize: '12px', color: '#d7e0f5', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '13px', color: 'var(--cc-text-main)', lineHeight: 1.65, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
-                  <strong>1. 自由配对：</strong>挑选我方与对手的出战圆球，两边都可以选<strong>「🎲 随机抽签」</strong>盲盒。
+                  🌸 <strong>挑选圆球：</strong>为我方和对手各选一颗果冻圆球，也可以交给<strong>「随机抽签」</strong>。
                 </div>
                 <div>
-                  <strong>2. 碰撞放招：</strong>全程自动对决，圆球撞击四周墙壁会触发<strong>碰壁反弹技</strong>，两球相撞则触发<strong>对撞攻击技</strong>。
+                  ✨ <strong>自动碰撞：</strong>放入斗盆后全程自动弹射，碰壁与相撞都会触发专属小技能。
                 </div>
                 <div>
-                  <strong>3. 按住暴走：</strong>每局可发动一次场外助威！<strong>按住底部暴走按钮蓄力并松开</strong>，你支持的圆球将体型暴涨、张开护盾并向对手猛冲放大招。
-                </div>
-                <div>
-                  <strong>4. 缩圈决战：</strong>对局进入尾声时四周墙壁将带电向内收缩，节奏加快直到决出胜负。
+                  💖 <strong>按住助威：</strong>每局可以<strong>按住底部按钮蓄力并松开</strong>，为你支持的圆球注入一次元气爆发！
                 </div>
               </div>
             </div>
