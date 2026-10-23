@@ -1,0 +1,623 @@
+/* ==========================================================================
+   mrduan 冬日哈气擦窗 · 治愈手绘风样式表 (page.module.css)
+   适配手机端单屏 (100dvh, 零上下滚动, 触控防抖)
+   ========================================================================== */
+
+.viewport {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: env(safe-area-inset-top, 14px) 18px env(safe-area-inset-bottom, 16px);
+  box-sizing: border-box;
+  /* 冬日暮色冷蓝到手绘暖米色的过渡背景 */
+  background: linear-gradient(180deg, #2b3a4a 0%, #3d5166 48%, #5e6472 100%);
+  transition: background 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: "Hiragino Maru Gothic ProN", "YouYuan", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.viewportWarm {
+  background: linear-gradient(180deg, #433530 0%, #6b4c3b 48%, #a67658 100%);
+}
+
+/* 飘落雪花背景层 */
+.snowLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -24px;
+  color: rgba(255, 250, 242, 0.65);
+  font-size: 14px;
+  animation: snowFall linear infinite;
+}
+
+.s1 { left: 12%; animation-duration: 7s; animation-delay: 0s; font-size: 16px; }
+.s2 { left: 28%; animation-duration: 9s; animation-delay: 1.5s; font-size: 12px; }
+.s3 { left: 52%; animation-duration: 8s; animation-delay: 0.8s; font-size: 18px; }
+.s4 { left: 68%; animation-duration: 6.5s; animation-delay: 2.2s; font-size: 14px; }
+.s5 { left: 84%; animation-duration: 8.5s; animation-delay: 0.4s; font-size: 15px; }
+.s6 { left: 92%; animation-duration: 10s; animation-delay: 3s; font-size: 11px; }
+
+@keyframes snowFall {
+  0% {
+    transform: translateY(-10px) translateX(0) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(48dvh) translateX(12px) rotate(180deg);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateY(102dvh) translateX(-8px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 顶部状态栏 */
+.topHeader {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.brandTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  background: #fdf8f2;
+  color: #5a3e2b;
+  border: 2px solid #5a3e2b;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 2px 3px 0px rgba(62, 40, 24, 0.35);
+}
+
+.brandDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e76f51;
+  display: inline-block;
+}
+
+.tempPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: #e6f0fa;
+  color: #3a5a78;
+  border: 2px solid #4a6680;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 2px 3px 0px rgba(42, 64, 86, 0.3);
+  transition: all 0.4s ease;
+}
+
+.tempPillWarm {
+  background: #ffedd8;
+  color: #9c4a1a;
+  border-color: #6b3e26;
+  box-shadow: 2px 3px 0px rgba(107, 62, 38, 0.35);
+}
+
+.tempIcon {
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   手绘木质窗框与擦窗主交互区
+   ========================================================================== */
+.windowFrameOuter {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 390px;
+  flex: 1;
+  max-height: 62dvh;
+  min-height: 330px;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  background: #8c583a;
+  border: 3.5px solid #4a2c18;
+  border-radius: 26px 26px 14px 14px;
+  padding: 12px 12px 0 12px;
+  box-sizing: border-box;
+  box-shadow:
+    0 12px 28px rgba(18, 24, 32, 0.42),
+    inset 0 2px 0 rgba(255, 224, 194, 0.35);
+}
+
+/* 窗顶积雪装饰 */
+.snowCap {
+  position: absolute;
+  top: -9px;
+  left: 16px;
+  right: 16px;
+  height: 14px;
+  background: #fffdf9;
+  border: 2.5px solid #5c6f84;
+  border-radius: 20px 20px 10px 10px;
+  z-index: 5;
+  box-shadow: 0 3px 0 rgba(196, 214, 232, 0.7);
+}
+
+.windowGlassPane {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  border-radius: 16px;
+  border: 3px solid #4a2c18;
+  overflow: hidden;
+  background: #2f231d;
+  touch-action: none;
+}
+
+/* 窗内手绘暖屋场景 */
+.indoorScene {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 24%, #ffe5a3 0%, #f5b971 48%, #d47a49 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px 14px;
+  box-sizing: border-box;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.indoorSceneActive {
+  background: radial-gradient(circle at 50% 22%, #fff1be 0%, #f8c57c 52%, #e0824f 100%);
+}
+
+.warmGlowOrb {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 184, 0.65) 0%, rgba(255, 200, 112, 0) 70%);
+  pointer-events: none;
+  animation: pulseWarmth 3.5s ease-in-out infinite;
+}
+
+@keyframes pulseWarmth {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.85; }
+  50% { transform: translateX(-50%) scale(1.12); opacity: 1; }
+}
+
+/* 窗户十字木格条 */
+.windowMullionH {
+  position: absolute;
+  top: 46%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: rgba(110, 66, 40, 0.25);
+  border-top: 1.5px solid rgba(74, 44, 24, 0.28);
+  border-bottom: 1.5px solid rgba(74, 44, 24, 0.28);
+  pointer-events: none;
+}
+
+.windowMullionV {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  background: rgba(110, 66, 40, 0.25);
+  border-left: 1.5px solid rgba(74, 44, 24, 0.28);
+  border-right: 1.5px solid rgba(74, 44, 24, 0.28);
+  pointer-events: none;
+}
+
+.illustrationSvg {
+  position: relative;
+  z-index: 2;
+  width: 185px;
+  height: 150px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(92, 48, 24, 0.18));
+}
+
+.steamPath1 {
+  animation: floatSteam 2.6s ease-in-out infinite;
+}
+
+.steamPath2 {
+  animation: floatSteam 2.6s ease-in-out 1.1s infinite;
+}
+
+@keyframes floatSteam {
+  0% { transform: translateY(3px); opacity: 0.25; }
+  50% { transform: translateY(-4px); opacity: 0.85; }
+  100% { transform: translateY(-10px); opacity: 0; }
+}
+
+/* 未完全擦开时的隐约字迹 */
+.windowNotePreview {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  background: rgba(255, 250, 240, 0.72);
+  border: 2px dashed rgba(107, 62, 38, 0.45);
+  transition: opacity 0.35s ease;
+}
+
+.windowNoteHidden {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.handwrittenHint {
+  margin: 0;
+  color: #6b3e26;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* 擦亮后弹出的治愈手绘信笺卡 */
+.letterCard {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  background: #fffdf7;
+  border: 2.5px solid #5a3822;
+  border-radius: 18px;
+  padding: 13px 15px 12px;
+  box-sizing: border-box;
+  box-shadow: 4px 5px 0px rgba(74, 44, 24, 0.28);
+  opacity: 0;
+  transform: translateY(16px) scale(0.95);
+  transition: all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.letterCardVisible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.letterPin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e76f51;
+  border: 2.5px solid #5a3822;
+  box-shadow: 0 2px 0 rgba(74, 44, 24, 0.3);
+}
+
+.letterGreeting {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9c6b49;
+}
+
+.letterMainText {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #4a2c18;
+  font-weight: 800;
+}
+
+.highlightWarm {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 0 6px;
+  background: #ffdf9e;
+  color: #b8421b;
+  border-radius: 6px;
+  border-bottom: 2px solid #e76f51;
+}
+
+.letterFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1.5px dashed #e2cbb8;
+  padding-top: 7px;
+  font-size: 12px;
+}
+
+.weatherSub {
+  color: #7d563c;
+  font-weight: 600;
+}
+
+.signature {
+  color: #5a3822;
+  font-weight: 800;
+  font-style: italic;
+}
+
+/* 哈气生成的白雾水汽动画 */
+.breathCloud {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  margin-left: -65px;
+  margin-top: -65px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(240, 248, 255, 0.45) 45%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  pointer-events: none;
+  z-index: 4;
+  animation: breathExpand 1.8s ease-out forwards;
+}
+
+@keyframes breathExpand {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* 顶层可擦拭冰霜 Canvas */
+.frostCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  cursor: pointer;
+  touch-action: none;
+  transition: opacity 0.85s ease;
+}
+
+.frostCanvasCleared {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 底部木质窗台 */
+.windowSill {
+  position: relative;
+  height: 36px;
+  margin: 0 -6px;
+  background: #a46846;
+  border-top: 3px solid #4a2c18;
+  border-radius: 6px 6px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff6ec;
+}
+
+.sillShadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(74, 44, 24, 0.22);
+}
+
+.sillPlant {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sillProgress {
+  background: rgba(58, 34, 18, 0.35);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   底部互动控制坞 (单屏自适应高度)
+   ========================================================================== */
+.bottomDock {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.toastBubble {
+  width: 100%;
+  text-align: center;
+  padding: 8px 14px;
+  background: rgba(255, 251, 245, 0.92);
+  border: 2px solid #5a3822;
+  border-radius: 999px;
+  color: #5a3822;
+  font-size: 13px;
+  font-weight: 700;
+  box-sizing: border-box;
+  box-shadow: 2px 3px 0px rgba(46, 28, 16, 0.28);
+}
+
+.actionRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.breathButton {
+  width: 100%;
+  padding: 13px 20px;
+  background: linear-gradient(180deg, #ff9f68 0%, #e76f51 100%);
+  color: #fffdf9;
+  border: 2.5px solid #4a2c18;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #4a2c18;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.breathButton:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #4a2c18;
+}
+
+.breathBtnIcon {
+  font-size: 18px;
+}
+
+/* 擦亮后的加衣互动胶囊列表 */
+.warmChecklistArea {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInUp 0.45s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coatChipsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  width: 100%;
+}
+
+.coatChip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: #fff9f0;
+  color: #5a3822;
+  border: 2px solid #5a3822;
+  border-radius: 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 2px 3px 0 #4a2c18;
+  transition: all 0.18s ease;
+}
+
+.coatChip:active {
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0 #4a2c18;
+}
+
+.coatChipActive {
+  background: #ffe0b5;
+  border-color: #b8421b;
+  color: #8f2d0c;
+}
+
+.coatChipIcon {
+  font-size: 18px;
+}
+
+.checkBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e76f51;
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #4a2c18;
+}
+
+.secondaryActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.coatsSummary {
+  font-size: 11.5px;
+  color: #ffeedb;
+  font-weight: 600;
+}
+
+.replayBtn {
+  background: rgba(255, 248, 238, 0.2);
+  color: #fff6ec;
+  border: 1.5px solid rgba(255, 246, 236, 0.55);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
