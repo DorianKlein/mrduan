@@ -134,11 +134,11 @@ export default function MrDuanWarmWindowPage() {
     const ratio = Math.min(100, Math.round((transparentPixels / totalSampled) * 100));
     setWipePercent(ratio);
 
-    if (ratio >= 30 && ratio < 52 && !isCleared) {
+    if (ratio >= 30 && ratio < 90 && !isCleared) {
       setActiveToast('暖黄的灯光透出来了，再擦几下～');
     }
 
-    if (ratio >= 52 && !isCleared) {
+    if (ratio >= 90 && !isCleared) {
       setIsCleared(true);
       setWipePercent(100);
       setActiveToast('白雾散开啦，把这份暖意收好吧');
