@@ -138,6 +138,15 @@ interface FloatingItem {
   offsetY: number;
 }
 
+// 获取本地当前 YYYY-MM-DD 日期字符串
+const getTodayKey = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const date = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+};
+
 export default function CyberMuyuPage() {
   const [count, setCount] = useState<number>(0);
   const [currentMode, setCurrentMode] = useState<ModeKey>('peace');
@@ -149,6 +158,7 @@ export default function CyberMuyuPage() {
   const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
   const [isCopySuccess, setIsCopySuccess] = useState<boolean>(false);
   const [quoteFading, setQuoteFading] = useState<boolean>(false);
+  const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const posterCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -156,12 +166,21 @@ export default function CyberMuyuPage() {
 
   const activeMode = MODE_CONFIG[currentMode];
 
-  // 读取本地存储
+  // 跨日自动清零与读取本地存储
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('muyu_count');
-      if (saved) {
-        setCount(parseInt(saved, 10) || 0);
+      const today = getTodayKey();
+      const savedDate = localStorage.getItem('muyu_date');
+      const savedCount = localStorage.getItem('muyu_count');
+
+      if (!savedDate || savedDate !== today) {
+        // 新的一天，跨日自动清零
+        setCount(0);
+        localStorage.setItem('muyu_date', today);
+        localStorage.setItem('muyu_count', '0');
+      } else if (savedCount) {
+        // 同一天，正常加载今日累计次数
+        setCount(parseInt(savedCount, 10) || 0);
       }
     } catch {}
   }, []);
@@ -186,11 +205,10 @@ export default function CyberMuyuPage() {
       const ctx = audioCtxRef.current;
       const now = ctx.currentTime;
 
-      // 针对不同模式赋予细微不同的音色频率
       let modeFreq = 620;
-      if (currentMode === 'anti-anxiety') modeFreq = 540; // 翡翠玉石，微沉稳
-      if (currentMode === 'luck') modeFreq = 720; // 鎏金，清脆上扬
-      if (currentMode === 'self-love') modeFreq = 490; // 温暖柔和
+      if (currentMode === 'anti-anxiety') modeFreq = 540;
+      if (currentMode === 'luck') modeFreq = 720;
+      if (currentMode === 'self-love') modeFreq = 580;
 
       const baseFreq = modeFreq + (Math.random() * 30 - 15);
       const osc = ctx.createOscillator();
@@ -234,10 +252,10 @@ export default function CyberMuyuPage() {
   }, [isSoundOn, currentMode]);
 
   // 手机触感震动反馈
-  const triggerHaptic = useCallback(() => {
+  const triggerHaptic = useCallback((ms = 16) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try {
-        navigator.vibrate(16);
+        navigator.vibrate(ms);
       } catch {}
     }
   }, []);
@@ -251,14 +269,24 @@ export default function CyberMuyuPage() {
     }, 150);
   }, []);
 
-  // 敲击动作
+  // 敲击动作（同时更新日期保护防跨夜未重置）
   const handleStrike = useCallback(() => {
     playWoodSound();
-    triggerHaptic();
+    triggerHaptic(16);
 
     setCount((prev) => {
-      const next = prev + 1;
+      const today = getTodayKey();
+      let currentBase = prev;
       try {
+        const savedDate = localStorage.getItem('muyu_date');
+        if (savedDate !== today) {
+          currentBase = 0; // 跨天时从 0 开始
+        }
+      } catch {}
+
+      const next = currentBase + 1;
+      try {
+        localStorage.setItem('muyu_date', today);
         localStorage.setItem('muyu_count', next.toString());
       } catch {}
 
@@ -286,6 +314,32 @@ export default function CyberMuyuPage() {
       setFloatingWords((prev) => prev.filter((item) => item.id !== newItem.id));
     }, 900);
   }, [currentMode, playWoodSound, triggerHaptic, triggerNextQuote]);
+
+  // 手动清零逻辑
+  const handleResetCount = useCallback(() => {
+    setCount(0);
+    const today = getTodayKey();
+    try {
+      localStorage.setItem('muyu_date', today);
+      localStorage.setItem('muyu_count', '0');
+    } catch {}
+
+    triggerHaptic(30);
+    setShowResetConfirm(false);
+
+    // 飘出一个“归零放空”的特殊浮词
+    const newItem: FloatingItem = {
+      id: Date.now(),
+      text: '万缘归零 · 从新出发',
+      color: 'text-zinc-200',
+      offsetX: 0,
+      offsetY: -10,
+    };
+    setFloatingWords((prev) => [...prev, newItem]);
+    setTimeout(() => {
+      setFloatingWords((prev) => prev.filter((item) => item.id !== newItem.id));
+    }, 1100);
+  }, [triggerHaptic]);
 
   // 自动敲击模式
   useEffect(() => {
@@ -319,7 +373,7 @@ export default function CyberMuyuPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleStrike]);
 
-  // 生成匹配当前模式的 Canvas 分享海报
+  // 生成 Canvas 分享海报
   const drawPoster = useCallback(() => {
     const canvas = posterCanvasRef.current;
     if (!canvas) return;
@@ -330,7 +384,6 @@ export default function CyberMuyuPage() {
     const h = canvas.height;
     const mode = MODE_CONFIG[currentMode];
 
-    // 1. 更加通透明亮的高级渐变背景
     const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
     bgGrad.addColorStop(0, '#23222a');
     bgGrad.addColorStop(0.5, '#17161c');
@@ -338,14 +391,12 @@ export default function CyberMuyuPage() {
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // 模式专属柔和彩色光晕
     const radGrad = ctx.createRadialGradient(w / 2, 280, 20, w / 2, 280, 280);
     radGrad.addColorStop(0, mode.glowColor);
     radGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = radGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // 双层细线边框（更明亮通透）
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(26, 26, w - 52, h - 52);
@@ -355,7 +406,6 @@ export default function CyberMuyuPage() {
     ctx.strokeRect(32, 32, w - 64, h - 64);
     ctx.globalAlpha = 1.0;
 
-    // 2. 日期与标题
     const now = new Date();
     const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
     const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
@@ -370,7 +420,6 @@ export default function CyberMuyuPage() {
     ctx.font = 'bold 36px -apple-system, sans-serif';
     ctx.fillText('赛 博 木 鱼', w / 2, 140);
 
-    // 3. 禅意圆印与当前模式标签
     ctx.save();
     ctx.beginPath();
     ctx.arc(w / 2, 280, 85, 0, Math.PI * 2);
@@ -387,7 +436,6 @@ export default function CyberMuyuPage() {
     ctx.fillText(`今日累计 ${count} 次`, w / 2, 305);
     ctx.restore();
 
-    // 4. 情绪箴言
     const quote = QUOTES[quoteIndex];
     ctx.fillStyle = mode.canvasPrimary;
     ctx.font = '34px sans-serif';
@@ -416,7 +464,6 @@ export default function CyberMuyuPage() {
     ctx.fillStyle = mode.canvasPrimary;
     ctx.fillText('”', w / 2, y + 45);
 
-    // 5. 底部署名
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.beginPath();
     ctx.moveTo(100, h - 140);
@@ -439,7 +486,7 @@ export default function CyberMuyuPage() {
   }, [isShareOpen, drawPoster]);
 
   const handleCopyQuote = () => {
-    const textToCopy = `【今日情绪解药】\n"${QUOTES[quoteIndex]}"\n—— 累计敲木鱼 ${count} 次 (mrduan.me)`;
+    const textToCopy = `【今日情绪解药】\n"${QUOTES[quoteIndex]}"\n—— 今日敲木鱼 ${count} 次 (mrduan.me)`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(textToCopy).then(() => {
         setIsCopySuccess(true);
@@ -466,13 +513,12 @@ export default function CyberMuyuPage() {
     <div
       className={`h-[100dvh] w-full bg-gradient-to-b ${activeMode.bgGradient} text-zinc-100 flex flex-col justify-between items-center relative overflow-hidden select-none font-sans transition-colors duration-700`}
     >
-      {/* 背景通透彩色动态光晕（随模式变换，亮度大幅提升） */}
+      {/* 背景动态光晕 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
         <div
           className="w-96 h-96 rounded-full blur-[110px] transition-all duration-700 opacity-90 scale-110"
           style={{ backgroundColor: activeMode.glowColor }}
         />
-        {/* 次级高位环境光，增添清透通透感 */}
         <div className="absolute -top-16 w-80 h-80 rounded-full bg-white/5 blur-[90px]" />
       </div>
 
@@ -539,7 +585,7 @@ export default function CyberMuyuPage() {
           </div>
         </div>
 
-        {/* 4 种心境模式切换胶囊（更清晰通透） */}
+        {/* 4 种心境模式切换胶囊 */}
         <div className="grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/15 text-center text-xs shadow-md">
           {(Object.keys(MODE_CONFIG) as ModeKey[]).map((key) => {
             const isActive = currentMode === key;
@@ -563,11 +609,46 @@ export default function CyberMuyuPage() {
 
       {/* 核心敲击交互区 */}
       <main className="w-full max-w-md flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-        {/* 今日累计计数器 */}
-        <div className="mb-4 text-center">
-          <div className="text-[11px] uppercase tracking-widest text-zinc-400 font-medium mb-0.5">
-            今日累计
+        {/* 今日累计计数器 & 清零重置功能 */}
+        <div className="mb-4 text-center relative flex flex-col items-center">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-zinc-400 font-medium mb-0.5">
+            <span>今日累计</span>
+
+            {/* 清零按钮 */}
+            {count > 0 && !showResetConfirm && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-zinc-200 transition active:scale-90 border border-white/5"
+                title="清零重置今日计数"
+              >
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-[10px]">清零</span>
+              </button>
+            )}
+
+            {/* 清零二次确认胶囊 */}
+            {showResetConfirm && (
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-500/20 border border-red-500/40 text-[10px] animate-fadeIn">
+                <span className="text-red-300">确定清零?</span>
+                <button
+                  onClick={handleResetCount}
+                  className="font-bold text-red-200 hover:text-white underline active:scale-95"
+                >
+                  是
+                </button>
+                <span className="text-zinc-500">/</span>
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="text-zinc-400 hover:text-zinc-200 active:scale-95"
+                >
+                  否
+                </button>
+              </div>
+            )}
           </div>
+
           <div className="text-5xl font-extralight tracking-tight text-white flex items-center justify-center gap-1.5 font-mono drop-shadow-md">
             <span>{count.toLocaleString()}</span>
             <span
@@ -605,7 +686,6 @@ export default function CyberMuyuPage() {
           <div className="relative w-60 h-52 sm:w-68 sm:h-60 filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.65)] transition-all duration-500">
             <svg viewBox="0 0 200 160" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                {/* 动态渐变绑定当前模式的木鱼色彩 */}
                 <radialGradient id="dynamicWoodGrad" cx="35%" cy="30%" r="72%">
                   <stop offset="0%" stopColor={wood.start} />
                   <stop offset="42%" stopColor={wood.mid} />
@@ -620,10 +700,8 @@ export default function CyberMuyuPage() {
                 </linearGradient>
               </defs>
 
-              {/* 木鱼底部柔和投影 */}
               <ellipse cx="100" cy="142" rx="74" ry="13" fill="rgba(0,0,0,0.45)" />
 
-              {/* 木鱼外壳轮廓（主色平滑过渡） */}
               <path
                 d="M 45 130 C 18 115, 12 75, 32 45 C 52 15, 110 12, 145 28 C 178 42, 192 82, 182 110 C 172 135, 135 145, 95 142 C 68 140, 52 135, 45 130 Z"
                 fill="url(#dynamicWoodGrad)"
@@ -632,14 +710,12 @@ export default function CyberMuyuPage() {
                 className="transition-all duration-500"
               />
 
-              {/* 顶部通透高光 */}
               <path
                 d="M 48 48 C 65 24, 108 22, 138 34 C 152 40, 160 52, 160 62 C 130 38, 75 35, 48 48 Z"
                 fill="url(#dynamicShineGrad)"
                 className="transition-all duration-500"
               />
 
-              {/* 木鱼发声中缝（深色腔体） */}
               <path
                 d="M 50 115 C 80 126, 125 125, 155 102 C 145 110, 105 118, 55 110 C 52 112, 50 114, 50 115 Z"
                 fill="#07070a"
@@ -648,7 +724,6 @@ export default function CyberMuyuPage() {
                 className="transition-all duration-500"
               />
 
-              {/* 鱼头弧线雕花 */}
               <path
                 d="M 68 85 C 80 95, 105 95, 120 85"
                 fill="none"
@@ -660,7 +735,6 @@ export default function CyberMuyuPage() {
               <circle cx="68" cy="85" r="4.5" fill={wood.innerStroke} className="transition-all duration-500" />
               <circle cx="120" cy="85" r="4.5" fill={wood.innerStroke} className="transition-all duration-500" />
 
-              {/* 敲击光芒提示点 */}
               <circle
                 cx="100"
                 cy="72"
@@ -692,10 +766,9 @@ export default function CyberMuyuPage() {
         </div>
       </main>
 
-      {/* 底部卡片区：带有情绪价值的话语（更亮更通透的高光玻璃质感） */}
+      {/* 底部卡片区：带有情绪价值的话语 */}
       <footer className="w-full max-w-md px-5 pb-6 pt-2 z-20">
         <div className="bg-white/10 hover:bg-white/[0.13] backdrop-blur-xl border border-white/20 rounded-2xl p-4 relative overflow-hidden shadow-xl transition-all duration-300">
-          {/* 模式专属彩色微光顶线 */}
           <div
             className="absolute top-0 left-0 right-0 h-[2px] transition-colors duration-500"
             style={{
