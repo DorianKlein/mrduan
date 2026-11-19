@@ -38,3 +38,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 
 npm run dev:https:cert:3443
+
+## 部署（上传到腾讯云 1Panel）
+
+```bash
+npm run deploy          # 打包 + 上传 + 服务器同步（约 28 秒）
+npm run deploy:rollback # 回滚到上一版
+```
+
+详细说明见 [DEPLOY.md](./DEPLOY.md)。

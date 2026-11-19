@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# deploy（含私钥与服务器配置，切勿提交）
+/.deploy/
+/.deploy.env
+/out.zip

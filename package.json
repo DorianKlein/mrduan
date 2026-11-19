@@ -10,6 +10,10 @@
     "dev:https:cert:3443": "next dev --experimental-https --experimental-https-key ./certs/dev-key.pem --experimental-https-cert ./certs/dev-cert.pem --hostname 0.0.0.0 --port 3443",
     "build": "next build",
     "start": "next start",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:check": "bash scripts/deploy.sh --check",
+    "deploy:rollback": "bash scripts/deploy.sh --rollback",
+    "deploy:test": "bash scripts/deploy.sh --selftest",
     "lint": "eslint"
   },
   "dependencies": {
